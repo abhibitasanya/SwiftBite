@@ -462,13 +462,15 @@ export function AuthLanding() {
     async function boot() {
       try {
         const response = await fetch(`${apiBaseUrl}/health`);
-        const data = (await response.json()) as { api?: string; database?: string };
+        const data = (await response.json()) as { api?: string; database?: string; message?: string };
 
         if (!cancelled) {
-          setBackendState(`API ${data.api ?? (response.ok ? "online" : "offline")} · DB ${data.database ?? "unknown"}`);
+          setBackendState(
+            data.message ?? `API ${data.api ?? (response.ok ? "online" : "offline")} · DB ${data.database ?? "unknown"}`
+          );
         }
       } catch {
-        if (!cancelled) setBackendState("API offline");
+        if (!cancelled) setBackendState("API offline · please connect MySQL");
       } finally {
         if (!cancelled) setIsBooting(false);
       }

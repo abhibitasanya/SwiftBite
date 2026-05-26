@@ -226,27 +226,42 @@ export function createApp() {
     app.use(cors({ origin: corsOrigin }));
     app.use(express.json());
     app.use(morgan("dev"));
-    app.get("/health", async (_request, response) => {
-        const timestamp = new Date().toISOString();
+    async function getHealthStatus() {
+        const mysqlConfigured = Boolean(process.env.MYSQL_HOST &&
+            process.env.MYSQL_USER &&
+            process.env.MYSQL_DATABASE);
+        if (!mysqlConfigured) {
+            return {
+                api: "online",
+                database: "not-configured",
+                message: "API online · please connect MySQL",
+            };
+        }
         try {
             await db.query("SELECT 1");
-            response.json({
-                service: "backend",
+            return {
                 api: "online",
                 database: "connected",
-                status: "ok",
-                timestamp,
-            });
+                message: "API online · DB connected",
+            };
         }
         catch {
-            response.json({
-                service: "backend",
+            return {
                 api: "online",
                 database: "disconnected",
-                status: "degraded",
-                timestamp,
-            });
+                message: "API online · please connect MySQL",
+            };
         }
+    }
+    app.get("/health", async (_request, response) => {
+        const timestamp = new Date().toISOString();
+        const healthStatus = await getHealthStatus();
+        response.json({
+            service: "backend",
+            ...healthStatus,
+            status: healthStatus.database === "connected" ? "ok" : "degraded",
+            timestamp,
+        });
     });
     app.get("/api/roles", (_request, response) => {
         response.json({
