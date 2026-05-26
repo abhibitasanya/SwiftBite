@@ -49,6 +49,7 @@ let fallbackRestaurants = [
         rating: 4.8,
         description: "Fresh bowls, wraps, and grain plates for quick lunch orders.",
         featured: true,
+        menu: buildMenuForRestaurant("Green Fork", "Healthy bowls"),
     },
     {
         id: 2,
@@ -59,6 +60,7 @@ let fallbackRestaurants = [
         rating: 4.6,
         description: "Comfort meals, curries, and tandoor plates for dinner.",
         featured: true,
+        menu: buildMenuForRestaurant("Spice Harbor", "North Indian"),
     },
     {
         id: 3,
@@ -69,6 +71,7 @@ let fallbackRestaurants = [
         rating: 4.5,
         description: "Grilled seafood and coastal specials with house sauces.",
         featured: false,
+        menu: buildMenuForRestaurant("Ocean Bites", "Seafood"),
     },
     {
         id: 4,
@@ -79,6 +82,7 @@ let fallbackRestaurants = [
         rating: 4.7,
         description: "Wood-fired pizzas, pasta bowls, and cheesy sides.",
         featured: true,
+        menu: buildMenuForRestaurant("Brick Oven House", "Pizza & Pasta"),
     },
 ];
 const fallbackDeliveryTasks = [
@@ -113,6 +117,22 @@ function sha256Hex(value) {
 function fallbackKey(identifier, role) {
     return `${identifier}::${role}`;
 }
+function buildMenuForRestaurant(name, cuisine) {
+    const lookup = `${name} ${cuisine}`.toLowerCase();
+    if (lookup.includes("green fork") || lookup.includes("healthy")) {
+        return ["Quinoa Power Bowl", "Avocado Wrap", "Seasonal Smoothie", "Chia Parfait"];
+    }
+    if (lookup.includes("spice") || lookup.includes("indian") || lookup.includes("tandoor")) {
+        return ["Paneer Tikka Platter", "Butter Naan Combo", "Dal Tadka Bowl", "Mango Lassi"];
+    }
+    if (lookup.includes("ocean") || lookup.includes("seafood") || lookup.includes("fish")) {
+        return ["Grilled Fish Bowl", "Prawn Rice Box", "Lemon Herb Fries", "Coastal Soup"];
+    }
+    if (lookup.includes("brick") || lookup.includes("pizza") || lookup.includes("pasta")) {
+        return ["Margherita Slice Box", "Creamy Alfredo", "Garlic Bread", "Cheese Dip"];
+    }
+    return ["Chef Special Bowl", "Daily Wrap", "Seasonal Plate", "House Drink"];
+}
 async function loadRestaurants() {
     try {
         const [rows] = await db.query("SELECT id, name, cuisine, location, eta_minutes, rating, description, featured FROM restaurants ORDER BY featured DESC, rating DESC, name ASC");
@@ -126,6 +146,7 @@ async function loadRestaurants() {
                 rating: Number(row.rating),
                 description: String(row.description),
                 featured: Boolean(row.featured),
+                menu: buildMenuForRestaurant(String(row.name), String(row.cuisine)),
             })),
             source: "mysql",
         };
@@ -259,6 +280,7 @@ export function createApp() {
             rating: parsed.data.rating,
             description: parsed.data.description,
             featured: parsed.data.featured,
+            menu: buildMenuForRestaurant(parsed.data.name, parsed.data.cuisine),
         };
         try {
             await db.query("INSERT INTO restaurants (name, cuisine, location, eta_minutes, rating, description, featured) VALUES (?, ?, ?, ?, ?, ?, ?)", [
