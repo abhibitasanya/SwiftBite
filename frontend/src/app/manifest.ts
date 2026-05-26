@@ -1,0 +1,23 @@
+import type { MetadataRoute } from "next";
+
+export const dynamic = "force-static";
+
+export default function manifest(): MetadataRoute.Manifest {
+  return {
+    name: "SwiftBite",
+    short_name: "SwiftBite",
+    description:
+      "A food ordering PWA for customers, delivery partners, restaurant owners, and the core platform team.",
+    start_url: "/",
+    display: "standalone",
+    background_color: "#0d1426",
+    theme_color: "#0f172a",
+    icons: [
+      {
+        src: "/icon.svg",
+        sizes: "any",
+        type: "image/svg+xml",
+      },
+    ],
+  };
+}

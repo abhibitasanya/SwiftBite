@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+:root {
+  --background: #e6e1d3;
+  --foreground: #182118;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: "Segoe UI", "Inter", system-ui, sans-serif;
+  --font-mono: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+}
+
+html {
+  background:
+    radial-gradient(circle at top left, rgba(67, 92, 63, 0.22), transparent 24%),
+    radial-gradient(circle at 80% 12%, rgba(126, 146, 107, 0.18), transparent 18%),
+    radial-gradient(circle at 18% 84%, rgba(79, 95, 72, 0.12), transparent 22%),
+    linear-gradient(180deg, #f1efe7 0%, #e1dccd 52%, #d3ccb8 100%);
+  color-scheme: light;
+}
+
+body {
+  min-height: 100vh;
+  background: transparent;
+  color: var(--foreground);
+  font-family: "Segoe UI", "Inter", system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::selection {
+  background: rgba(63, 90, 61, 0.24);
+  color: #f7f4ec;
+}
+
+.role-carousel {
+  scrollbar-width: auto;
+  scrollbar-color: #6f845b #e7efdf;
+  scrollbar-gutter: stable both-edges;
+}
+
+.role-carousel::-webkit-scrollbar {
+  height: 12px;
+}
+
+.role-carousel::-webkit-scrollbar-track {
+  background: #e7efdf;
+  border-radius: 999px;
+}
+
+.role-carousel::-webkit-scrollbar-thumb {
+  background: #6f845b;
+  border-radius: 999px;
+  border: 3px solid #e7efdf;
+}
