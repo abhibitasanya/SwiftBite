@@ -284,9 +284,9 @@ function ChatWidget({
                 <img src="/message-icon.svg" alt="chat avatar" className="h-8 w-8 object-contain" />
               </div>
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#5e6965]">SwiftBite assistant</p>
-                <h3 className="mt-1 text-lg font-black text-[#24302b]">Need help?</h3>
-                <p className="mt-1 text-sm text-[#4a5551]">Ask me about login, register, orders, delivery, or support.</p>
+                <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#f3f6f2]">SwiftBite assistant</p>
+                <h3 className="mt-1 text-lg font-black text-[#f3f6f2]">Need help?</h3>
+                <p className="mt-1 text-sm text-[#f3f6f2]">Ask me about login, register, orders, delivery, or support.</p>
               </div>
             </div>
             <button

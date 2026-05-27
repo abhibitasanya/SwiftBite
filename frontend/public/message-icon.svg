@@ -1,9 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="message icon">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="message icon">
   <rect width="512" height="512" rx="64" fill="#223326" />
-  <g transform="translate(96,96)">
-    <path d="M48 96c0-26.5 21.5-48 48-48h160c26.5 0 48 21.5 48 48v80c0 26.5-21.5 48-48 48H160l-48 40V224H112c-26.5 0-48-21.5-48-48V96z" fill="#ffffff" />
-    <circle cx="176" cy="136" r="10" fill="#223326" />
-    <circle cx="208" cy="136" r="10" fill="#223326" />
-    <circle cx="240" cy="136" r="10" fill="#223326" />
+  <!-- subtle inner inset for depth -->
+  <rect x="36" y="36" width="440" height="440" rx="56" fill="#18321d" opacity="0.06" />
+
+  <!-- white speech bubble centered -->
+  <g transform="translate(0,0)">
+    <rect x="116" y="176" width="280" height="140" rx="28" fill="#ffffff" />
+    <!-- tail -->
+    <path d="M196 316l-36 28v-28z" fill="#ffffff" />
+    <!-- dots -->
+    <circle cx="236" cy="246" r="10" fill="#223326" />
+    <circle cx="256" cy="246" r="10" fill="#223326" />
+    <circle cx="276" cy="246" r="10" fill="#223326" />
   </g>
 </svg>

@@ -7,13 +7,13 @@
     </clipPath>
   </defs>
   <g clip-path="url(#stickerClip)">
-    <image href="/sticker.png" x="14" y="14" width="164" height="164" preserveAspectRatio="xMidYMid meet" />
+    <image href="/app_logo.png" x="14" y="14" width="164" height="164" preserveAspectRatio="xMidYMid meet" />
   </g>
   <!-- Add subtle drop shadow for sticker to sit above the border -->
   <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
     <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000000" flood-opacity="0.18" />
   </filter>
   <g filter="url(#shadow)">
-    <image href="/sticker.png" x="14" y="14" width="164" height="164" preserveAspectRatio="xMidYMid meet" opacity="1" />
+    <image href="/app_logo.png" x="14" y="14" width="164" height="164" preserveAspectRatio="xMidYMid meet" opacity="1" />
   </g>
 </svg>
