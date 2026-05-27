@@ -350,7 +350,7 @@ function ChatWidget({
                     key={suggestion.label}
                     type="button"
                     onClick={() => onSuggestionClick(suggestion.value)}
-                    className="rounded-full border border-[#314a32] bg-[#edf3ea] px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-[#314a32] hover:bg-white"
+                    className="rounded-full border border-[#dfe7d0] bg-[#edf3ea] px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-[#314a32] hover:bg-white"
                   >
                     {suggestion.label}
                   </button>
