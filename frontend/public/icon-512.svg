@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="SwiftBite icon 512">
+  <rect x="0" y="0" width="512" height="512" rx="64" fill="#f6efe2" stroke="#223326" stroke-width="20" />
+  <defs>
+    <clipPath id="clip512">
+      <rect x="40" y="40" width="432" height="432" rx="56" />
+    </clipPath>
+  </defs>
+  <g clip-path="url(#clip512)">
+    <image href="/sticker.png" x="40" y="40" width="432" height="432" preserveAspectRatio="xMidYMid meet" />
+  </g>
+</svg>

@@ -277,15 +277,11 @@ function ChatWidget({
   return (
     <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3">
       {isOpen ? (
-        <div className="w-[min(92vw,24rem)] overflow-hidden rounded-[1.75rem] border border-[#6f7f68]/55 bg-[#f8fbf4] shadow-[0_24px_70px_rgba(45,61,44,0.18)] backdrop-blur-xl">
-          <div className="flex items-start justify-between gap-4 border-b border-[#d8dfdd] bg-gradient-to-br from-[#e6ebea] via-[#c2c9c7] to-[#8b9390] px-4 py-4 text-[#25302b]">
+        <div className="w-[min(92vw,24rem)] overflow-hidden rounded-[1.75rem] border border-[#2f4f2f]/55 bg-[#f8fbf4] shadow-[0_24px_70px_rgba(45,61,44,0.18)] backdrop-blur-xl">
+          <div className="flex items-start justify-between gap-4 border-b border-[#25412b] bg-gradient-to-br from-[#314a32] via-[#274428] to-[#1c2f22] px-4 py-4 text-[#f3f6f2]">
             <div className="flex items-start gap-3">
-              <div className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-[1rem] border border-white/55 bg-gradient-to-br from-[#fbfbfb] via-[#d8dddc] to-[#aab1af] shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_8px_18px_rgba(20,28,24,0.12)]">
-                <div className="relative h-6 w-6 rounded-[0.7rem] border border-[#767f7c] bg-gradient-to-br from-[#ffffff] via-[#dfe4e3] to-[#b3bab8]">
-                  <span className="absolute left-[0.35rem] top-[0.45rem] h-1.1 w-1.1 rounded-full bg-[#5d6764]" />
-                  <span className="absolute right-[0.35rem] top-[0.45rem] h-1.1 w-1.1 rounded-full bg-[#5d6764]" />
-                  <span className="absolute bottom-[0.35rem] left-1/2 h-1 w-2.5 -translate-x-1/2 rounded-full bg-[#5d6764]" />
-                </div>
+              <div className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-[1rem] border border-[#18321d] bg-[#223326] shadow-[inset_0_1px_0_rgba(0,0,0,0.12),0_8px_18px_rgba(20,28,24,0.12)]">
+                <img src="/sticker.svg" alt="logo" className="h-8 w-8 object-contain" />
               </div>
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#5e6965]">SwiftBite assistant</p>
@@ -296,7 +292,7 @@ function ChatWidget({
             <button
               type="button"
               onClick={onToggle}
-              className="rounded-full border border-white/40 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-[#25302b] hover:bg-white/30"
+              className="rounded-full border border-[#2f4f2f] px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-[#f3f6f2] hover:bg-white/6"
               aria-label="Close chat"
             >
               ✕
@@ -354,7 +350,7 @@ function ChatWidget({
                     key={suggestion.label}
                     type="button"
                     onClick={() => onSuggestionClick(suggestion.value)}
-                    className="rounded-full border border-[#c4ccc8] bg-[#eef2f1] px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[#495551] hover:bg-white"
+                    className="rounded-full border border-[#314a32] bg-[#edf3ea] px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-[#314a32] hover:bg-white"
                   >
                     {suggestion.label}
                   </button>
@@ -374,7 +370,7 @@ function ChatWidget({
                 type="button"
                 onClick={onSubmit}
                 disabled={isSending || !chatInput.trim()}
-                className="rounded-full bg-[#5d6563] px-4 py-3 text-sm font-semibold text-[#f5f8f1] shadow-[0_10px_24px_rgba(62,69,68,0.14)] transition hover:bg-[#727a78] disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-full bg-[#314a32] px-4 py-3 text-sm font-semibold text-[#f5f8f1] shadow-[0_10px_24px_rgba(31,47,34,0.28)] transition hover:bg-[#243426] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isSending ? "..." : "Send"}
               </button>
@@ -1577,7 +1573,9 @@ export function AuthLanding() {
                 className="flex h-16 w-16 items-center justify-center rounded-full border border-[#dfe7d6] bg-[#f7faf2] text-2xl font-black text-[#4f5b47] shadow-[0_14px_32px_rgba(37,46,34,0.12)] transition hover:-translate-y-0.5 hover:bg-white sm:h-18 sm:w-18"
                 aria-label="Previous role"
               >
-                ΓùÇ
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+                  <path d="M15 6L9 12L15 18" stroke="#314a32" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
               </button>
 
               <div className="relative flex min-h-[30rem] w-full max-w-[60rem] items-center justify-center overflow-visible px-2 sm:min-h-[32rem] sm:px-6" style={{ perspective: "1200px" }}>
@@ -1647,7 +1645,9 @@ export function AuthLanding() {
                 className="flex h-16 w-16 items-center justify-center rounded-full border border-[#dfe7d6] bg-[#f7faf2] text-2xl font-black text-[#4f5b47] shadow-[0_14px_32px_rgba(37,46,34,0.12)] transition hover:-translate-y-0.5 hover:bg-white sm:h-18 sm:w-18"
                 aria-label="Next role"
               >
-                Γû╢
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+                  <path d="M9 6L15 12L9 18" stroke="#314a32" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
               </button>
             </div>
 

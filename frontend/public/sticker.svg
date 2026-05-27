@@ -1,20 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <defs>
-    <linearGradient id="g" x1="0" x2="1">
-      <stop offset="0" stop-color="#eef1f2" />
-      <stop offset="1" stop-color="#cfd6d7" />
-    </linearGradient>
-  </defs>
-  <rect width="100%" height="100%" rx="48" fill="#f6efe2"/>
-  <g transform="translate(64,64)">
-    <circle cx="192" cy="192" r="128" fill="url(#g)" />
-    <circle cx="192" cy="172" r="84" fill="#ffffff" opacity="0.06" />
-    <!-- robot face -->
-    <rect x="156" y="190" width="72" height="28" rx="10" fill="#1f2b21" opacity="0.9" />
-    <circle cx="176" cy="176" r="12" fill="#1f2b21" />
-    <circle cx="208" cy="176" r="12" fill="#1f2b21" />
-    <rect x="188" y="200" width="16" height="12" rx="6" fill="#1f2b21" />
-    <!-- small head dot -->
-    <circle cx="192" cy="132" r="18" fill="#e7e9ea" />
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="SwiftBite message icon">
+  <!-- Dark moss green square with rounded corners and a white message bubble icon -->
+  <rect width="512" height="512" rx="64" fill="#223326" />
+  <g transform="translate(96,96) scale(1)">
+    <rect x="32" y="48" width="288" height="224" rx="28" fill="#ffffff" opacity="0.08" />
+    <path d="M64 96c0-26.5 21.5-48 48-48h160c26.5 0 48 21.5 48 48v80c0 26.5-21.5 48-48 48H160l-48 40V224H112c-26.5 0-48-21.5-48-48V96z" fill="#ffffff" opacity="0.95"/>
+    <!-- message dots -->
+    <circle cx="176" cy="136" r="10" fill="#223326" />
+    <circle cx="208" cy="136" r="10" fill="#223326" />
+    <circle cx="240" cy="136" r="10" fill="#223326" />
   </g>
 </svg>

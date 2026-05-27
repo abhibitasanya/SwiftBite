@@ -1,12 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" fill="none">
-  <!-- Beige rounded background with dark moss green border; centers /sticker.png -->
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192" role="img" aria-label="SwiftBite icon 192">
   <rect x="0" y="0" width="192" height="192" rx="28" fill="#f6efe2" stroke="#223326" stroke-width="8" />
   <defs>
-    <clipPath id="stickerClip">
+    <clipPath id="clip192">
       <rect x="20" y="20" width="152" height="152" rx="20" />
     </clipPath>
   </defs>
-  <g clip-path="url(#stickerClip)">
+  <g clip-path="url(#clip192)">
     <image href="/sticker.png" x="20" y="20" width="152" height="152" preserveAspectRatio="xMidYMid meet" />
   </g>
 </svg>
