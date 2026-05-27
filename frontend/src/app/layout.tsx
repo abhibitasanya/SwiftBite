@@ -7,12 +7,9 @@ export const metadata: Metadata = {
   description:
     "A food ordering PWA concept for customers, delivery partners, restaurant owners, and the platform team.",
   icons: {
-    icon: [
-      { url: icon.src ?? icon, type: "image/png", sizes: "192x192" },
-      { url: "/favicon.ico", type: "image/x-icon", sizes: "any" },
-    ],
-    shortcut: [{ url: icon.src ?? icon }],
-    apple: [{ url: icon.src ?? icon }],
+    icon: [{ url: icon.src ?? icon, type: "image/png", sizes: "192x192" }],
+    shortcut: [{ url: icon.src ?? icon, type: "image/png" }],
+    apple: [{ url: icon.src ?? icon, type: "image/png" }],
   },
 };
 
