@@ -281,7 +281,7 @@ function ChatWidget({
           <div className="flex items-start justify-between gap-4 border-b border-[#25412b] bg-gradient-to-br from-[#314a32] via-[#274428] to-[#1c2f22] px-4 py-4 text-[#f3f6f2]">
             <div className="flex items-start gap-3">
               <div className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-[1rem] border border-[#18321d] bg-[#223326] shadow-[inset_0_1px_0_rgba(0,0,0,0.12),0_8px_18px_rgba(20,28,24,0.12)]">
-                <img src="/sticker.svg" alt="logo" className="h-8 w-8 object-contain" />
+                <img src="/message-icon.svg" alt="chat avatar" className="h-8 w-8 object-contain" />
               </div>
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#5e6965]">SwiftBite assistant</p>
