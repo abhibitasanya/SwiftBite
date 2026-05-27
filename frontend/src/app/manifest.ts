@@ -10,8 +10,8 @@ export default function manifest(): MetadataRoute.Manifest {
       "A food ordering PWA for customers, delivery partners, restaurant owners, and the core platform team.",
     start_url: "/",
     display: "standalone",
-    background_color: "#0d1426",
-    theme_color: "#0f172a",
+    background_color: "#f6efe2",
+    theme_color: "#e6e1d3",
     icons: [
       {
         src: "/icon.svg",
