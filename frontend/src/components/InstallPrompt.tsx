@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import iconImg from "../app/icon.png";
 
 export default function InstallPrompt() {
   const [promptEvent, setPromptEvent] = useState<any>(null);
@@ -41,7 +42,7 @@ export default function InstallPrompt() {
     <div className="flex items-center gap-3">
       <div className="p-2">
           <div className="rounded-lg border-4 border-[#314a32] bg-[#223326] p-2 w-20 h-20 flex items-center justify-center">
-          <img src="/icon.png" alt="SwiftBite logo" className="max-w-full max-h-full object-contain" />
+          <img src={iconImg.src ?? iconImg} alt="SwiftBite logo" className="max-w-full max-h-full object-contain" />
         </div>
       </div>
 
@@ -84,7 +85,7 @@ export default function InstallPrompt() {
             <div className="mt-3">
               <p className="text-xs text-[#6b6b6b]">Logo preview</p>
               <div className="mt-2 inline-block rounded-lg border-4 border-[#314a32] bg-[#223326] p-2">
-                <img src="/icon.png" alt="logo preview" className="w-28 h-28 object-contain" />
+                <img src={iconImg.src ?? iconImg} alt="logo preview" className="w-28 h-28 object-contain" />
               </div>
             </div>
           </div>
