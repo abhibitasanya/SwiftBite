@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import InstallPrompt from "./InstallPrompt";
 
 type LoginMode = "email" | "phone";
 type AuthMode = "login" | "register";
@@ -1556,12 +1555,7 @@ export function AuthLanding() {
                 <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite</p>
                 <h1 className="mt-3 text-4xl font-black tracking-tight sm:text-5xl">Choose your role</h1>
               </div>
-              <div className="flex items-center gap-4">
-                <InstallPrompt />
-                <span className="rounded-full border border-[#6a8160]/55 bg-[#dfe7d6] px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-[#243025]">
-                  Step 1 of 2
-                </span>
-              </div>
+              
             </div>
 
             <p className="max-w-2xl text-sm leading-7 text-[#4d564a]">Select the profile you want to use. The next screen will show login or register for that role.</p>
