@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot, type Root } from "react-dom/client";
@@ -88,6 +88,11 @@ type ChatMessage = {
   id: number;
   role: "user" | "assistant";
   text: string;
+};
+
+type ChatSuggestion = {
+  label: string;
+  value: string;
 };
 
 const roleCards: Array<{
@@ -191,6 +196,60 @@ function NotificationCard({
   );
 }
 
+function getChatSuggestions(intent: string | null, isStarter: boolean): ChatSuggestion[] {
+  if (isStarter) {
+    return [
+      { label: "How do I register?", value: "How do I register?" },
+      { label: "How do I log in?", value: "How do I log in?" },
+      { label: "How do I order food?", value: "How do I order food?" },
+    ];
+  }
+
+  const normalizedIntent = (intent ?? "").toLowerCase();
+
+  if (normalizedIntent.includes("register")) {
+    return [
+      { label: "What details are needed?", value: "What details are needed to register?" },
+      { label: "Which role should I choose?", value: "Which role should I choose?" },
+      { label: "What if captcha fails?", value: "What if captcha fails during registration?" },
+    ];
+  }
+
+  if (normalizedIntent.includes("login") || normalizedIntent.includes("log in")) {
+    return [
+      { label: "Email or phone?", value: "Should I use email or phone to log in?" },
+      { label: "Why login fails?", value: "Why is my login failing?" },
+      { label: "What if I forgot password?", value: "What if I forget my password?" },
+    ];
+  }
+
+  if (normalizedIntent.includes("order") || normalizedIntent.includes("cart") || normalizedIntent.includes("checkout")) {
+    return [
+      { label: "How to add items?", value: "How do I add items to the cart?" },
+      { label: "How to checkout?", value: "How do I go to checkout?" },
+      { label: "How to change quantity?", value: "How do I change item quantity?" },
+    ];
+  }
+
+  if (normalizedIntent.includes("delivery") || normalizedIntent.includes("track") || normalizedIntent.includes("eta")) {
+    return [
+      { label: "How to track rider?", value: "How do I track the rider?" },
+      { label: "What does ETA mean?", value: "What does ETA mean?" },
+      { label: "Where is my order?", value: "Where is my order right now?" },
+    ];
+  }
+
+  if (normalizedIntent.includes("database") || normalizedIntent.includes("db") || normalizedIntent.includes("mysql")) {
+    return [
+      { label: "What is saved?", value: "What is saved in the database?" },
+      { label: "Is data online?", value: "Is the data stored online?" },
+      { label: "How to connect DB?", value: "How do I connect the database?" },
+    ];
+  }
+
+  return [];
+}
+
 function ChatWidget({
   isOpen,
   isSending,
@@ -210,27 +269,33 @@ function ChatWidget({
   onSubmit: () => void;
   onSuggestionClick: (value: string) => void;
 }) {
-  const suggestions = [
-    "How do I register?",
-    "How do I log in?",
-    "How do I order food?",
-    "How does delivery tracking work?",
-  ];
+  const latestUserMessage = [...messages].reverse().find((message) => message.role === "user");
+  const hasUserMessage = Boolean(latestUserMessage);
+  const suggestions = getChatSuggestions(latestUserMessage?.text ?? null, !hasUserMessage);
 
   return (
     <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3">
       {isOpen ? (
         <div className="w-[min(92vw,24rem)] overflow-hidden rounded-[1.75rem] border border-[#6f7f68]/55 bg-[#f8fbf4] shadow-[0_24px_70px_rgba(45,61,44,0.18)] backdrop-blur-xl">
-          <div className="flex items-start justify-between gap-4 border-b border-[#dfe7d6] bg-[#223326] px-4 py-4 text-[#f5f8f1]">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#b9c8ad]">SwiftBite assistant</p>
-              <h3 className="mt-1 text-lg font-black">Need help?</h3>
-              <p className="mt-1 text-sm text-[#d6e2cd]">Ask me about login, register, orders, delivery, or support.</p>
+          <div className="flex items-start justify-between gap-4 border-b border-[#d8dfdd] bg-gradient-to-br from-[#e6ebea] via-[#c2c9c7] to-[#8b9390] px-4 py-4 text-[#25302b]">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-[1rem] border border-white/55 bg-gradient-to-br from-[#fbfbfb] via-[#d8dddc] to-[#aab1af] shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_8px_18px_rgba(20,28,24,0.12)]">
+                <div className="relative h-6 w-6 rounded-[0.7rem] border border-[#767f7c] bg-gradient-to-br from-[#ffffff] via-[#dfe4e3] to-[#b3bab8]">
+                  <span className="absolute left-[0.35rem] top-[0.45rem] h-1.1 w-1.1 rounded-full bg-[#5d6764]" />
+                  <span className="absolute right-[0.35rem] top-[0.45rem] h-1.1 w-1.1 rounded-full bg-[#5d6764]" />
+                  <span className="absolute bottom-[0.35rem] left-1/2 h-1 w-2.5 -translate-x-1/2 rounded-full bg-[#5d6764]" />
+                </div>
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#5e6965]">SwiftBite assistant</p>
+                <h3 className="mt-1 text-lg font-black text-[#24302b]">Need help?</h3>
+                <p className="mt-1 text-sm text-[#4a5551]">Ask me about login, register, orders, delivery, or support.</p>
+              </div>
             </div>
             <button
               type="button"
               onClick={onToggle}
-              className="rounded-full border border-white/20 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-[#f5f8f1] hover:bg-white/10"
+              className="rounded-full border border-white/40 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-[#25302b] hover:bg-white/30"
               aria-label="Close chat"
             >
               ✕
@@ -244,27 +309,57 @@ function ChatWidget({
                 className={`max-w-[88%] rounded-[1.2rem] px-4 py-3 text-sm leading-6 shadow-[0_8px_22px_rgba(37,46,34,0.08)] ${
                   message.role === "user"
                     ? "ml-auto bg-[#223326] text-[#f5f8f1]"
-                    : "border border-[#dfe7d6] bg-white text-[#243025]"
+                    : "border border-[#cfd5d0] bg-[linear-gradient(180deg,#ffffff_0%,#eef2f1_100%)] text-[#243025]"
                 }`}
               >
-                {message.text}
+                {message.role === "assistant" ? (
+                  <div className="flex items-start gap-3">
+                    <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-[0.85rem] border border-[#c2cbc7] bg-gradient-to-br from-[#f6f7f7] via-[#d6dbda] to-[#a7b0ad] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+                      <div className="relative h-4.5 w-4.5 rounded-[0.5rem] border border-[#7a8582] bg-gradient-to-br from-[#f7f8f8] via-[#dfe3e3] to-[#bac2c0]">
+                        <span className="absolute left-[0.22rem] top-[0.24rem] h-0.9 w-0.9 rounded-full bg-[#5d6764]" />
+                        <span className="absolute right-[0.22rem] top-[0.24rem] h-0.9 w-0.9 rounded-full bg-[#5d6764]" />
+                        <span className="absolute bottom-[0.2rem] left-1/2 h-0.8 w-2 -translate-x-1/2 rounded-full bg-[#5d6764]" />
+                      </div>
+                    </div>
+                    <div className="flex-1">{message.text}</div>
+                  </div>
+                ) : (
+                  message.text
+                )}
               </div>
             ))}
+
+            {isSending ? (
+              <div className="max-w-[88%] rounded-[1.2rem] border border-[#cfd5d0] bg-[linear-gradient(180deg,#ffffff_0%,#eef2f1_100%)] px-4 py-3 text-sm leading-6 text-[#243025] shadow-[0_8px_22px_rgba(37,46,34,0.08)]">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-[0.85rem] border border-[#c2cbc7] bg-gradient-to-br from-[#f6f7f7] via-[#d6dbda] to-[#a7b0ad] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+                    <div className="flex items-center gap-1">
+                      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#5d6764]" />
+                      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#5d6764] [animation-delay:150ms]" />
+                      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#5d6764] [animation-delay:300ms]" />
+                    </div>
+                  </div>
+                  <span>Thinking...</span>
+                </div>
+              </div>
+            ) : null}
           </div>
 
           <div className="border-t border-[#dfe7d6] px-4 py-3">
-            <div className="flex flex-wrap gap-2">
-              {suggestions.map((suggestion) => (
-                <button
-                  key={suggestion}
-                  type="button"
-                  onClick={() => onSuggestionClick(suggestion)}
-                  className="rounded-full border border-[#cdd8c2] bg-[#f1f5ea] px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[#4f6750] hover:bg-white"
-                >
-                  {suggestion}
-                </button>
-              ))}
-            </div>
+            {suggestions.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {suggestions.map((suggestion) => (
+                  <button
+                    key={suggestion.label}
+                    type="button"
+                    onClick={() => onSuggestionClick(suggestion.value)}
+                    className="rounded-full border border-[#c4ccc8] bg-[#eef2f1] px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[#495551] hover:bg-white"
+                  >
+                    {suggestion.label}
+                  </button>
+                ))}
+              </div>
+            ) : null}
 
             <div className="mt-3 flex items-end gap-2">
               <textarea
@@ -272,13 +367,13 @@ function ChatWidget({
                 onChange={(event) => onInputChange(event.target.value)}
                 placeholder="Type your question"
                 rows={2}
-                className="min-h-12 flex-1 resize-none rounded-[1.1rem] border border-[#cdd8c2] bg-white px-4 py-3 text-sm text-[#243025] outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10"
+                className="min-h-12 flex-1 resize-none rounded-[1.1rem] border border-[#cdd8c2] bg-white px-4 py-3 text-sm text-[#243025] outline-none focus:border-[#7a8582]/70 focus:ring-2 focus:ring-[#7a8582]/10"
               />
               <button
                 type="button"
                 onClick={onSubmit}
                 disabled={isSending || !chatInput.trim()}
-                className="rounded-full bg-[#223326] px-4 py-3 text-sm font-semibold text-[#f5f8f1] disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-full bg-[#5d6563] px-4 py-3 text-sm font-semibold text-[#f5f8f1] shadow-[0_10px_24px_rgba(62,69,68,0.14)] transition hover:bg-[#727a78] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isSending ? "..." : "Send"}
               </button>
@@ -290,10 +385,15 @@ function ChatWidget({
       <button
         type="button"
         onClick={onToggle}
-        className="flex h-16 w-16 items-center justify-center rounded-full bg-[#2ecc71] text-2xl font-black text-white shadow-[0_18px_44px_rgba(46,204,113,0.35)] transition hover:-translate-y-0.5"
+        className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-[#e6ebea] via-[#aeb6b4] to-[#6f7775] text-2xl font-black text-[#25302b] shadow-[0_18px_44px_rgba(65,74,71,0.22)] transition hover:-translate-y-0.5"
         aria-label="Open chat assistant"
       >
-        💬
+        <div className="relative flex h-8 w-8 items-center justify-center rounded-[1rem] border border-[#dbe1df] bg-[linear-gradient(180deg,#ffffff_0%,#c9cfcd_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
+          <span className="absolute left-[0.45rem] top-[0.55rem] h-1.5 w-1.5 rounded-full bg-[#5a6461]" />
+          <span className="absolute right-[0.45rem] top-[0.55rem] h-1.5 w-1.5 rounded-full bg-[#5a6461]" />
+          <span className="absolute bottom-[0.55rem] left-1/2 h-1.5 w-3 -translate-x-1/2 rounded-full bg-[#5a6461]" />
+          <span className="absolute -top-1.5 right-1.5 h-2.5 w-2.5 rounded-full bg-[#edf1ef] shadow-[0_0_0_2px_rgba(255,255,255,0.22)]" />
+        </div>
       </button>
     </div>
   );
@@ -450,7 +550,7 @@ function createFallbackDashboard(role: UserRole, restaurants: RestaurantCard[]):
     return {
       role,
       source: "fallback",
-      stats: { activeTrips: 2, completedToday: 24, earningsToday: "₹1,240" },
+      stats: { activeTrips: 2, completedToday: 24, earningsToday: "Γé╣1,240" },
       currentPosition: "Near Lake Bridge",
       nextDrop: "Sector 12, Block C",
       timeToReach: "14 min",
@@ -588,11 +688,11 @@ export function AuthLanding() {
 
         if (!cancelled) {
           setBackendState(
-            data.message ?? `API ${data.api ?? (response.ok ? "online" : "offline")} · DB ${data.database ?? "unknown"}`
+            data.message ?? `API ${data.api ?? (response.ok ? "online" : "offline")} ┬╖ DB ${data.database ?? "unknown"}`
           );
         }
       } catch {
-        if (!cancelled) setBackendState("API offline · please connect MySQL");
+        if (!cancelled) setBackendState("API offline ┬╖ please connect MySQL");
       } finally {
         if (!cancelled) setIsBooting(false);
       }
@@ -927,7 +1027,7 @@ export function AuthLanding() {
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
           <section className="relative mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl items-start gap-6 lg:grid-cols-[0.95fr_1.05fr]">
             <SoftScreen>
-              <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite · Delivery</p>
+              <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite ┬╖ Delivery</p>
               <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">Where you are right now</h1>
               <p className="mt-3 text-sm leading-7 text-[#5e6b5a]">Track your active trips, current position, and ETA to the next drop.</p>
               <div className="mt-6 rounded-[1.5rem] border border-[#dfe7d6] bg-[#eef3e8] p-5">
@@ -959,7 +1059,7 @@ export function AuthLanding() {
                     <div className="flex items-start justify-between gap-4">
                       <div>
                         <p className="text-lg font-black text-[#1f2b21]">{trip.customer}</p>
-                        <p className="mt-1 text-sm text-[#5e6b5a]">{trip.pickup} → {trip.dropoff}</p>
+                        <p className="mt-1 text-sm text-[#5e6b5a]">{trip.pickup} ΓåÆ {trip.dropoff}</p>
                       </div>
                       <span className="rounded-full bg-[#4f6b52] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.2em] text-[#f5f8f1]">{trip.etaMinutes} min</span>
                     </div>
@@ -974,7 +1074,7 @@ export function AuthLanding() {
                 {selectedTrip ? (
                   <>
                     <p className="mt-2 text-2xl font-black text-[#1f2b21]">{selectedTrip.customer}</p>
-                    <p className="mt-1 text-sm text-[#5e6b5a]">{selectedTrip.pickup} → {selectedTrip.dropoff}</p>
+                    <p className="mt-1 text-sm text-[#5e6b5a]">{selectedTrip.pickup} ΓåÆ {selectedTrip.dropoff}</p>
                     <p className="mt-3 text-sm text-[#5e6b5a]">{selectedTrip.status}</p>
                     <p className="mt-1 text-sm text-[#5e6b5a]">Current location: {selectedTrip.currentLocation}</p>
                     <div className="mt-4 flex flex-wrap gap-2">
@@ -999,7 +1099,7 @@ export function AuthLanding() {
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
           <section className="relative mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl items-start gap-6 lg:grid-cols-[1fr_1fr]">
             <SoftScreen>
-              <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite · Restaurant Owner</p>
+              <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite ┬╖ Restaurant Owner</p>
               <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">Manage your restaurant</h1>
               <p className="mt-3 text-sm leading-7 text-[#5e6b5a]">Add a restaurant, edit your profile, and keep the kitchen queue moving.</p>
 
@@ -1019,7 +1119,7 @@ export function AuthLanding() {
               <div className="mt-4">
                 <NotificationCard
                   title="Kitchen status"
-                  message={restaurantFormStatus || `${restaurantDashboard.profile.ordersPending} orders pending · ${restaurantDashboard.profile.kitchenStatus} kitchen`}
+                  message={restaurantFormStatus || `${restaurantDashboard.profile.ordersPending} orders pending ┬╖ ${restaurantDashboard.profile.kitchenStatus} kitchen`}
                   tone={restaurantFormStatus ? toneFromText(restaurantFormStatus) : "warning"}
                 />
               </div>
@@ -1040,7 +1140,7 @@ export function AuthLanding() {
                     }`}
                   >
                     <p className="text-lg font-black text-[#1f2b21]">{restaurant.name}</p>
-                    <p className="mt-1 text-sm text-[#5e6b5a]">{restaurant.cuisine} · {restaurant.location}</p>
+                    <p className="mt-1 text-sm text-[#5e6b5a]">{restaurant.cuisine} ┬╖ {restaurant.location}</p>
                     <p className="mt-2 text-sm text-[#5e6b5a]">{restaurant.description}</p>
                   </button>
                 ))}
@@ -1051,7 +1151,7 @@ export function AuthLanding() {
                 {selectedRestaurantOption ? (
                   <>
                     <p className="mt-2 text-2xl font-black text-[#1f2b21]">{selectedRestaurantOption.name}</p>
-                    <p className="mt-1 text-sm text-[#5e6b5a]">{selectedRestaurantOption.cuisine} · {selectedRestaurantOption.location}</p>
+                    <p className="mt-1 text-sm text-[#5e6b5a]">{selectedRestaurantOption.cuisine} ┬╖ {selectedRestaurantOption.location}</p>
                     <p className="mt-3 text-sm text-[#5e6b5a]">{selectedRestaurantOption.description}</p>
                     <div className="mt-4 flex flex-wrap gap-2">
                       {selectedRestaurantOption.menu.map((dish) => (
@@ -1066,7 +1166,7 @@ export function AuthLanding() {
                 <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#4f6750]">Pending orders</p>
                 <div className="mt-3 grid gap-2">
                   {restaurantDashboard.pendingOrders.map((order) => (
-                    <div key={order.id} className="rounded-xl border border-[#dfe7d6] bg-white/92 px-3 py-2 text-sm text-[#5e6b5a]">{order.id} · {order.customer} · {order.items} · {order.status} · {order.due}</div>
+                    <div key={order.id} className="rounded-xl border border-[#dfe7d6] bg-white/92 px-3 py-2 text-sm text-[#5e6b5a]">{order.id} ┬╖ {order.customer} ┬╖ {order.items} ┬╖ {order.status} ┬╖ {order.due}</div>
                   ))}
                 </div>
               </div>
@@ -1086,7 +1186,7 @@ export function AuthLanding() {
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
           <section className="relative mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl items-start gap-6 lg:grid-cols-[1fr_1fr]">
             <SoftScreen>
-              <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite · Main Team</p>
+              <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite ┬╖ Main Team</p>
               <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">Everything in one view</h1>
               <p className="mt-3 text-sm leading-7 text-[#5e6b5a]">See who is using the app, how many restaurants are live, and what is happening right now.</p>
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -1118,7 +1218,7 @@ export function AuthLanding() {
                           : "border-[#dfe7d6] bg-white/92 text-[#5e6b5a] hover:bg-[#f7faf4]"
                       }`}
                     >
-                      {user.fullName} · {user.role} · {user.identifier}
+                      {user.fullName} ┬╖ {user.role} ┬╖ {user.identifier}
                     </button>
                   ))}
                 </div>
@@ -1129,7 +1229,7 @@ export function AuthLanding() {
                 {selectedPlatformUser ? (
                   <>
                     <p className="mt-2 text-2xl font-black text-[#1f2b21]">{selectedPlatformUser.fullName}</p>
-                    <p className="mt-1 text-sm text-[#5e6b5a]">{selectedPlatformUser.role} · {selectedPlatformUser.identifier}</p>
+                    <p className="mt-1 text-sm text-[#5e6b5a]">{selectedPlatformUser.role} ┬╖ {selectedPlatformUser.identifier}</p>
                   </>
                 ) : null}
               </div>
@@ -1139,7 +1239,7 @@ export function AuthLanding() {
                 {selectedPlatformRestaurant ? (
                   <>
                     <p className="mt-2 text-2xl font-black text-[#1f2b21]">{selectedPlatformRestaurant.name}</p>
-                    <p className="mt-1 text-sm text-[#5e6b5a]">{selectedPlatformRestaurant.cuisine} · {selectedPlatformRestaurant.location}</p>
+                    <p className="mt-1 text-sm text-[#5e6b5a]">{selectedPlatformRestaurant.cuisine} ┬╖ {selectedPlatformRestaurant.location}</p>
                     <div className="mt-4 flex flex-wrap gap-2">
                       {selectedPlatformRestaurant.menu.map((dish) => (
                         <span key={dish} className="rounded-full bg-white/90 px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#4f6750]">{dish}</span>
@@ -1161,14 +1261,14 @@ export function AuthLanding() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
         <section className="relative mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl items-start gap-6 lg:grid-cols-[0.95fr_1.05fr]">
           <SoftScreen>
-            <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite · Customer</p>
+            <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite ┬╖ Customer</p>
             <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">Track your order</h1>
             <p className="mt-3 text-sm leading-7 text-[#5e6b5a]">See your active order, rider ETA, and the restaurants available right now.</p>
             <div className="mt-6 rounded-[1.5rem] border border-[#dfe7d6] bg-[#eef3e8] p-5 shadow-[0_10px_24px_rgba(37,46,34,0.05)]">
               <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#4f6750]">Active order</p>
               <p className="mt-2 text-2xl font-black text-[#1f2b21]">{customerDashboard.activeOrder.restaurant}</p>
-              <p className="mt-1 text-sm text-[#5e6b5a]">{customerDashboard.activeOrder.status} · Rider {customerDashboard.activeOrder.rider}</p>
-              <p className="mt-1 text-sm text-[#5e6b5a]">ETA {customerDashboard.activeOrder.etaMinutes} min · {customerDashboard.activeOrder.address}</p>
+              <p className="mt-1 text-sm text-[#5e6b5a]">{customerDashboard.activeOrder.status} ┬╖ Rider {customerDashboard.activeOrder.rider}</p>
+              <p className="mt-1 text-sm text-[#5e6b5a]">ETA {customerDashboard.activeOrder.etaMinutes} min ┬╖ {customerDashboard.activeOrder.address}</p>
             </div>
             <div className="mt-6 flex flex-wrap gap-3">
               <button type="button" onClick={() => setStage("role")} className="rounded-full border border-[#dfe7d6] bg-[#f8faf4] px-5 py-3 text-sm font-semibold text-[#4f5b47] shadow-[0_8px_18px_rgba(37,46,34,0.06)]">Change role</button>
@@ -1191,7 +1291,7 @@ export function AuthLanding() {
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <p className="text-lg font-black text-[#1f2b21]">{restaurant.name}</p>
-                      <p className="mt-1 text-sm text-[#5e6b5a]">{restaurant.cuisine} · {restaurant.location}</p>
+                      <p className="mt-1 text-sm text-[#5e6b5a]">{restaurant.cuisine} ┬╖ {restaurant.location}</p>
                     </div>
                     <span className="rounded-full bg-[#4f6b52] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.2em] text-[#f5f8f1]">ETA {restaurant.etaMinutes} min</span>
                   </div>
@@ -1217,11 +1317,11 @@ export function AuthLanding() {
       <main className="min-h-screen px-4 py-4 text-[#243025] sm:px-6 sm:py-6 lg:px-8">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
         <button type="button" onClick={() => setIsRestaurantProfileOpen((current) => !current)} className="fixed left-4 top-4 z-30 rounded-full border border-[#6f7f68]/45 bg-white/95 p-3 shadow-[0_14px_30px_rgba(37,46,34,0.14)] backdrop-blur-xl" aria-label="Open profile settings">
-          <span className="block text-xl font-black text-[#4f6750]">☰</span>
+          <span className="block text-xl font-black text-[#4f6750]">Γÿ░</span>
         </button>
 
         <button type="button" onClick={() => setIsRestaurantCartOpen((current) => !current)} className="fixed right-3 top-1/2 z-30 -translate-y-1/2 rounded-full border border-[#6f7f68]/45 bg-[#223326] p-3 shadow-[0_14px_30px_rgba(37,46,34,0.14)]" aria-label="Open cart">
-          <span className="block text-xl font-black text-[#f5f8f1]">🛒</span>
+          <span className="block text-xl font-black text-[#f5f8f1]">≡ƒ¢Æ</span>
           {restaurantMenuItemCount > 0 ? (
             <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#d6e2c2] px-1 text-[10px] font-black text-[#1f2b21]">{restaurantMenuItemCount}</span>
           ) : null}
@@ -1231,9 +1331,9 @@ export function AuthLanding() {
           <SoftScreen>
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite · Menu</p>
+                <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite ┬╖ Menu</p>
                 <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">{selectedRestaurant.name}</h1>
-                <p className="mt-2 text-sm text-[#5e6b5a]">{selectedRestaurant.cuisine} · {selectedRestaurant.location}</p>
+                <p className="mt-2 text-sm text-[#5e6b5a]">{selectedRestaurant.cuisine} ┬╖ {selectedRestaurant.location}</p>
               </div>
               <button type="button" onClick={() => setStage("restaurants")} className="rounded-full border border-[#6f7f68]/45 bg-[#f8faf4] px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-[#4f5b47]">
                 Back
@@ -1258,7 +1358,7 @@ export function AuthLanding() {
             <div className="mt-6 flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#4f6750]">
               <span className="rounded-full bg-[#e7efdf] px-3 py-1">ETA {selectedRestaurant.etaMinutes} min</span>
               <span className="rounded-full bg-[#e7efdf] px-3 py-1">Rating {selectedRestaurant.rating.toFixed(1)}</span>
-              <span className="rounded-full bg-[#e7efdf] px-3 py-1">Use + / − to change quantity</span>
+              <span className="rounded-full bg-[#e7efdf] px-3 py-1">Use + / ΓêÆ to change quantity</span>
             </div>
             <div className="mt-6 grid gap-3">
               {selectedRestaurant.menu.map((dish, index) => {
@@ -1271,10 +1371,10 @@ export function AuthLanding() {
                       <div>
                         <p className="text-lg font-black text-[#1f2b21]">{dish}</p>
                         <p className="mt-1 text-sm text-[#5e6b5a]">Freshly prepared and easy to customize.</p>
-                        <p className="mt-2 text-sm font-semibold text-[#4f6750]">₹{price}</p>
+                        <p className="mt-2 text-sm font-semibold text-[#4f6750]">Γé╣{price}</p>
                       </div>
                       <div className="flex items-center gap-2 rounded-full border border-[#dfe7d6] bg-white px-2 py-2">
-                        <button type="button" onClick={() => updateRestaurantMenuCart(dish, price, -1)} className="flex h-8 w-8 items-center justify-center rounded-full bg-[#eef3e8] text-lg font-black text-[#4f6750]">−</button>
+                        <button type="button" onClick={() => updateRestaurantMenuCart(dish, price, -1)} className="flex h-8 w-8 items-center justify-center rounded-full bg-[#eef3e8] text-lg font-black text-[#4f6750]">ΓêÆ</button>
                         <span className="min-w-7 text-center text-sm font-bold text-[#1f2b21]">{cartItem?.quantity ?? 0}</span>
                         <button type="button" onClick={() => updateRestaurantMenuCart(dish, price, 1)} className="flex h-8 w-8 items-center justify-center rounded-full bg-[#223326] text-lg font-black text-[#f5f8f1]">+</button>
                       </div>
@@ -1298,7 +1398,7 @@ export function AuthLanding() {
               </div>
               <div className="mt-4 flex items-center justify-between text-sm text-[#5e6b5a]">
                 <span>Subtotal</span>
-                <span className="text-lg font-black text-[#1f2b21]">₹{restaurantMenuSubtotal.toFixed(0)}</span>
+                <span className="text-lg font-black text-[#1f2b21]">Γé╣{restaurantMenuSubtotal.toFixed(0)}</span>
               </div>
               <button type="button" onClick={openRestaurantCheckout} className="mt-4 w-full rounded-full bg-[#223326] px-5 py-3 text-sm font-semibold text-[#f5f8f1]">Proceed to checkout</button>
             </div>
@@ -1310,10 +1410,10 @@ export function AuthLanding() {
                     <div className="flex items-center justify-between gap-3">
                       <div>
                         <p className="text-sm font-bold text-[#1f2b21]">{item.name}</p>
-                        <p className="text-xs uppercase tracking-[0.18em] text-[#4f6750]">₹{item.price} each</p>
+                        <p className="text-xs uppercase tracking-[0.18em] text-[#4f6750]">Γé╣{item.price} each</p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <button type="button" onClick={() => updateRestaurantMenuCart(item.name, item.price, -1)} className="flex h-8 w-8 items-center justify-center rounded-full bg-[#eef3e8] text-lg font-black text-[#4f6750]">−</button>
+                        <button type="button" onClick={() => updateRestaurantMenuCart(item.name, item.price, -1)} className="flex h-8 w-8 items-center justify-center rounded-full bg-[#eef3e8] text-lg font-black text-[#4f6750]">ΓêÆ</button>
                         <span className="min-w-7 text-center text-sm font-bold text-[#1f2b21]">{item.quantity}</span>
                         <button type="button" onClick={() => updateRestaurantMenuCart(item.name, item.price, 1)} className="flex h-8 w-8 items-center justify-center rounded-full bg-[#223326] text-lg font-black text-[#f5f8f1]">+</button>
                       </div>
@@ -1323,7 +1423,7 @@ export function AuthLanding() {
               </div>
               <div className="mt-4 flex items-center justify-between text-sm text-[#5e6b5a]">
                 <span>Total</span>
-                <span className="text-lg font-black text-[#1f2b21]">₹{restaurantMenuSubtotal.toFixed(0)}</span>
+                <span className="text-lg font-black text-[#1f2b21]">Γé╣{restaurantMenuSubtotal.toFixed(0)}</span>
               </div>
             </div>
             <div className={`fixed left-16 top-24 z-30 w-[min(92vw,20rem)] rounded-[1.6rem] border border-[#dfe7d6] bg-[#fbfcf8] p-4 shadow-[0_20px_60px_rgba(37,46,34,0.18)] transition ${isRestaurantProfileOpen ? "translate-x-0 opacity-100" : "pointer-events-none -translate-x-6 opacity-0"}`}>
@@ -1355,12 +1455,12 @@ export function AuthLanding() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
 
         <button type="button" onClick={() => setStage("restaurant-menu")} className="fixed left-4 top-4 z-30 rounded-full border border-[#6f7f68]/45 bg-white/95 p-3 shadow-[0_14px_30px_rgba(37,46,34,0.14)] backdrop-blur-xl" aria-label="Open menu">
-          <span className="block text-xl font-black text-[#4f6750]">☰</span>
+          <span className="block text-xl font-black text-[#4f6750]">Γÿ░</span>
         </button>
 
         <section className="relative mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl items-start gap-6 lg:grid-cols-[1.05fr_0.95fr]">
           <SoftScreen>
-            <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite · Checkout</p>
+            <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite ┬╖ Checkout</p>
             <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">Delivery details</h1>
             <p className="mt-3 text-sm leading-7 text-[#5e6b5a]">Add the rider instructions, landmark, and contact details before placing the order.</p>
 
@@ -1397,12 +1497,12 @@ export function AuthLanding() {
             <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">Order summary</p>
             <div className="mt-4 rounded-[1.35rem] border border-[#dfe7d6] bg-[#fbfcf8] p-4">
               <p className="text-sm font-bold text-[#1f2b21]">{selectedRestaurant.name}</p>
-              <p className="mt-1 text-sm text-[#5e6b5a]">{selectedRestaurant.cuisine} · {selectedRestaurant.location}</p>
+              <p className="mt-1 text-sm text-[#5e6b5a]">{selectedRestaurant.cuisine} ┬╖ {selectedRestaurant.location}</p>
               <div className="mt-4 grid gap-2">
                 {restaurantMenuCart.length > 0 ? restaurantMenuCart.map((item) => (
                   <div key={item.name} className="flex items-center justify-between text-sm text-[#5e6b5a]">
                     <span>{item.name} x{item.quantity}</span>
-                    <span className="font-semibold text-[#1f2b21]">₹{(item.price * item.quantity).toFixed(0)}</span>
+                    <span className="font-semibold text-[#1f2b21]">Γé╣{(item.price * item.quantity).toFixed(0)}</span>
                   </div>
                 )) : <p className="text-sm leading-7 text-[#5e6b5a]">Your cart is empty.</p>}
               </div>
@@ -1422,7 +1522,7 @@ export function AuthLanding() {
             <div className="mt-5 rounded-[1.35rem] border border-[#dfe7d6] bg-[#fbfcf8] p-4 shadow-[0_10px_24px_rgba(37,46,34,0.06)]">
               <div className="flex items-center justify-between gap-4">
                 <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#4f6750]">Total</p>
-                <span className="text-lg font-black text-[#1f2b21]">₹{restaurantMenuSubtotal.toFixed(0)}</span>
+                <span className="text-lg font-black text-[#1f2b21]">Γé╣{restaurantMenuSubtotal.toFixed(0)}</span>
               </div>
               <button type="button" className="mt-4 w-full rounded-full bg-[#223326] px-5 py-3 text-sm font-semibold text-[#f5f8f1]">
                 Confirm and send to rider
@@ -1473,7 +1573,7 @@ export function AuthLanding() {
                 className="flex h-16 w-16 items-center justify-center rounded-full border border-[#dfe7d6] bg-[#f7faf2] text-2xl font-black text-[#4f5b47] shadow-[0_14px_32px_rgba(37,46,34,0.12)] transition hover:-translate-y-0.5 hover:bg-white sm:h-18 sm:w-18"
                 aria-label="Previous role"
               >
-                ◀
+                ΓùÇ
               </button>
 
               <div className="relative flex min-h-[30rem] w-full max-w-[60rem] items-center justify-center overflow-visible px-2 sm:min-h-[32rem] sm:px-6" style={{ perspective: "1200px" }}>
@@ -1543,7 +1643,7 @@ export function AuthLanding() {
                 className="flex h-16 w-16 items-center justify-center rounded-full border border-[#dfe7d6] bg-[#f7faf2] text-2xl font-black text-[#4f5b47] shadow-[0_14px_32px_rgba(37,46,34,0.12)] transition hover:-translate-y-0.5 hover:bg-white sm:h-18 sm:w-18"
                 aria-label="Next role"
               >
-                ▶
+                Γû╢
               </button>
             </div>
 
@@ -1574,7 +1674,7 @@ export function AuthLanding() {
 
         <section className="relative mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl items-center gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="rounded-[2rem] border border-[#5f7756]/55 bg-[rgba(225,212,193,0.92)] p-6 shadow-[0_24px_70px_rgba(45,61,44,0.14)] backdrop-blur-xl sm:p-8 lg:p-10">
-            <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite · Step 2</p>
+            <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite ┬╖ Step 2</p>
             <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">Welcome, {selectedRoleCard.title}</h1>
             <p className="mt-3 max-w-2xl text-sm leading-7 text-[#4d564a]">Your account is ready. The next app area can open from here.</p>
 
@@ -1625,7 +1725,7 @@ export function AuthLanding() {
 
         <section className="relative mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl items-center gap-6 lg:grid-cols-[0.95fr_1.05fr]">
           <div className="rounded-[2rem] border border-[#6f7f68]/45 bg-[rgba(248,251,246,0.94)] p-6 shadow-[0_24px_70px_rgba(45,61,44,0.1)] backdrop-blur-xl sm:p-8 lg:p-10">
-            <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite · Restaurants</p>
+            <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite ┬╖ Restaurants</p>
             <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">Pick a restaurant</h1>
             <p className="mt-3 max-w-2xl text-sm leading-7 text-[#5e6b5a]">
               This page is the next step after login. It loads restaurant options from the backend
@@ -1680,7 +1780,7 @@ export function AuthLanding() {
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <p className="text-lg font-black text-[#1f2b21]">{restaurant.name}</p>
-                      <p className="mt-1 text-sm text-[#5e6b5a]">{restaurant.cuisine} · {restaurant.location}</p>
+                      <p className="mt-1 text-sm text-[#5e6b5a]">{restaurant.cuisine} ┬╖ {restaurant.location}</p>
                     </div>
                     {restaurant.featured ? (
                       <span className="rounded-full bg-[#4f6b52] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.2em] text-[#f5f8f1]">
