@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createRoot, type Root } from "react-dom/client";
 
 type LoginMode = "email" | "phone";
 type AuthMode = "login" | "register";
@@ -82,6 +83,12 @@ type MenuCartItem = {
 };
 
 type CheckoutMethod = "cash" | "card" | "upi";
+
+type ChatMessage = {
+  id: number;
+  role: "user" | "assistant";
+  text: string;
+};
 
 const roleCards: Array<{
   id: UserRole;
@@ -180,6 +187,114 @@ function NotificationCard({
     <div className={`rounded-[1.35rem] border px-4 ${compact ? "py-3" : "py-4"} shadow-[0_10px_30px_rgba(37,46,34,0.12)] backdrop-blur-xl ${styles[tone]}`}>
       <p className="text-[11px] font-bold uppercase tracking-[0.26em] opacity-80">{title}</p>
       <p className={`mt-2 ${compact ? "text-sm" : "text-[0.95rem]"} leading-7 opacity-95`}>{message}</p>
+    </div>
+  );
+}
+
+function ChatWidget({
+  isOpen,
+  isSending,
+  messages,
+  chatInput,
+  onToggle,
+  onInputChange,
+  onSubmit,
+  onSuggestionClick,
+}: {
+  isOpen: boolean;
+  isSending: boolean;
+  messages: ChatMessage[];
+  chatInput: string;
+  onToggle: () => void;
+  onInputChange: (value: string) => void;
+  onSubmit: () => void;
+  onSuggestionClick: (value: string) => void;
+}) {
+  const suggestions = [
+    "How do I register?",
+    "How do I log in?",
+    "How do I order food?",
+    "How does delivery tracking work?",
+  ];
+
+  return (
+    <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3">
+      {isOpen ? (
+        <div className="w-[min(92vw,24rem)] overflow-hidden rounded-[1.75rem] border border-[#6f7f68]/55 bg-[#f8fbf4] shadow-[0_24px_70px_rgba(45,61,44,0.18)] backdrop-blur-xl">
+          <div className="flex items-start justify-between gap-4 border-b border-[#dfe7d6] bg-[#223326] px-4 py-4 text-[#f5f8f1]">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#b9c8ad]">SwiftBite assistant</p>
+              <h3 className="mt-1 text-lg font-black">Need help?</h3>
+              <p className="mt-1 text-sm text-[#d6e2cd]">Ask me about login, register, orders, delivery, or support.</p>
+            </div>
+            <button
+              type="button"
+              onClick={onToggle}
+              className="rounded-full border border-white/20 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-[#f5f8f1] hover:bg-white/10"
+              aria-label="Close chat"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="max-h-[22rem] space-y-3 overflow-y-auto px-4 py-4">
+            {messages.map((message) => (
+              <div
+                key={message.id}
+                className={`max-w-[88%] rounded-[1.2rem] px-4 py-3 text-sm leading-6 shadow-[0_8px_22px_rgba(37,46,34,0.08)] ${
+                  message.role === "user"
+                    ? "ml-auto bg-[#223326] text-[#f5f8f1]"
+                    : "border border-[#dfe7d6] bg-white text-[#243025]"
+                }`}
+              >
+                {message.text}
+              </div>
+            ))}
+          </div>
+
+          <div className="border-t border-[#dfe7d6] px-4 py-3">
+            <div className="flex flex-wrap gap-2">
+              {suggestions.map((suggestion) => (
+                <button
+                  key={suggestion}
+                  type="button"
+                  onClick={() => onSuggestionClick(suggestion)}
+                  className="rounded-full border border-[#cdd8c2] bg-[#f1f5ea] px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[#4f6750] hover:bg-white"
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
+
+            <div className="mt-3 flex items-end gap-2">
+              <textarea
+                value={chatInput}
+                onChange={(event) => onInputChange(event.target.value)}
+                placeholder="Type your question"
+                rows={2}
+                className="min-h-12 flex-1 resize-none rounded-[1.1rem] border border-[#cdd8c2] bg-white px-4 py-3 text-sm text-[#243025] outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10"
+              />
+              <button
+                type="button"
+                onClick={onSubmit}
+                disabled={isSending || !chatInput.trim()}
+                className="rounded-full bg-[#223326] px-4 py-3 text-sm font-semibold text-[#f5f8f1] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isSending ? "..." : "Send"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex h-16 w-16 items-center justify-center rounded-full bg-[#2ecc71] text-2xl font-black text-white shadow-[0_18px_44px_rgba(46,204,113,0.35)] transition hover:-translate-y-0.5"
+        aria-label="Open chat assistant"
+      >
+        💬
+      </button>
     </div>
   );
 }
@@ -436,6 +551,13 @@ export function AuthLanding() {
   const [newRestaurantFeatured, setNewRestaurantFeatured] = useState(true);
   const [isBooting, setIsBooting] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatInput, setChatInput] = useState("");
+  const [isChatSending, setIsChatSending] = useState(false);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
+    { id: 1, role: "assistant", text: "Hi, I can help with login, register, restaurant ordering, delivery tracking, or database setup." },
+  ]);
+  const chatbotRootRef = useRef<Root | null>(null);
 
   const selectedRoleCard = useMemo(
     () => roleCards.find((card) => card.id === selectedRole) ?? roleCards[0],
@@ -495,6 +617,24 @@ export function AuthLanding() {
       cancelled = true;
     };
   }, [apiBaseUrl, selectedRole]);
+
+  useEffect(() => {
+    const rootId = "swiftbite-chatbot-root";
+    let mountPoint = document.getElementById(rootId) as HTMLDivElement | null;
+
+    if (!mountPoint) {
+      mountPoint = document.createElement("div");
+      mountPoint.id = rootId;
+      document.body.appendChild(mountPoint);
+    }
+
+    chatbotRootRef.current = createRoot(mountPoint);
+
+    return () => {
+      chatbotRootRef.current?.unmount();
+      chatbotRootRef.current = null;
+    };
+  }, []);
 
   function chooseRole(role: UserRole) {
     setSelectedRole(role);
@@ -702,6 +842,78 @@ export function AuthLanding() {
       setRestaurantFormStatus("Unable to reach the backend while adding the restaurant.");
     }
   }
+
+  async function handleChatSubmit() {
+    const cleanMessage = chatInput.trim();
+
+    if (!cleanMessage || isChatSending) {
+      return;
+    }
+
+    const userMessage: ChatMessage = {
+      id: Date.now(),
+      role: "user",
+      text: cleanMessage,
+    };
+
+    setChatMessages((current) => [...current, userMessage]);
+    setChatInput("");
+    setIsChatSending(true);
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/chatbot/assist`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: cleanMessage, role: selectedRole }),
+      });
+
+      const payload = (await response.json()) as { reply?: string; message?: string };
+
+      setChatMessages((current) => [
+        ...current,
+        {
+          id: Date.now() + 1,
+          role: "assistant",
+          text: response.ok ? (payload.reply ?? "I can help with that.") : (payload.message ?? "Sorry, I could not answer right now."),
+        },
+      ]);
+    } catch {
+      setChatMessages((current) => [
+        ...current,
+        {
+          id: Date.now() + 1,
+          role: "assistant",
+          text: "I could not reach the chatbot service right now. Please try again.",
+        },
+      ]);
+    } finally {
+      setIsChatSending(false);
+    }
+  }
+
+  const chatbotWidget = (
+    <ChatWidget
+      isOpen={isChatOpen}
+      isSending={isChatSending}
+      messages={chatMessages}
+      chatInput={chatInput}
+      onToggle={() => setIsChatOpen((current) => !current)}
+      onInputChange={setChatInput}
+      onSubmit={handleChatSubmit}
+      onSuggestionClick={(value) => {
+        setChatInput(value);
+        setIsChatOpen(true);
+      }}
+    />
+  );
+
+  useEffect(() => {
+    if (!chatbotRootRef.current) {
+      return;
+    }
+
+    chatbotRootRef.current.render(chatbotWidget);
+  }, [chatbotWidget]);
 
   const dashboard = dashboardData ?? createFallbackDashboard(selectedRole, fallbackRestaurantsForUi);
 

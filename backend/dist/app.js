@@ -133,6 +133,44 @@ function buildMenuForRestaurant(name, cuisine) {
     }
     return ["Chef Special Bowl", "Daily Wrap", "Seasonal Plate", "House Drink"];
 }
+function buildChatbotReply(message, role) {
+    const normalizedMessage = message.toLowerCase();
+    const rolePrefix = role ? `${role}: ` : "";
+    if (normalizedMessage.includes("register") || normalizedMessage.includes("sign up") || normalizedMessage.includes("create account")) {
+        return {
+            reply: `${rolePrefix}To register, choose your role, fill in your name, email or phone, password, and captcha, then submit the form.`,
+            intent: "registration-help",
+        };
+    }
+    if (normalizedMessage.includes("login") || normalizedMessage.includes("sign in")) {
+        return {
+            reply: `${rolePrefix}To log in, select your role, choose email or phone, enter the same details you used while registering, and submit the form.`,
+            intent: "login-help",
+        };
+    }
+    if (normalizedMessage.includes("restaurant") || normalizedMessage.includes("menu") || normalizedMessage.includes("order")) {
+        return {
+            reply: `${rolePrefix}Use the restaurant cards to open menus, add items to the cart, and continue to checkout when you are ready.`,
+            intent: "ordering-help",
+        };
+    }
+    if (normalizedMessage.includes("delivery") || normalizedMessage.includes("track") || normalizedMessage.includes("eta")) {
+        return {
+            reply: `${rolePrefix}Open the delivery dashboard to see active trips, current location, and ETA for the next drop.`,
+            intent: "delivery-help",
+        };
+    }
+    if (normalizedMessage.includes("database") || normalizedMessage.includes("mysql") || normalizedMessage.includes("save")) {
+        return {
+            reply: `${rolePrefix}The backend stores user accounts and restaurant data in MySQL when the cloud database is connected.`,
+            intent: "database-help",
+        };
+    }
+    return {
+        reply: `${rolePrefix}I can help with login, register, restaurant browsing, delivery tracking, or database setup. Ask me a specific question and I will guide you.`,
+        intent: "starter-assistant",
+    };
+}
 async function loadRestaurants() {
     try {
         const [rows] = await db.query("SELECT id, name, cuisine, location, eta_minutes, rating, description, featured FROM restaurants ORDER BY featured DESC, rating DESC, name ASC");
@@ -460,11 +498,7 @@ export function createApp() {
             });
             return;
         }
-        const rolePrefix = parsed.data.role ? `${parsed.data.role}: ` : "";
-        response.json({
-            reply: `${rolePrefix}I can help with login, orders, delivery status, restaurant setup, or platform support.`,
-            intent: "starter-assistant",
-        });
+        response.json(buildChatbotReply(parsed.data.message, parsed.data.role));
     });
     app.use((_request, response) => {
         response.status(404).json({ message: "Route not found" });
