@@ -1,23 +1,23 @@
 @import "tailwindcss";
 
 :root {
-  --background: #d8dfcf;
+  --background: #f3f0e4;
   --foreground: #182118;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: "Segoe UI", "Inter", system-ui, sans-serif;
+  --font-sans: "Segoe UI Variable", "Segoe UI", "Aptos", system-ui, sans-serif;
   --font-mono: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
 }
 
 html {
   background:
-    radial-gradient(circle at top left, rgba(61, 88, 58, 0.28), transparent 22%),
-    radial-gradient(circle at 80% 12%, rgba(105, 131, 92, 0.22), transparent 18%),
-    radial-gradient(circle at 18% 84%, rgba(79, 106, 72, 0.14), transparent 20%),
-    linear-gradient(180deg, #eef3e8 0%, #dde7d7 48%, #cddbbf 100%);
+    radial-gradient(circle at top left, rgba(70, 93, 63, 0.14), transparent 20%),
+    radial-gradient(circle at 80% 12%, rgba(118, 134, 104, 0.12), transparent 16%),
+    radial-gradient(circle at 18% 84%, rgba(101, 118, 92, 0.08), transparent 18%),
+    linear-gradient(180deg, #f7f4ea 0%, #f1eddc 50%, #e6e0cd 100%);
   color-scheme: light;
 }
 
@@ -25,7 +25,7 @@ body {
   min-height: 100vh;
   background: transparent;
   color: var(--foreground);
-  font-family: "Segoe UI", "Inter", system-ui, sans-serif;
+  font-family: "Segoe UI Variable", "Segoe UI", "Aptos", system-ui, sans-serif;
   overflow-x: hidden;
 }
 
