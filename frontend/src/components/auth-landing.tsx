@@ -1519,7 +1519,29 @@ export function AuthLanding() {
               </div>
             </div>
 
-            
+            <div className="rounded-[1.6rem] border border-[#e6eade] bg-white/96 p-4 shadow-[0_18px_44px_rgba(12,18,11,0.12)]">
+              <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">Choose your role</p>
+              <p className="mt-2 text-sm text-[#5e6b5a]">Select the role that best matches how you'll use SwiftBite.</p>
+
+              <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                {roleCards.map((card) => (
+                  <button
+                    key={card.id}
+                    type="button"
+                    onClick={() => {
+                      chooseRole(card.id);
+                      setStage("login");
+                      switchAuthMode("login");
+                    }}
+                    className={`rounded-[1.2rem] border p-4 text-left transition text-[#243025] ${selectedRole === card.id ? "ring-2 ring-[#4f6b52]/30 bg-[#f7fbf6]" : "bg-white/98 hover:bg-[#fbfcf8]"}`}
+                  >
+                    <p className="text-lg font-black">{card.title}</p>
+                    <p className="mt-1 text-sm text-[#5e6b5a]">{card.subtitle}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
           </div>
 
         </section>
