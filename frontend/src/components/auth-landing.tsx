@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot, type Root } from "react-dom/client";
@@ -713,7 +713,15 @@ function createFallbackDashboard(role: UserRole, restaurants: RestaurantCard[]):
 
 export function AuthLanding() {
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
-  const [stage, setStage] = useState<Stage>("role");
+  const [stage, setStage] = useState<Stage>(() => {
+    if (typeof window === "undefined") return "role";
+    const savedStage = window.localStorage.getItem("swiftbite.stage") as Stage;
+    const validStages: Stage[] = ["role", "login", "dashboard", "continue", "restaurants", "restaurant-menu", "checkout"];
+    if (savedStage && validStages.includes(savedStage)) {
+      return savedStage;
+    }
+    return "role";
+  });
   const [selectedRole, setSelectedRole] = useState<UserRole>(() => {
     if (typeof window === "undefined") return "customer";
     const savedRole = window.localStorage.getItem("swiftbite.selectedRole");
@@ -954,16 +962,50 @@ export function AuthLanding() {
   }, [dashboardData, selectedRole]);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
     window.localStorage.setItem("swiftbite.selectedRole", selectedRole);
   }, [selectedRole]);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
     window.localStorage.setItem("swiftbite.authMode", authMode);
   }, [authMode]);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
     window.localStorage.setItem("swiftbite.loginMode", loginMode);
   }, [loginMode]);
+
+  // Synchronize stage state with browser history (popstate) and save to localStorage
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    if (!window.history.state || !window.history.state.stage) {
+      window.history.replaceState({ stage }, "");
+    }
+
+    const handlePopState = (event: PopStateEvent) => {
+      const stateFromHistory = event.state;
+      if (stateFromHistory && stateFromHistory.stage) {
+        setStage(stateFromHistory.stage);
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem("swiftbite.stage", stage);
+
+    const currentHistoryStage = window.history.state?.stage;
+    if (currentHistoryStage !== stage) {
+      window.history.pushState({ stage }, "");
+    }
+  }, [stage]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -1531,6 +1573,39 @@ export function AuthLanding() {
     chatbotRootRef.current.render(chatbotWidget);
   }, [chatbotWidget]);
 
+  function handleGoBack() {
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      window.history.back();
+    } else {
+      if (stage === "checkout") {
+        setStage("restaurant-menu");
+      } else if (stage === "restaurant-menu") {
+        setStage("restaurants");
+      } else if (stage === "restaurants") {
+        setStage("continue");
+      } else if (stage === "continue") {
+        setStage("dashboard");
+      } else if (stage === "dashboard") {
+        setStage("role");
+      } else if (stage === "login") {
+        setStage("role");
+      }
+    }
+  }
+
+  const globalBackButton = stage !== "role" && (
+    <button
+      type="button"
+      onClick={handleGoBack}
+      className="fixed left-[max(1rem,env(safe-area-inset-left))] top-[max(1.2rem,env(safe-area-inset-top))] z-50 flex h-11 w-11 items-center justify-center rounded-full border border-[#cbd5c0] bg-[#fbfcf9]/90 text-[#2d472c] shadow-[0_10px_25px_rgba(63,78,56,0.14)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#2d472c] hover:text-white hover:border-[#2d472c] hover:shadow-[0_14px_30px_rgba(45,71,44,0.26)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2d472c] sm:left-[max(1.5rem,env(safe-area-inset-left))] sm:top-[max(1.5rem,env(safe-area-inset-top))]"
+      aria-label="Go back"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 fill-none stroke-current stroke-[2.8]">
+        <path d="M15 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </button>
+  );
+
   const dashboard = dashboardData ?? createFallbackDashboard(selectedRole, fallbackRestaurantsForUi);
 
   if (stage === "dashboard") {
@@ -1541,6 +1616,7 @@ export function AuthLanding() {
       return (
         <main className="min-h-screen px-4 py-4 text-[#243025] sm:px-6 sm:py-6 lg:px-8">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
+          {globalBackButton}
           <section className="relative mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl items-start gap-6 lg:grid-cols-[0.95fr_1.05fr]">
             <SoftScreen>
               <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite • Delivery</p>
@@ -1702,6 +1778,7 @@ export function AuthLanding() {
       return (
         <main className="min-h-screen px-4 py-4 text-[#243025] sm:px-6 sm:py-6 lg:px-8">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
+          {globalBackButton}
           <section className="relative mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl items-start gap-6 lg:grid-cols-[1fr_1fr]">
             <SoftScreen>
               <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite • Restaurant Owner</p>
@@ -1940,6 +2017,7 @@ export function AuthLanding() {
       return (
         <main className="min-h-screen px-4 py-4 text-[#243025] sm:px-6 sm:py-6 lg:px-8">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
+          {globalBackButton}
           <section className="relative mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl items-start gap-6 lg:grid-cols-[1fr_1fr]">
             <SoftScreen>
               <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite • Main Team</p>
@@ -2041,6 +2119,7 @@ export function AuthLanding() {
     return (
       <main className="min-h-screen px-4 py-4 text-[#243025] sm:px-6 sm:py-6 lg:px-8">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
+        {globalBackButton}
         <section className="relative mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl items-start gap-6 lg:grid-cols-[0.95fr_1.05fr]">
           <SoftScreen>
             <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite • Customer</p>
@@ -2053,8 +2132,8 @@ export function AuthLanding() {
               <p className="mt-1 text-sm text-[#5e6b5a]">ETA {customerDashboard.activeOrder.etaMinutes} min • {customerDashboard.activeOrder.address}</p>
             </div>
             <div className="mt-6 flex flex-wrap gap-3">
-              <button type="button" onClick={() => setStage("role")} className="rounded-full border border-[#dfe7d6] bg-[#f8faf4] px-5 py-3 text-sm font-semibold text-[#4f5b47] shadow-[0_8px_18px_rgba(37,46,34,0.06)]">Change role</button>
-              <button type="button" onClick={() => setStage("login")} className="rounded-full bg-[#223326] px-5 py-3 text-sm font-semibold text-[#f5f8f1]">Sign out</button>
+              <button type="button" onClick={() => setStage("role")} className="rounded-full border border-[#cbd5c0] bg-[#fbfcf9] px-5 py-3 text-sm font-semibold text-[#2d472c] shadow-[0_8px_18px_rgba(63,78,56,0.06)] hover:bg-[#eef3e8]">Change role</button>
+              <button type="button" onClick={() => setStage("login")} className="rounded-full bg-[#2d472c] px-5 py-3 text-sm font-semibold text-white shadow-[0_8px_18px_rgba(45,71,44,0.12)] transition duration-300 hover:bg-[#1a2d1a]">Sign out</button>
             </div>
           </SoftScreen>
 
@@ -2098,8 +2177,9 @@ export function AuthLanding() {
     return (
       <main className="min-h-screen px-4 py-4 text-[#243025] sm:px-6 sm:py-6 lg:px-8">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
-        <button type="button" onClick={() => setIsRestaurantProfileOpen((current) => !current)} className="fixed left-4 top-4 z-30 rounded-full border border-[#6f7f68]/45 bg-white/95 p-3 shadow-[0_14px_30px_rgba(37,46,34,0.14)] backdrop-blur-xl" aria-label="Open profile settings">
-          <span className="block text-lg font-black text-[#4f6750]">☰</span>
+        {globalBackButton}
+        <button type="button" onClick={() => setIsRestaurantProfileOpen((current) => !current)} className="fixed right-4 top-4 z-30 rounded-full border border-[#cbd5c0] bg-white/90 p-3 text-[#2d472c] shadow-[0_10px_25px_rgba(63,78,56,0.12)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-[#2d472c] hover:text-white" aria-label="Open profile settings">
+          <span className="block text-lg font-bold">☰</span>
         </button>
 
         <button type="button" onClick={() => setIsRestaurantCartOpen((current) => !current)} className="fixed right-3 top-1/2 z-30 -translate-y-1/2 rounded-full border border-[#6f7f68]/45 bg-[#223326] p-3 shadow-[0_14px_30px_rgba(37,46,34,0.14)]" aria-label="Open cart">
@@ -2208,7 +2288,7 @@ export function AuthLanding() {
                 <span className="text-lg font-black text-[#1f2b21]">₹{restaurantMenuSubtotal.toFixed(0)}</span>
               </div>
             </div>
-            <div className={`fixed left-16 top-24 z-30 w-[min(92vw,20rem)] rounded-[1.6rem] border border-[#c9d7bf] bg-[linear-gradient(180deg,#fbfdf8_0%,#eef4e6_100%)] p-4 shadow-[0_20px_60px_rgba(63,78,56,0.14)] transition ${isRestaurantProfileOpen ? "translate-x-0 opacity-100" : "pointer-events-none -translate-x-6 opacity-0"}`}>
+            <div className={`fixed right-16 top-24 z-30 w-[min(92vw,20rem)] rounded-[1.6rem] border border-[#c9d7bf] bg-[linear-gradient(180deg,#fbfdf8_0%,#eef4e6_100%)] p-4 shadow-[0_20px_60px_rgba(63,78,56,0.14)] transition ${isRestaurantProfileOpen ? "translate-x-0 opacity-100" : "pointer-events-none translate-x-6 opacity-0"}`}>
               <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#4f6750]">Profile & settings</p>
               <p className="mt-3 text-sm font-black text-[#1f2b21]">{selectedRoleCard.title}</p>
               <p className="mt-1 text-sm text-[#5e6b5a]">Manage your profile, saved addresses, and menu preferences.</p>
@@ -2235,10 +2315,7 @@ export function AuthLanding() {
     return (
       <main className="min-h-screen px-4 py-4 text-[#243025] sm:px-6 sm:py-6 lg:px-8">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
-
-        <button type="button" onClick={() => setStage("restaurant-menu")} className="fixed left-4 top-4 z-30 rounded-full border border-[#6f7f68]/45 bg-white/95 p-3 shadow-[0_14px_30px_rgba(37,46,34,0.14)] backdrop-blur-xl" aria-label="Open menu">
-          <span className="block text-lg font-black text-[#4f6750]">←</span>
-        </button>
+        {globalBackButton}
 
         <section className="relative mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl items-start gap-6 lg:grid-cols-[1.05fr_0.95fr]">
           <SoftScreen>
@@ -2369,9 +2446,12 @@ export function AuthLanding() {
                   <button
                     type="button"
                     onClick={() => cycleRole("left")}
-                    className="absolute left-0 z-30 flex h-16 w-16 items-center justify-center rounded-full bg-[#173321] text-white shadow-[0_18px_40px_rgba(0,0,0,0.18)] transition hover:scale-105"
+                    className="absolute left-0 z-30 flex h-14 w-14 items-center justify-center rounded-full border border-white/20 bg-gradient-to-br from-[#2d472c] to-[#1e301e] text-white shadow-[0_12px_28px_rgba(45,71,44,0.25)] transition duration-300 hover:scale-105 hover:shadow-[0_16px_34px_rgba(45,71,44,0.35)] focus:outline-none focus:ring-2 focus:ring-[#5c7a59]"
+                    aria-label="Previous role"
                   >
-                    <span className="text-2xl">‹</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="h-6 w-6 stroke-[2.8]">
+                      <path d="M15 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
                   </button>
 
                   {/* CAROUSEL */}
@@ -2419,7 +2499,7 @@ export function AuthLanding() {
                               </div>
 
                               {isActive && (
-                                <div className="rounded-full bg-[#234128] px-4 py-1 text-[0.7rem] font-bold uppercase tracking-[0.22em] text-white">
+                                <div className="rounded-full bg-[#2d472c] px-4 py-1 text-[0.7rem] font-bold uppercase tracking-[0.22em] text-white">
                                   Selected
                                 </div>
                               )}
@@ -2440,13 +2520,6 @@ export function AuthLanding() {
                             </div>
 
                             {/* BOTTOM */}
-                            <div className="absolute bottom-6 left-7 text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#65745f]">
-                              Preview
-                            </div>
-
-                            <div className="absolute bottom-6 right-7 text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#65745f]">
-                              Swipe card
-                            </div>
 
                           </button>
                         </div>
@@ -2458,9 +2531,12 @@ export function AuthLanding() {
                   <button
                     type="button"
                     onClick={() => cycleRole("right")}
-                    className="absolute right-0 z-30 flex h-16 w-16 items-center justify-center rounded-full bg-[#173321] text-white shadow-[0_18px_40px_rgba(0,0,0,0.18)] transition hover:scale-105"
+                    className="absolute right-0 z-30 flex h-14 w-14 items-center justify-center rounded-full border border-white/20 bg-gradient-to-br from-[#2d472c] to-[#1e301e] text-white shadow-[0_12px_28px_rgba(45,71,44,0.25)] transition duration-300 hover:scale-105 hover:shadow-[0_16px_34px_rgba(45,71,44,0.35)] focus:outline-none focus:ring-2 focus:ring-[#5c7a59]"
+                    aria-label="Next role"
                   >
-                    <span className="text-2xl">›</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="h-6 w-6 stroke-[2.8]">
+                      <path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
                   </button>
                 </div>
 
@@ -2478,7 +2554,7 @@ export function AuthLanding() {
                     setStage("login");
                     switchAuthMode("login");
                   }}
-                  className="rounded-full bg-[#223326] px-5 py-3 text-sm font-semibold text-[#f5f8f1] shadow-[0_12px_28px_rgba(35,49,34,0.18)] transition hover:bg-[#1a291e]"
+                  className="rounded-full bg-gradient-to-r from-[#2d472c] to-[#1e301e] px-6 py-3.5 text-sm font-bold uppercase tracking-[0.1em] text-white shadow-[0_12px_28px_rgba(45,71,44,0.22)] transition-all duration-300 hover:scale-103 hover:shadow-[0_16px_34px_rgba(45,71,44,0.32)] focus:outline-none focus:ring-2 focus:ring-[#5c7a59]"
                 >
                   Next
                 </button>
@@ -2495,6 +2571,7 @@ export function AuthLanding() {
     return (
       <main className="min-h-screen px-4 py-4 text-[#243025] sm:px-6 sm:py-6 lg:px-8">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
+        {globalBackButton}
 
         <section className="relative mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl items-center gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="rounded-[2rem] border border-[#5f7756]/55 bg-[rgba(225,212,193,0.92)] p-6 shadow-[0_24px_70px_rgba(45,61,44,0.14)] backdrop-blur-xl sm:p-8 lg:p-10">
@@ -2538,6 +2615,7 @@ export function AuthLanding() {
     return (
       <main className="min-h-screen px-4 py-4 text-[#243025] sm:px-6 sm:py-6 lg:px-8">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
+        {globalBackButton}
 
         <section className="relative mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl items-center gap-6 lg:grid-cols-[0.95fr_1.05fr]">
           <div className="rounded-[2rem] border border-[#6f7f68]/45 bg-[rgba(248,251,246,0.94)] p-6 shadow-[0_24px_70px_rgba(45,61,44,0.1)] backdrop-blur-xl sm:p-8 lg:p-10">
