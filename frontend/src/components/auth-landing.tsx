@@ -250,10 +250,10 @@ function ChatWidget({
   const suggestions = getChatSuggestions(latestUserMessage?.text ?? null, !hasUserMessage);
 
   return (
-    <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3">
+    <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-3 sm:bottom-5 sm:right-5">
       {isOpen ? (
-        <div className="w-[min(92vw,24rem)] overflow-hidden rounded-[1.75rem] border border-[#2f4f2f]/55 bg-[#f8fbf4] shadow-[0_24px_70px_rgba(45,61,44,0.18)] backdrop-blur-xl">
-          <div className="flex items-start justify-between gap-4 border-b border-[#25412b] bg-gradient-to-br from-[#314a32] via-[#274428] to-[#1c2f22] px-4 py-4 text-[#f3f6f2]">
+        <div className="w-[min(94vw,24.5rem)] overflow-hidden rounded-[1.85rem] border border-[#31543a]/35 bg-[#f9fbf5] shadow-[0_28px_76px_rgba(27,47,31,0.24)] backdrop-blur-xl">
+          <div className="flex items-start justify-between gap-4 border-b border-[#24412c] bg-[linear-gradient(135deg,#35543a_0%,#23412b_55%,#13281b_100%)] px-4 py-4 text-[#f3f6f2]">
             <div className="flex items-start gap-3">
               <div className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-[1rem] border border-[#18321d] bg-[#223326] shadow-[inset_0_1px_0_rgba(0,0,0,0.12),0_8px_18px_rgba(20,28,24,0.12)]">
                 <img src="/message-icon.svg" alt="chat avatar" className="h-8 w-8 object-contain" />
@@ -267,7 +267,7 @@ function ChatWidget({
             <button
               type="button"
               onClick={onToggle}
-              className="rounded-full border border-[#2f4f2f] px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-[#f3f6f2] hover:bg-white/6"
+              className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-[#f3f6f2] hover:bg-white/18"
               aria-label="Close chat"
             >
               ✕
@@ -280,7 +280,7 @@ function ChatWidget({
                 key={message.id}
                 className={`max-w-[88%] rounded-[1.2rem] px-4 py-3 text-sm leading-6 shadow-[0_8px_22px_rgba(37,46,34,0.08)] ${
                   message.role === "user"
-                    ? "ml-auto bg-[#223326] text-[#f5f8f1]"
+                    ? "ml-auto bg-[#254b34] text-[#f5f8f1]"
                     : "border border-[#cfd5d0] bg-[linear-gradient(180deg,#ffffff_0%,#eef2f1_100%)] text-[#243025]"
                 }`}
               >
@@ -317,7 +317,7 @@ function ChatWidget({
             ) : null}
           </div>
 
-          <div className="border-t border-[#dfe7d6] px-4 py-3">
+          <div className="border-t border-[#dfe7d6] bg-[#f1f6ec] px-4 py-3">
             {suggestions.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {suggestions.map((suggestion) => (
@@ -325,7 +325,7 @@ function ChatWidget({
                     key={suggestion.label}
                     type="button"
                     onClick={() => onSuggestionClick(suggestion.value)}
-                    className="rounded-full border border-[#dfe7d0] bg-[#edf3ea] px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-[#314a32] hover:bg-white"
+                    className="rounded-full border border-[#cfe0c8] bg-[#dde9d6] px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-[#23412b] hover:bg-[#f2f7ee]"
                   >
                     {suggestion.label}
                   </button>
@@ -339,13 +339,13 @@ function ChatWidget({
                 onChange={(event) => onInputChange(event.target.value)}
                 placeholder="Type your question"
                 rows={2}
-                className="min-h-12 flex-1 resize-none rounded-[1.1rem] border border-[#cdd8c2] bg-white px-4 py-3 text-sm text-[#243025] outline-none focus:border-[#7a8582]/70 focus:ring-2 focus:ring-[#7a8582]/10"
+                className="min-h-12 flex-1 resize-none rounded-[1.1rem] border border-[#cdd8c2] bg-white px-4 py-3 text-sm text-[#243025] outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/15"
               />
               <button
                 type="button"
                 onClick={onSubmit}
                 disabled={isSending || !chatInput.trim()}
-                className="rounded-full bg-[#314a32] px-4 py-3 text-sm font-semibold text-[#f5f8f1] shadow-[0_10px_24px_rgba(31,47,34,0.28)] transition hover:bg-[#243426] disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-full bg-[#254b34] px-4 py-3 text-sm font-semibold text-[#f5f8f1] shadow-[0_12px_26px_rgba(36,75,52,0.34)] transition hover:bg-[#1e3928] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isSending ? "..." : "Send"}
               </button>
@@ -357,14 +357,14 @@ function ChatWidget({
       <button
         type="button"
         onClick={onToggle}
-        className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-[#e6ebea] via-[#aeb6b4] to-[#6f7775] text-2xl font-black text-[#25302b] shadow-[0_18px_44px_rgba(65,74,71,0.22)] transition hover:-translate-y-0.5"
+        className="flex h-16 w-16 items-center justify-center rounded-full border border-[#d3dfcb] bg-[linear-gradient(135deg,#f0f6ea_0%,#a9bb8d_55%,#4f6b52_100%)] text-2xl font-black text-white shadow-[0_18px_44px_rgba(44,74,49,0.28)] transition hover:-translate-y-0.5"
         aria-label="Open chat assistant"
       >
-        <div className="relative flex h-8 w-8 items-center justify-center rounded-[1rem] border border-[#dbe1df] bg-[linear-gradient(180deg,#ffffff_0%,#c9cfcd_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
-          <span className="absolute left-[0.45rem] top-[0.55rem] h-1.5 w-1.5 rounded-full bg-[#5a6461]" />
-          <span className="absolute right-[0.45rem] top-[0.55rem] h-1.5 w-1.5 rounded-full bg-[#5a6461]" />
-          <span className="absolute bottom-[0.55rem] left-1/2 h-1.5 w-3 -translate-x-1/2 rounded-full bg-[#5a6461]" />
-          <span className="absolute -top-1.5 right-1.5 h-2.5 w-2.5 rounded-full bg-[#edf1ef] shadow-[0_0_0_2px_rgba(255,255,255,0.22)]" />
+        <div className="relative flex h-8 w-8 items-center justify-center rounded-[1rem] border border-white/35 bg-[linear-gradient(180deg,#ffffff_0%,#dce7d0_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.95)]">
+          <span className="absolute left-[0.45rem] top-[0.55rem] h-1.5 w-1.5 rounded-full bg-[#51604a]" />
+          <span className="absolute right-[0.45rem] top-[0.55rem] h-1.5 w-1.5 rounded-full bg-[#51604a]" />
+          <span className="absolute bottom-[0.55rem] left-1/2 h-1.5 w-3 -translate-x-1/2 rounded-full bg-[#51604a]" />
+          <span className="absolute -top-1.5 right-1.5 h-2.5 w-2.5 rounded-full bg-[#ffe89a] shadow-[0_0_0_2px_rgba(255,255,255,0.28)]" />
         </div>
       </button>
     </div>
@@ -1738,15 +1738,15 @@ export function AuthLanding() {
   }
 
   return (
-    <main className="min-h-screen px-4 py-4 text-[#1f2b21] sm:px-6 sm:py-6 lg:px-8">
+    <main className="min-h-screen px-3 py-3 text-[#1f2b21] sm:px-4 sm:py-4 md:px-6 lg:px-8">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
 
-      <section className="relative mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl items-center gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="rounded-[2rem] border border-[#6f7f68]/45 bg-[rgba(248,251,246,0.94)] p-6 shadow-[0_24px_70px_rgba(45,61,44,0.1)] backdrop-blur-xl sm:p-8 lg:p-10">
-          <div className="flex items-center justify-between gap-4">
+      <section className="relative mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl items-center gap-6 lg:grid-cols-[1.05fr_0.95fr]">
+          <div className="mx-auto w-full max-w-2xl rounded-[2.2rem] border border-[#6f7f68]/45 bg-[rgba(248,251,246,0.94)] p-5 shadow-[0_24px_70px_rgba(45,61,44,0.1)] backdrop-blur-xl sm:p-7 lg:p-10 lg:max-w-none">
+          <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite</p>
-              <h1 className="mt-3 text-4xl font-black tracking-tight sm:text-5xl">Welcome back</h1>
+              <h1 className="mt-2 text-4xl font-black tracking-tight sm:text-5xl">Welcome back</h1>
             </div>
             <div className="hidden rounded-full border border-[#6f7f68]/45 bg-[#e7efdf] px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-[#4f6750] sm:block">
               Login / Register
@@ -1774,7 +1774,7 @@ export function AuthLanding() {
             })}
           </div>
 
-          <div className="mt-4 rounded-[1.25rem] border border-[#6f7f68]/45 bg-[#e7efdf] p-4">
+          <div className="mt-4 rounded-[1.25rem] border border-[#6f7f68]/45 bg-[#e7efdf] p-4 shadow-[0_10px_24px_rgba(37,46,34,0.05)]">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#4f6750]">Sign in method</p>
@@ -1801,7 +1801,7 @@ export function AuthLanding() {
             </div>
           </div>
 
-          <form className="mt-8 space-y-4" onSubmit={handleAuthSubmit}>
+          <form className="mx-auto mt-8 w-full max-w-xl space-y-4" onSubmit={handleAuthSubmit}>
             {authMode === "register" ? (
               <label className="block space-y-2">
                 <span className="text-sm font-medium text-[#243025]">Full name</span>
