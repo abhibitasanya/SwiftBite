@@ -520,15 +520,35 @@ function toneFromText(message: string): "neutral" | "success" | "warning" | "err
 function StatusBanner({ message }: { message: string }) {
   const tone = toneFromText(message);
   const styles = {
-    neutral: "border-[#d5dccf] bg-[#f4f7ef] text-[#334636]",
-    success: "border-[#9cbc98] bg-[#e9f4e4] text-[#24412b]",
-    warning: "border-[#d7c688] bg-[#f7f0d9] text-[#5a4720]",
-    error: "border-[#d39c92] bg-[#f8e4df] text-[#592a25]",
+    neutral: "border-[#b9c6b0] bg-[linear-gradient(135deg,rgba(245,248,240,0.98)_0%,rgba(225,234,216,0.96)_100%)] text-[#2f4132] shadow-[0_14px_30px_rgba(58,78,57,0.12)]",
+    success: "border-[#7fa071] bg-[linear-gradient(135deg,rgba(232,247,228,0.98)_0%,rgba(194,225,181,0.98)_100%)] text-[#204026] shadow-[0_14px_30px_rgba(53,92,52,0.16)]",
+    warning: "border-[#d3a94b] bg-[linear-gradient(135deg,rgba(252,241,210,0.99)_0%,rgba(245,220,147,0.97)_100%)] text-[#6b4f13] shadow-[0_14px_30px_rgba(120,94,25,0.16)]",
+    error: "border-[#cf7b6f] bg-[linear-gradient(135deg,rgba(251,230,224,0.99)_0%,rgba(245,199,191,0.97)_100%)] text-[#6d2e28] shadow-[0_14px_30px_rgba(128,58,50,0.16)]",
+  } as const;
+
+  const symbols = {
+    neutral: "ℹ",
+    success: "✓",
+    warning: "!",
+    error: "⚠",
   } as const;
 
   return (
-    <div className={`rounded-[1.15rem] border px-4 py-3 text-sm font-medium shadow-[0_10px_24px_rgba(37,46,34,0.08)] ${styles[tone]}`}>
-      {message}
+    <div
+      role="status"
+      aria-live="polite"
+      className={`relative overflow-hidden rounded-[1.2rem] border px-4 py-3 text-sm font-semibold ${styles[tone]}`}
+    >
+      <div className="absolute left-0 top-0 h-full w-1.5 bg-current opacity-45" />
+      <div className="flex items-start gap-3 pl-2">
+        <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/70 text-sm font-black shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+          {symbols[tone]}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-[10px] font-black uppercase tracking-[0.28em] opacity-80">Live status</p>
+          <p className="mt-1 leading-6">{message}</p>
+        </div>
+      </div>
     </div>
   );
 }
@@ -1560,14 +1580,10 @@ export function AuthLanding() {
             </div>
 
             <div className="rounded-[2.25rem] border border-[#dfe7d6] bg-[rgba(251,252,248,0.98)] p-6 shadow-[0_20px_48px_rgba(37,46,34,0.08)] sm:p-7">
-              <p className="text-[12px] font-black uppercase tracking-[0.38em] text-[#334636]">Choose your role</p>
-              <p className="mt-3 max-w-2xl text-[16px] leading-7 text-[#5e6b5a]">Select the role that best matches how you'll use SwiftBite.</p>
+              <p className="text-[14px] font-black uppercase tracking-[0.34em] text-[#213223] sm:text-[15px]">Choose Your Role</p>
+              <p className="mt-3 max-w-2xl text-[15px] leading-7 text-[#5e6b5a] sm:text-[16px]">Select the role that best matches how you'll use SwiftBite.</p>
 
-              <div className="mt-10 flex items-center justify-center">
-                <button type="button" onClick={() => cycleRole("left")} className="mr-4 flex h-12 w-12 items-center justify-center rounded-full border border-[#e3ead7] bg-[#f9fbf5] text-[#314a32] shadow-[0_8px_20px_rgba(37,46,34,0.08)] transition hover:bg-white">
-                  ◀
-                </button>
-
+              <div className="mt-12 flex flex-col items-center gap-4 sm:mt-14">
                 <div className="relative mx-2 h-[22rem] w-[min(90vw,62rem)] overflow-visible">
                   {roleWheelCards.map(({ card, offset }) => {
                     const absOffset = Math.abs(offset);
@@ -1602,8 +1618,8 @@ export function AuthLanding() {
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div>
-                            <p className="text-[1.45rem] font-black tracking-[-0.04em] text-[#133016] sm:text-[1.65rem]">{card.title}</p>
-                            <p className="mt-1 text-[16px] text-[#476152]">{card.subtitle}</p>
+                            <p className="text-[1.55rem] font-black tracking-[-0.05em] text-[#112514] sm:text-[1.75rem]">{card.title}</p>
+                            <p className="mt-1 text-[15px] text-[#476152] sm:text-[16px]">{card.subtitle}</p>
                           </div>
                           {isSelected ? (
                             <span className="rounded-full bg-[#254b34] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-white">SELECTED</span>
@@ -1630,9 +1646,15 @@ export function AuthLanding() {
                   })}
                 </div>
 
-                <button type="button" onClick={() => cycleRole("right")} className="ml-4 flex h-12 w-12 items-center justify-center rounded-full border border-[#e3ead7] bg-[#f9fbf5] text-[#314a32] shadow-[0_8px_20px_rgba(37,46,34,0.08)] transition hover:bg-white">
-                  ▶
-                </button>
+                <div className="flex items-center justify-center gap-4">
+                  <button type="button" onClick={() => cycleRole("left")} className="flex h-12 w-12 items-center justify-center rounded-full border border-[#e3ead7] bg-[#f9fbf5] text-[#314a32] shadow-[0_8px_20px_rgba(37,46,34,0.08)] transition hover:bg-white">
+                    ◀
+                  </button>
+
+                  <button type="button" onClick={() => cycleRole("right")} className="flex h-12 w-12 items-center justify-center rounded-full border border-[#e3ead7] bg-[#f9fbf5] text-[#314a32] shadow-[0_8px_20px_rgba(37,46,34,0.08)] transition hover:bg-white">
+                    ▶
+                  </button>
+                </div>
               </div>
 
               <div className="mt-8 flex items-center justify-between border-t border-[#e5eadc] pt-5">
@@ -1782,20 +1804,20 @@ export function AuthLanding() {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
 
       <section className="relative mx-auto flex min-h-[calc(100vh-2rem)] w-full max-w-6xl items-center justify-center">
-        <div className="mx-auto w-full max-w-2xl rounded-[2.4rem] border border-white/35 bg-[rgba(249,250,246,0.86)] p-5 shadow-[0_28px_90px_rgba(34,51,34,0.12)] backdrop-blur-2xl sm:p-7 lg:p-10">
-          <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+        <div className="mx-auto w-full max-w-2xl rounded-[2.4rem] border border-white/35 bg-[rgba(249,250,246,0.86)] p-4 shadow-[0_28px_90px_rgba(34,51,34,0.12)] backdrop-blur-2xl sm:p-6 lg:p-8">
+          <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite</p>
-              <h1 className="mt-2 text-4xl font-black tracking-tight sm:text-5xl">Welcome back</h1>
+              <h1 className="mt-1 text-3xl font-black tracking-tight sm:text-4xl lg:text-5xl">Welcome back</h1>
             </div>
             <div className="hidden rounded-full border border-[#6f7f68]/45 bg-[#e7efdf] px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-[#4f6750] sm:block">
               Login / Register
             </div>
           </div>
 
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-[#5e6b5a]">Use a clean sign-in flow with email or phone login, or create a new account for the selected role.</p>
+          <p className="mt-2 max-w-2xl text-[13px] leading-6 text-[#5e6b5a] sm:text-sm">Use a clean sign-in flow with email or phone login, or create a new account for the selected role.</p>
 
-          <div className="mt-6 grid grid-cols-2 gap-2 rounded-full border border-white/55 bg-white/35 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.45)] backdrop-blur-md">
+          <div className="mt-4 grid grid-cols-2 gap-2 rounded-full border border-white/55 bg-white/35 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.45)] backdrop-blur-md">
             {(["login", "register"] as const).map((mode) => {
               const isActive = authMode === mode;
 
@@ -1804,7 +1826,7 @@ export function AuthLanding() {
                   key={mode}
                   type="button"
                   onClick={() => switchAuthMode(mode)}
-                      className={`rounded-full px-4 py-3 text-sm font-semibold transition ${
+                      className={`rounded-full px-4 py-2.5 text-sm font-semibold transition ${
                     isActive ? "bg-[#223326] text-[#f5f8f1] shadow-[0_10px_24px_rgba(34,51,34,0.2)]" : "text-[#4f5b47] hover:bg-white/78"
                   }`}
                 >
@@ -1814,11 +1836,11 @@ export function AuthLanding() {
             })}
           </div>
 
-          <div className="mt-4 rounded-[1.25rem] border border-white/45 bg-white/28 p-4 shadow-[0_10px_24px_rgba(37,46,34,0.08)] backdrop-blur-md">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-3 rounded-[1.15rem] border border-white/45 bg-white/28 p-3.5 shadow-[0_10px_24px_rgba(37,46,34,0.08)] backdrop-blur-md">
+            <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#4f6750]">Sign in method</p>
-                <p className="mt-1 text-sm text-[#5e6b5a]">Pick how you want to identify this account.</p>
+                <p className="mt-1 text-[13px] text-[#5e6b5a]">Pick how you want to identify this account.</p>
               </div>
               <div className="grid w-full gap-2 sm:w-auto sm:grid-cols-2">
                 {(["email", "phone"] as const).map((mode) => {
@@ -1829,7 +1851,7 @@ export function AuthLanding() {
                       key={mode}
                       type="button"
                       onClick={() => setLoginMode(mode)}
-                      className={`rounded-full px-4 py-2.5 text-sm font-semibold transition ${
+                      className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
                         isActive ? "bg-[#223326] text-[#f5f8f1] shadow-[0_10px_24px_rgba(34,51,34,0.2)]" : "border border-white/45 bg-white/72 text-[#4f5b47] hover:bg-white"
                       }`}
                     >
@@ -1841,7 +1863,7 @@ export function AuthLanding() {
             </div>
           </div>
 
-          <form className="mx-auto mt-8 w-full max-w-xl space-y-4" onSubmit={handleAuthSubmit}>
+          <form className="mx-auto mt-5 w-full max-w-xl space-y-3.5" onSubmit={handleAuthSubmit}>
             {authMode === "register" ? (
               <label className="block space-y-2">
                 <span className="text-sm font-medium text-[#243025]">Full name</span>
@@ -1849,19 +1871,19 @@ export function AuthLanding() {
                   value={fullName}
                   onChange={(event) => setFullName(event.target.value)}
                   placeholder="Your name"
-                  className="w-full rounded-[1.15rem] border border-white/55 bg-white/72 px-4 py-3 text-[#1f2b21] outline-none placeholder:text-[#7f8a7a] focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10 backdrop-blur-sm"
+                  className="w-full rounded-[1.15rem] border border-white/55 bg-white/72 px-4 py-2.5 text-[#1f2b21] outline-none placeholder:text-[#7f8a7a] focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10 backdrop-blur-sm"
                 />
               </label>
             ) : null}
 
-            <div className="grid gap-4">
+            <div className="grid gap-3.5">
               <label className="block space-y-2">
                 <span className="text-sm font-medium text-[#243025]">{loginMode === "email" ? "Email address" : "Mobile number"}</span>
                 <input
                   value={identifier}
                   onChange={(event) => setIdentifier(event.target.value)}
                   placeholder={helperText}
-                  className="w-full rounded-[1.15rem] border border-white/55 bg-white/72 px-4 py-3 text-[#1f2b21] outline-none placeholder:text-[#7f8a7a] focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10 backdrop-blur-sm"
+                  className="w-full rounded-[1.15rem] border border-white/55 bg-white/72 px-4 py-2.5 text-[#1f2b21] outline-none placeholder:text-[#7f8a7a] focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10 backdrop-blur-sm"
                 />
               </label>
 
@@ -1872,7 +1894,7 @@ export function AuthLanding() {
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   placeholder="Password"
-                  className="w-full rounded-[1.15rem] border border-white/55 bg-white/72 px-4 py-3 text-[#243025] outline-none placeholder:text-[#8a927f] focus:border-[#7a8e63]/70 focus:ring-2 focus:ring-[#7a8e63]/10 backdrop-blur-sm"
+                  className="w-full rounded-[1.15rem] border border-white/55 bg-white/72 px-4 py-2.5 text-[#243025] outline-none placeholder:text-[#8a927f] focus:border-[#7a8e63]/70 focus:ring-2 focus:ring-[#7a8e63]/10 backdrop-blur-sm"
                 />
               </label>
 
@@ -1884,26 +1906,26 @@ export function AuthLanding() {
                     value={confirmPassword}
                     onChange={(event) => setConfirmPassword(event.target.value)}
                     placeholder="Repeat password"
-                    className="w-full rounded-[1.15rem] border border-white/55 bg-white/72 px-4 py-3 text-[#1f2b21] outline-none placeholder:text-[#7f8a7a] focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10 backdrop-blur-sm"
+                    className="w-full rounded-[1.15rem] border border-white/55 bg-white/72 px-4 py-2.5 text-[#1f2b21] outline-none placeholder:text-[#7f8a7a] focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10 backdrop-blur-sm"
                   />
                 </label>
               ) : null}
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+            <div className="grid gap-2.5 sm:grid-cols-[1fr_auto] sm:items-end">
               <label className="block space-y-2">
                 <span className="text-sm font-medium text-[#243025]">Captcha</span>
                 <input
                   value={captchaInput}
                   onChange={(event) => setCaptchaInput(event.target.value)}
                   placeholder="Answer"
-                  className="w-full rounded-[1.15rem] border border-white/55 bg-white/72 px-4 py-3 text-[#1f2b21] outline-none placeholder:text-[#7f8a7a] focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10 backdrop-blur-sm"
+                  className="w-full rounded-[1.15rem] border border-white/55 bg-white/72 px-4 py-2.5 text-[#1f2b21] outline-none placeholder:text-[#7f8a7a] focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10 backdrop-blur-sm"
                 />
               </label>
 
-              <div className="rounded-[1.15rem] border border-white/45 bg-white/36 px-4 py-3 text-[#1f2b21] shadow-[0_10px_24px_rgba(37,46,34,0.08)] backdrop-blur-md">
+              <div className="rounded-[1.15rem] border border-white/45 bg-white/36 px-4 py-2.5 text-[#1f2b21] shadow-[0_10px_24px_rgba(37,46,34,0.08)] backdrop-blur-md">
                 <p className="text-[11px] uppercase tracking-[0.28em] text-[#4f6750]">Check</p>
-                <p className="mt-2 text-2xl font-black">{captcha.left} {captcha.operator} {captcha.right}</p>
+                <p className="mt-1.5 text-2xl font-black">{captcha.left} {captcha.operator} {captcha.right}</p>
                 <button type="button" onClick={refreshCaptcha} className="mt-2 text-xs font-bold uppercase tracking-[0.22em] text-[#4f6750]">
                   Refresh
                 </button>
@@ -1913,12 +1935,12 @@ export function AuthLanding() {
             <button
               type="submit"
               disabled={isLoading || isBooting}
-              className="w-full rounded-full bg-[#223326] px-5 py-3.5 text-sm font-semibold text-[#f5f8f1] shadow-[0_14px_30px_rgba(34,51,34,0.24)] transition hover:bg-[#314537] disabled:cursor-not-allowed disabled:opacity-70"
+              className="w-full rounded-full bg-[#223326] px-5 py-3 text-sm font-semibold text-[#f5f8f1] shadow-[0_14px_30px_rgba(34,51,34,0.24)] transition hover:bg-[#314537] disabled:cursor-not-allowed disabled:opacity-70"
             >
               {isLoading ? "Working..." : authMode === "login" ? "Sign in" : "Create account"}
             </button>
 
-            <div className="pt-1">
+            <div className="pt-0.5">
               <StatusBanner message={statusMessage} />
             </div>
           </form>
