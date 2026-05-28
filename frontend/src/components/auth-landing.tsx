@@ -1694,8 +1694,10 @@ export function AuthLanding() {
 
     if (selectedRole === "restaurant") {
       const restaurantDashboard = (dashboard.role === "restaurant" ? dashboard : createFallbackDashboard("restaurant", fallbackRestaurantsForUi)) as any;
-      const selectedRestaurantOption = restaurantDashboard.restaurantOptions.find((restaurant) => restaurant.id === selectedRestaurantOptionId) ?? restaurantDashboard.restaurantOptions[0] ?? null;
-      const menuItems = restaurantDashboard.menuItems ?? [];
+      const restaurantOptions = (restaurantDashboard.restaurantOptions ?? []) as RestaurantCard[];
+      const menuItems = (restaurantDashboard.menuItems ?? []) as any[];
+      const pendingOrders = (restaurantDashboard.pendingOrders ?? []) as Array<{ id: string; customer: string; items: string; status: string; due: string }>;
+      const selectedRestaurantOption = restaurantOptions.find((restaurant) => restaurant.id === selectedRestaurantOptionId) ?? restaurantOptions[0] ?? null;
 
       return (
         <main className="min-h-screen px-4 py-4 text-[#243025] sm:px-6 sm:py-6 lg:px-8">
@@ -1834,10 +1836,23 @@ export function AuthLanding() {
               </div>
 
               <div className="mt-5 grid gap-3">
-                {restaurantDashboard.restaurantOptions.map((restaurant) => (
+                {restaurantOptions.map((restaurant) => (
                   <button
                     key={restaurant.id}
                     type="button"
+                    onClick={() => setSelectedRestaurantOptionId(restaurant.id)}
+                    className={`rounded-[1.35rem] border p-4 text-left shadow-[0_10px_24px_rgba(63,78,56,0.08)] transition ${
+                      selectedRestaurantOption?.id === restaurant.id
+                        ? "border-[#bdd0b2] bg-[linear-gradient(180deg,#f3f7ef_0%,#e7f0df_100%)]"
+                        : "border-[#d3dfca] bg-[linear-gradient(180deg,#fbfdf8_0%,#eef4e6_100%)] hover:bg-[#f7faf4]"
+                    }`}
+                  >
+                    <p className="text-lg font-black text-[#1f2b21]">{restaurant.name}</p>
+                    <p className="mt-1 text-sm text-[#5e6b5a]">{restaurant.cuisine} • {restaurant.location}</p>
+                    <p className="mt-2 text-sm text-[#5e6b5a]">{restaurant.description}</p>
+                  </button>
+                ))}
+              </div>
 
               <div className="mt-5 rounded-[1.35rem] border border-[#c9d7bf] bg-[linear-gradient(180deg,#f6faf2_0%,#e8f1df_100%)] p-4 shadow-[0_12px_28px_rgba(63,78,56,0.08)]">
                 <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#4f6750]">Live menu items</p>
@@ -1881,19 +1896,6 @@ export function AuthLanding() {
                   ))}
                 </div>
               </div>
-                    onClick={() => setSelectedRestaurantOptionId(restaurant.id)}
-                    className={`rounded-[1.35rem] border p-4 text-left shadow-[0_10px_24px_rgba(63,78,56,0.08)] transition ${
-                      selectedRestaurantOption?.id === restaurant.id
-                        ? "border-[#bdd0b2] bg-[linear-gradient(180deg,#f3f7ef_0%,#e7f0df_100%)]"
-                        : "border-[#d3dfca] bg-[linear-gradient(180deg,#fbfdf8_0%,#eef4e6_100%)] hover:bg-[#f7faf4]"
-                    }`}
-                  >
-                    <p className="text-lg font-black text-[#1f2b21]">{restaurant.name}</p>
-                    <p className="mt-1 text-sm text-[#5e6b5a]">{restaurant.cuisine} • {restaurant.location}</p>
-                    <p className="mt-2 text-sm text-[#5e6b5a]">{restaurant.description}</p>
-                  </button>
-                ))}
-              </div>
 
               <div className="mt-5 rounded-[1.35rem] border border-[#c9d7bf] bg-[linear-gradient(180deg,#f6faf2_0%,#e8f1df_100%)] p-4 shadow-[0_12px_28px_rgba(63,78,56,0.08)]">
                 <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#4f6750]">Selected restaurant</p>
@@ -1914,7 +1916,7 @@ export function AuthLanding() {
               <div className="mt-5 rounded-[1.35rem] border border-[#c9d7bf] bg-[linear-gradient(180deg,#f6faf2_0%,#e8f1df_100%)] p-4 shadow-[0_12px_28px_rgba(63,78,56,0.08)]">
                 <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#4f6750]">Pending orders</p>
                 <div className="mt-3 grid gap-2">
-                  {restaurantDashboard.pendingOrders.map((order) => (
+                  {pendingOrders.map((order) => (
                     <div key={order.id} className="rounded-xl border border-[#dfe7d6] bg-white/92 px-3 py-2 text-sm text-[#5e6b5a]">{order.id} • {order.customer} • {order.items} • {order.status} • {order.due}</div>
                   ))}
                 </div>
@@ -1927,10 +1929,13 @@ export function AuthLanding() {
 
     if (selectedRole === "platform") {
       const platformDashboard = (dashboard.role === "platform" ? dashboard : createFallbackDashboard("platform", fallbackRestaurantsForUi)) as any;
-      const selectedPlatformUser = platformDashboard.recentUsers.find((user) => user.identifier === selectedPlatformUserIdentifier) ?? platformDashboard.recentUsers[0] ?? null;
-      const selectedPlatformRestaurant = platformDashboard.recentRestaurants.find((restaurant) => restaurant.id === selectedPlatformRestaurantId) ?? platformDashboard.recentRestaurants[0] ?? null;
-      const riderProfiles = platformDashboard.riderProfiles ?? [];
-      const restaurantProfiles = platformDashboard.restaurantProfiles ?? [];
+      const recentUsers = (platformDashboard.recentUsers ?? []) as Array<{ fullName: string; identifier: string; role: UserRole }>;
+      const recentRestaurants = (platformDashboard.recentRestaurants ?? []) as RestaurantCard[];
+      const riderProfiles = (platformDashboard.riderProfiles ?? []) as Array<{ userIdentifier: string; fullName: string; vehicleType: string; deliveryZone: string; availabilityStatus: string; isOnline: boolean; completedOrdersCount: string }>;
+      const restaurantProfiles = (platformDashboard.restaurantProfiles ?? []) as Array<{ userIdentifier: string; restaurantName: string; cuisineType: string; cityState: string; ownerName: string; deliveryRadius: string }>;
+      const activity = (platformDashboard.activity ?? []) as string[];
+      const selectedPlatformUser = recentUsers.find((user) => user.identifier === selectedPlatformUserIdentifier) ?? recentUsers[0] ?? null;
+      const selectedPlatformRestaurant = recentRestaurants.find((restaurant) => restaurant.id === selectedPlatformRestaurantId) ?? recentRestaurants[0] ?? null;
 
       return (
         <main className="min-h-screen px-4 py-4 text-[#243025] sm:px-6 sm:py-6 lg:px-8">
@@ -1951,14 +1956,14 @@ export function AuthLanding() {
             <SoftScreen>
               <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">Activity stream</p>
               <div className="mt-4 grid gap-3">
-                {platformDashboard.activity.map((item) => (
+                {activity.map((item) => (
                   <div key={item} className="rounded-[1.1rem] border border-[#d3dfca] bg-[linear-gradient(180deg,#fbfdf8_0%,#eef4e6_100%)] px-4 py-3 text-sm text-[#5e6b5a] shadow-[0_10px_24px_rgba(63,78,56,0.08)]">{item}</div>
                 ))}
               </div>
               <div className="mt-5 rounded-[1.35rem] border border-[#c9d7bf] bg-[linear-gradient(180deg,#f6faf2_0%,#e8f1df_100%)] p-4 shadow-[0_12px_28px_rgba(63,78,56,0.08)]">
                 <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#4f6750]">Recent users</p>
                 <div className="mt-3 grid gap-2">
-                  {platformDashboard.recentUsers.map((user) => (
+                  {recentUsers.map((user) => (
                     <button
                       key={`${user.identifier}-${user.role}`}
                       type="button"
