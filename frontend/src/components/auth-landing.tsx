@@ -170,31 +170,7 @@ const fallbackRestaurantsForUi: RestaurantCard[] = [
   },
 ];
 
-function NotificationCard({
-  title,
-  message,
-  tone = "neutral",
-  compact = false,
-}: {
-  title: string;
-  message: string;
-  tone?: "neutral" | "success" | "warning" | "error";
-  compact?: boolean;
-}) {
-  const styles = {
-    neutral: "border-[#6f7f68]/55 bg-[#e8e4d9]/90 text-[#243025]",
-    success: "border-[#4f6b52]/55 bg-[#dfe7d6] text-[#1f2b21]",
-    warning: "border-[#7f8d60]/55 bg-[#ede3c9] text-[#2c2417]",
-    error: "border-[#8b5a4d]/55 bg-[#edd6d0] text-[#381f1a]",
-  } as const;
 
-  return (
-    <div className={`rounded-[1.35rem] border px-4 ${compact ? "py-3" : "py-4"} shadow-[0_10px_30px_rgba(37,46,34,0.12)] backdrop-blur-xl ${styles[tone]}`}>
-      <p className="text-[11px] font-bold uppercase tracking-[0.26em] opacity-80">{title}</p>
-      <p className={`mt-2 ${compact ? "text-sm" : "text-[0.95rem]"} leading-7 opacity-95`}>{message}</p>
-    </div>
-  );
-}
 
 function getChatSuggestions(intent: string | null, isStarter: boolean): ChatSuggestion[] {
   if (isStarter) {
@@ -1112,13 +1088,7 @@ export function AuthLanding() {
                 <button type="submit" className="rounded-full bg-[#223326] px-5 py-3 text-sm font-semibold text-[#f5f8f1] shadow-[0_10px_24px_rgba(63,90,61,0.18)]">Add restaurant</button>
               </form>
 
-              <div className="mt-4">
-                <NotificationCard
-                  title="Kitchen status"
-                  message={restaurantFormStatus || `${restaurantDashboard.profile.ordersPending} orders pending ┬╖ ${restaurantDashboard.profile.kitchenStatus} kitchen`}
-                  tone={restaurantFormStatus ? toneFromText(restaurantFormStatus) : "warning"}
-                />
-              </div>
+              
             </SoftScreen>
 
             <SoftScreen>
@@ -1594,15 +1564,7 @@ export function AuthLanding() {
             </div>
           </div>
 
-          <div className="rounded-[2rem] border border-[#5f7756]/55 bg-[rgba(225,212,193,0.92)] p-6 shadow-[0_24px_70px_rgba(45,61,44,0.14)] backdrop-blur-xl sm:p-8 lg:p-10">
-            <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">Status</p>
-            <div className="mt-4">
-              <NotificationCard title="Login confirmed" message="Signed in successfully. The dashboard is ready." tone="success" />
-            </div>
-            <div className="mt-4">
-              <NotificationCard title="Backend" message={backendState} tone={toneFromText(backendState)} compact />
-            </div>
-          </div>
+          
         </section>
       </main>
     );
@@ -1622,10 +1584,7 @@ export function AuthLanding() {
               and will use MySQL when the database is available.
             </p>
 
-            <div className="mt-8 grid gap-3">
-              <NotificationCard title="Backend source" message={backendState} tone={toneFromText(backendState)} />
-              <NotificationCard title="Restaurant feed" message={restaurantSource} tone={toneFromText(restaurantSource)} compact />
-            </div>
+            
 
             <div className="mt-6 flex flex-wrap gap-3">
               <button
@@ -1837,23 +1796,10 @@ export function AuthLanding() {
             </button>
           </form>
 
-          <div className="mt-5">
-            <NotificationCard title={authMode === "login" ? "Login status" : "Register status"} message={statusMessage} tone={toneFromText(statusMessage)} />
-          </div>
+          
         </div>
 
-        <aside className="rounded-[2rem] border border-[#5f7756]/55 bg-[rgba(225,212,193,0.92)] p-6 shadow-[0_24px_70px_rgba(45,61,44,0.14)] backdrop-blur-xl sm:p-8 lg:p-10">
-          <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">Status</p>
-          <div className="mt-4">
-            <NotificationCard title="Backend health" message={backendState} tone={toneFromText(backendState)} />
-          </div>
-
-            <div className="mt-5 grid gap-3 text-sm text-[#4d564a]">
-            <div className="rounded-[1.1rem] border border-[#6f7f68]/45 bg-[#f4efe4]/92 px-4 py-3 shadow-[0_8px_24px_rgba(37,46,34,0.08)]">Login and register now both connect to the backend.</div>
-            <div className="rounded-[1.1rem] border border-[#6f7f68]/45 bg-[#f4efe4]/92 px-4 py-3 shadow-[0_8px_24px_rgba(37,46,34,0.08)]">Register creates a real user row in MySQL.</div>
-            <div className="rounded-[1.1rem] border border-[#6f7f68]/45 bg-[#f4efe4]/92 px-4 py-3 shadow-[0_8px_24px_rgba(37,46,34,0.08)]">Errors now say exactly what failed.</div>
-          </div>
-        </aside>
+        
       </section>
     </main>
   );
