@@ -1,0 +1,51 @@
+name: CI Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [24.x]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install root deps
+        run: npm ci
+        working-directory: ./frontend
+
+      - name: Build frontend
+        env:
+          NODE_OPTIONS: --max_old_space_size=4096
+        run: |
+          npm ci
+          npm run build
+        working-directory: ./frontend
+
+      - name: Build backend
+        env:
+          NODE_OPTIONS: --max_old_space_size=4096
+        run: |
+          npm ci
+          npm run build
+        working-directory: ./backend
+
+      - name: Upload build logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs
+          path: |
+            frontend/.next/**
+            backend/dist/**

@@ -1240,7 +1240,7 @@ export function AuthLanding() {
         ((dashboard && (dashboard as any).restaurants) ?? fallbackRestaurantsForUi)
           .find((r: any) => r.id === selectedRestaurantId)
           ?.name ?? ""
-      ,
+      ),
       customerIdentifier: identifier || "guest",
       items: restaurantMenuCart.map((it) => ({ name: it.name, quantity: it.quantity, price: it.price })),
       address: deliveryAddress,
