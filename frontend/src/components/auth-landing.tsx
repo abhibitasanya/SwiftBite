@@ -517,12 +517,28 @@ function toneFromText(message: string): "neutral" | "success" | "warning" | "err
   return "neutral";
 }
 
+function StatusBanner({ message }: { message: string }) {
+  const tone = toneFromText(message);
+  const styles = {
+    neutral: "border-[#d5dccf] bg-[#f4f7ef] text-[#334636]",
+    success: "border-[#9cbc98] bg-[#e9f4e4] text-[#24412b]",
+    warning: "border-[#d7c688] bg-[#f7f0d9] text-[#5a4720]",
+    error: "border-[#d39c92] bg-[#f8e4df] text-[#592a25]",
+  } as const;
+
+  return (
+    <div className={`rounded-[1.15rem] border px-4 py-3 text-sm font-medium shadow-[0_10px_24px_rgba(37,46,34,0.08)] ${styles[tone]}`}>
+      {message}
+    </div>
+  );
+}
+
 function createFallbackDashboard(role: UserRole, restaurants: RestaurantCard[]): DashboardData {
   if (role === "delivery") {
     return {
       role,
       source: "fallback",
-      stats: { activeTrips: 2, completedToday: 24, earningsToday: "Γé╣1,240" },
+      stats: { activeTrips: 2, completedToday: 24, earningsToday: "₹1,240" },
       currentPosition: "Near Lake Bridge",
       nextDrop: "Sector 12, Block C",
       timeToReach: "14 min",
@@ -586,9 +602,21 @@ function createFallbackDashboard(role: UserRole, restaurants: RestaurantCard[]):
 export function AuthLanding() {
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
   const [stage, setStage] = useState<Stage>("role");
-  const [selectedRole, setSelectedRole] = useState<UserRole>("customer");
-  const [authMode, setAuthMode] = useState<AuthMode>("login");
-  const [loginMode, setLoginMode] = useState<LoginMode>("email");
+  const [selectedRole, setSelectedRole] = useState<UserRole>(() => {
+    if (typeof window === "undefined") return "customer";
+    const savedRole = window.localStorage.getItem("swiftbite.selectedRole");
+    return savedRole === "customer" || savedRole === "delivery" || savedRole === "restaurant" || savedRole === "platform" ? savedRole : "customer";
+  });
+  const [authMode, setAuthMode] = useState<AuthMode>(() => {
+    if (typeof window === "undefined") return "login";
+    const savedAuthMode = window.localStorage.getItem("swiftbite.authMode");
+    return savedAuthMode === "register" ? "register" : "login";
+  });
+  const [loginMode, setLoginMode] = useState<LoginMode>(() => {
+    if (typeof window === "undefined") return "email";
+    const savedLoginMode = window.localStorage.getItem("swiftbite.loginMode");
+    return savedLoginMode === "phone" ? "phone" : "email";
+  });
   const [fullName, setFullName] = useState("");
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
@@ -651,6 +679,18 @@ export function AuthLanding() {
   const helperText = loginMode === "email" ? "name@example.com" : "10-digit mobile number";
 
   useEffect(() => {
+    window.localStorage.setItem("swiftbite.selectedRole", selectedRole);
+  }, [selectedRole]);
+
+  useEffect(() => {
+    window.localStorage.setItem("swiftbite.authMode", authMode);
+  }, [authMode]);
+
+  useEffect(() => {
+    window.localStorage.setItem("swiftbite.loginMode", loginMode);
+  }, [loginMode]);
+
+  useEffect(() => {
     let cancelled = false;
 
     async function boot() {
@@ -660,11 +700,11 @@ export function AuthLanding() {
 
         if (!cancelled) {
           setBackendState(
-            data.message ?? `API ${data.api ?? (response.ok ? "online" : "offline")} ┬╖ DB ${data.database ?? "unknown"}`
+            data.message ?? `API ${data.api ?? (response.ok ? "online" : "offline")} • DB ${data.database ?? "unknown"}`
           );
         }
       } catch {
-        if (!cancelled) setBackendState("API offline ┬╖ please connect MySQL");
+        if (!cancelled) setBackendState("API offline • please connect MySQL");
       } finally {
         if (!cancelled) setIsBooting(false);
       }
@@ -999,7 +1039,7 @@ export function AuthLanding() {
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
           <section className="relative mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl items-start gap-6 lg:grid-cols-[0.95fr_1.05fr]">
             <SoftScreen>
-              <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite ┬╖ Delivery</p>
+              <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite • Delivery</p>
               <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">Where you are right now</h1>
               <p className="mt-3 text-sm leading-7 text-[#5e6b5a]">Track your active trips, current position, and ETA to the next drop.</p>
               <div className="mt-6 rounded-[1.5rem] border border-[#dfe7d6] bg-[#eef3e8] p-5">
@@ -1031,7 +1071,7 @@ export function AuthLanding() {
                     <div className="flex items-start justify-between gap-4">
                       <div>
                         <p className="text-lg font-black text-[#1f2b21]">{trip.customer}</p>
-                        <p className="mt-1 text-sm text-[#5e6b5a]">{trip.pickup} ΓåÆ {trip.dropoff}</p>
+                        <p className="mt-1 text-sm text-[#5e6b5a]">{trip.pickup} → {trip.dropoff}</p>
                       </div>
                       <span className="rounded-full bg-[#4f6b52] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.2em] text-[#f5f8f1]">{trip.etaMinutes} min</span>
                     </div>
@@ -1046,7 +1086,7 @@ export function AuthLanding() {
                 {selectedTrip ? (
                   <>
                     <p className="mt-2 text-2xl font-black text-[#1f2b21]">{selectedTrip.customer}</p>
-                    <p className="mt-1 text-sm text-[#5e6b5a]">{selectedTrip.pickup} ΓåÆ {selectedTrip.dropoff}</p>
+                    <p className="mt-1 text-sm text-[#5e6b5a]">{selectedTrip.pickup} → {selectedTrip.dropoff}</p>
                     <p className="mt-3 text-sm text-[#5e6b5a]">{selectedTrip.status}</p>
                     <p className="mt-1 text-sm text-[#5e6b5a]">Current location: {selectedTrip.currentLocation}</p>
                     <div className="mt-4 flex flex-wrap gap-2">
@@ -1071,7 +1111,7 @@ export function AuthLanding() {
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
           <section className="relative mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl items-start gap-6 lg:grid-cols-[1fr_1fr]">
             <SoftScreen>
-              <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite ┬╖ Restaurant Owner</p>
+              <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite • Restaurant Owner</p>
               <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">Manage your restaurant</h1>
               <p className="mt-3 text-sm leading-7 text-[#5e6b5a]">Add a restaurant, edit your profile, and keep the kitchen queue moving.</p>
 
@@ -1106,7 +1146,7 @@ export function AuthLanding() {
                     }`}
                   >
                     <p className="text-lg font-black text-[#1f2b21]">{restaurant.name}</p>
-                    <p className="mt-1 text-sm text-[#5e6b5a]">{restaurant.cuisine} ┬╖ {restaurant.location}</p>
+                    <p className="mt-1 text-sm text-[#5e6b5a]">{restaurant.cuisine} • {restaurant.location}</p>
                     <p className="mt-2 text-sm text-[#5e6b5a]">{restaurant.description}</p>
                   </button>
                 ))}
@@ -1117,7 +1157,7 @@ export function AuthLanding() {
                 {selectedRestaurantOption ? (
                   <>
                     <p className="mt-2 text-2xl font-black text-[#1f2b21]">{selectedRestaurantOption.name}</p>
-                    <p className="mt-1 text-sm text-[#5e6b5a]">{selectedRestaurantOption.cuisine} ┬╖ {selectedRestaurantOption.location}</p>
+                    <p className="mt-1 text-sm text-[#5e6b5a]">{selectedRestaurantOption.cuisine} • {selectedRestaurantOption.location}</p>
                     <p className="mt-3 text-sm text-[#5e6b5a]">{selectedRestaurantOption.description}</p>
                     <div className="mt-4 flex flex-wrap gap-2">
                       {selectedRestaurantOption.menu.map((dish) => (
@@ -1132,7 +1172,7 @@ export function AuthLanding() {
                 <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#4f6750]">Pending orders</p>
                 <div className="mt-3 grid gap-2">
                   {restaurantDashboard.pendingOrders.map((order) => (
-                    <div key={order.id} className="rounded-xl border border-[#dfe7d6] bg-white/92 px-3 py-2 text-sm text-[#5e6b5a]">{order.id} ┬╖ {order.customer} ┬╖ {order.items} ┬╖ {order.status} ┬╖ {order.due}</div>
+                    <div key={order.id} className="rounded-xl border border-[#dfe7d6] bg-white/92 px-3 py-2 text-sm text-[#5e6b5a]">{order.id} • {order.customer} • {order.items} • {order.status} • {order.due}</div>
                   ))}
                 </div>
               </div>
@@ -1152,7 +1192,7 @@ export function AuthLanding() {
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
           <section className="relative mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl items-start gap-6 lg:grid-cols-[1fr_1fr]">
             <SoftScreen>
-              <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite ┬╖ Main Team</p>
+              <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite • Main Team</p>
               <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">Everything in one view</h1>
               <p className="mt-3 text-sm leading-7 text-[#5e6b5a]">See who is using the app, how many restaurants are live, and what is happening right now.</p>
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -1184,7 +1224,7 @@ export function AuthLanding() {
                           : "border-[#dfe7d6] bg-white/92 text-[#5e6b5a] hover:bg-[#f7faf4]"
                       }`}
                     >
-                      {user.fullName} ┬╖ {user.role} ┬╖ {user.identifier}
+                      {user.fullName} • {user.role} • {user.identifier}
                     </button>
                   ))}
                 </div>
@@ -1195,7 +1235,7 @@ export function AuthLanding() {
                 {selectedPlatformUser ? (
                   <>
                     <p className="mt-2 text-2xl font-black text-[#1f2b21]">{selectedPlatformUser.fullName}</p>
-                    <p className="mt-1 text-sm text-[#5e6b5a]">{selectedPlatformUser.role} ┬╖ {selectedPlatformUser.identifier}</p>
+                    <p className="mt-1 text-sm text-[#5e6b5a]">{selectedPlatformUser.role} • {selectedPlatformUser.identifier}</p>
                   </>
                 ) : null}
               </div>
@@ -1205,7 +1245,7 @@ export function AuthLanding() {
                 {selectedPlatformRestaurant ? (
                   <>
                     <p className="mt-2 text-2xl font-black text-[#1f2b21]">{selectedPlatformRestaurant.name}</p>
-                    <p className="mt-1 text-sm text-[#5e6b5a]">{selectedPlatformRestaurant.cuisine} ┬╖ {selectedPlatformRestaurant.location}</p>
+                    <p className="mt-1 text-sm text-[#5e6b5a]">{selectedPlatformRestaurant.cuisine} • {selectedPlatformRestaurant.location}</p>
                     <div className="mt-4 flex flex-wrap gap-2">
                       {selectedPlatformRestaurant.menu.map((dish) => (
                         <span key={dish} className="rounded-full bg-white/90 px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#4f6750]">{dish}</span>
@@ -1227,14 +1267,14 @@ export function AuthLanding() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
         <section className="relative mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl items-start gap-6 lg:grid-cols-[0.95fr_1.05fr]">
           <SoftScreen>
-            <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite ┬╖ Customer</p>
+            <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite • Customer</p>
             <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">Track your order</h1>
             <p className="mt-3 text-sm leading-7 text-[#5e6b5a]">See your active order, rider ETA, and the restaurants available right now.</p>
             <div className="mt-6 rounded-[1.5rem] border border-[#dfe7d6] bg-[#eef3e8] p-5 shadow-[0_10px_24px_rgba(37,46,34,0.05)]">
               <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#4f6750]">Active order</p>
               <p className="mt-2 text-2xl font-black text-[#1f2b21]">{customerDashboard.activeOrder.restaurant}</p>
-              <p className="mt-1 text-sm text-[#5e6b5a]">{customerDashboard.activeOrder.status} ┬╖ Rider {customerDashboard.activeOrder.rider}</p>
-              <p className="mt-1 text-sm text-[#5e6b5a]">ETA {customerDashboard.activeOrder.etaMinutes} min ┬╖ {customerDashboard.activeOrder.address}</p>
+              <p className="mt-1 text-sm text-[#5e6b5a]">{customerDashboard.activeOrder.status} • Rider {customerDashboard.activeOrder.rider}</p>
+              <p className="mt-1 text-sm text-[#5e6b5a]">ETA {customerDashboard.activeOrder.etaMinutes} min • {customerDashboard.activeOrder.address}</p>
             </div>
             <div className="mt-6 flex flex-wrap gap-3">
               <button type="button" onClick={() => setStage("role")} className="rounded-full border border-[#dfe7d6] bg-[#f8faf4] px-5 py-3 text-sm font-semibold text-[#4f5b47] shadow-[0_8px_18px_rgba(37,46,34,0.06)]">Change role</button>
@@ -1257,7 +1297,7 @@ export function AuthLanding() {
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <p className="text-lg font-black text-[#1f2b21]">{restaurant.name}</p>
-                      <p className="mt-1 text-sm text-[#5e6b5a]">{restaurant.cuisine} ┬╖ {restaurant.location}</p>
+                      <p className="mt-1 text-sm text-[#5e6b5a]">{restaurant.cuisine} • {restaurant.location}</p>
                     </div>
                     <span className="rounded-full bg-[#4f6b52] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.2em] text-[#f5f8f1]">ETA {restaurant.etaMinutes} min</span>
                   </div>
@@ -1283,11 +1323,11 @@ export function AuthLanding() {
       <main className="min-h-screen px-4 py-4 text-[#243025] sm:px-6 sm:py-6 lg:px-8">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
         <button type="button" onClick={() => setIsRestaurantProfileOpen((current) => !current)} className="fixed left-4 top-4 z-30 rounded-full border border-[#6f7f68]/45 bg-white/95 p-3 shadow-[0_14px_30px_rgba(37,46,34,0.14)] backdrop-blur-xl" aria-label="Open profile settings">
-          <span className="block text-xl font-black text-[#4f6750]">Γÿ░</span>
+          <span className="block text-lg font-black text-[#4f6750]">Profile</span>
         </button>
 
         <button type="button" onClick={() => setIsRestaurantCartOpen((current) => !current)} className="fixed right-3 top-1/2 z-30 -translate-y-1/2 rounded-full border border-[#6f7f68]/45 bg-[#223326] p-3 shadow-[0_14px_30px_rgba(37,46,34,0.14)]" aria-label="Open cart">
-          <span className="block text-xl font-black text-[#f5f8f1]">≡ƒ¢Æ</span>
+          <span className="block text-lg font-black text-[#f5f8f1]">Cart</span>
           {restaurantMenuItemCount > 0 ? (
             <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#d6e2c2] px-1 text-[10px] font-black text-[#1f2b21]">{restaurantMenuItemCount}</span>
           ) : null}
@@ -1297,9 +1337,9 @@ export function AuthLanding() {
           <SoftScreen>
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite ┬╖ Menu</p>
+                <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite • Menu</p>
                 <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">{selectedRestaurant.name}</h1>
-                <p className="mt-2 text-sm text-[#5e6b5a]">{selectedRestaurant.cuisine} ┬╖ {selectedRestaurant.location}</p>
+                <p className="mt-2 text-sm text-[#5e6b5a]">{selectedRestaurant.cuisine} • {selectedRestaurant.location}</p>
               </div>
               <button type="button" onClick={() => setStage("restaurants")} className="rounded-full border border-[#6f7f68]/45 bg-[#f8faf4] px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-[#4f5b47]">
                 Back
@@ -1324,7 +1364,7 @@ export function AuthLanding() {
             <div className="mt-6 flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#4f6750]">
               <span className="rounded-full bg-[#e7efdf] px-3 py-1">ETA {selectedRestaurant.etaMinutes} min</span>
               <span className="rounded-full bg-[#e7efdf] px-3 py-1">Rating {selectedRestaurant.rating.toFixed(1)}</span>
-              <span className="rounded-full bg-[#e7efdf] px-3 py-1">Use + / ΓêÆ to change quantity</span>
+              <span className="rounded-full bg-[#e7efdf] px-3 py-1">Use + / - to change quantity</span>
             </div>
             <div className="mt-6 grid gap-3">
               {selectedRestaurant.menu.map((dish, index) => {
@@ -1337,10 +1377,10 @@ export function AuthLanding() {
                       <div>
                         <p className="text-lg font-black text-[#1f2b21]">{dish}</p>
                         <p className="mt-1 text-sm text-[#5e6b5a]">Freshly prepared and easy to customize.</p>
-                        <p className="mt-2 text-sm font-semibold text-[#4f6750]">Γé╣{price}</p>
+                        <p className="mt-2 text-sm font-semibold text-[#4f6750]">₹{price}</p>
                       </div>
                       <div className="flex items-center gap-2 rounded-full border border-[#dfe7d6] bg-white px-2 py-2">
-                        <button type="button" onClick={() => updateRestaurantMenuCart(dish, price, -1)} className="flex h-8 w-8 items-center justify-center rounded-full bg-[#eef3e8] text-lg font-black text-[#4f6750]">ΓêÆ</button>
+                        <button type="button" onClick={() => updateRestaurantMenuCart(dish, price, -1)} className="flex h-8 w-8 items-center justify-center rounded-full bg-[#eef3e8] text-lg font-black text-[#4f6750]">-</button>
                         <span className="min-w-7 text-center text-sm font-bold text-[#1f2b21]">{cartItem?.quantity ?? 0}</span>
                         <button type="button" onClick={() => updateRestaurantMenuCart(dish, price, 1)} className="flex h-8 w-8 items-center justify-center rounded-full bg-[#223326] text-lg font-black text-[#f5f8f1]">+</button>
                       </div>
@@ -1364,7 +1404,7 @@ export function AuthLanding() {
               </div>
               <div className="mt-4 flex items-center justify-between text-sm text-[#5e6b5a]">
                 <span>Subtotal</span>
-                <span className="text-lg font-black text-[#1f2b21]">Γé╣{restaurantMenuSubtotal.toFixed(0)}</span>
+                <span className="text-lg font-black text-[#1f2b21]">₹{restaurantMenuSubtotal.toFixed(0)}</span>
               </div>
               <button type="button" onClick={openRestaurantCheckout} className="mt-4 w-full rounded-full bg-[#223326] px-5 py-3 text-sm font-semibold text-[#f5f8f1]">Proceed to checkout</button>
             </div>
@@ -1376,10 +1416,10 @@ export function AuthLanding() {
                     <div className="flex items-center justify-between gap-3">
                       <div>
                         <p className="text-sm font-bold text-[#1f2b21]">{item.name}</p>
-                        <p className="text-xs uppercase tracking-[0.18em] text-[#4f6750]">Γé╣{item.price} each</p>
+                        <p className="text-xs uppercase tracking-[0.18em] text-[#4f6750]">₹{item.price} each</p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <button type="button" onClick={() => updateRestaurantMenuCart(item.name, item.price, -1)} className="flex h-8 w-8 items-center justify-center rounded-full bg-[#eef3e8] text-lg font-black text-[#4f6750]">ΓêÆ</button>
+                        <button type="button" onClick={() => updateRestaurantMenuCart(item.name, item.price, -1)} className="flex h-8 w-8 items-center justify-center rounded-full bg-[#eef3e8] text-lg font-black text-[#4f6750]">-</button>
                         <span className="min-w-7 text-center text-sm font-bold text-[#1f2b21]">{item.quantity}</span>
                         <button type="button" onClick={() => updateRestaurantMenuCart(item.name, item.price, 1)} className="flex h-8 w-8 items-center justify-center rounded-full bg-[#223326] text-lg font-black text-[#f5f8f1]">+</button>
                       </div>
@@ -1389,7 +1429,7 @@ export function AuthLanding() {
               </div>
               <div className="mt-4 flex items-center justify-between text-sm text-[#5e6b5a]">
                 <span>Total</span>
-                <span className="text-lg font-black text-[#1f2b21]">Γé╣{restaurantMenuSubtotal.toFixed(0)}</span>
+                <span className="text-lg font-black text-[#1f2b21]">₹{restaurantMenuSubtotal.toFixed(0)}</span>
               </div>
             </div>
             <div className={`fixed left-16 top-24 z-30 w-[min(92vw,20rem)] rounded-[1.6rem] border border-[#dfe7d6] bg-[#fbfcf8] p-4 shadow-[0_20px_60px_rgba(37,46,34,0.18)] transition ${isRestaurantProfileOpen ? "translate-x-0 opacity-100" : "pointer-events-none -translate-x-6 opacity-0"}`}>
@@ -1421,12 +1461,12 @@ export function AuthLanding() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
 
         <button type="button" onClick={() => setStage("restaurant-menu")} className="fixed left-4 top-4 z-30 rounded-full border border-[#6f7f68]/45 bg-white/95 p-3 shadow-[0_14px_30px_rgba(37,46,34,0.14)] backdrop-blur-xl" aria-label="Open menu">
-          <span className="block text-xl font-black text-[#4f6750]">Γÿ░</span>
+          <span className="block text-lg font-black text-[#4f6750]">Back</span>
         </button>
 
         <section className="relative mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl items-start gap-6 lg:grid-cols-[1.05fr_0.95fr]">
           <SoftScreen>
-            <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite ┬╖ Checkout</p>
+            <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite • Checkout</p>
             <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">Delivery details</h1>
             <p className="mt-3 text-sm leading-7 text-[#5e6b5a]">Add the rider instructions, landmark, and contact details before placing the order.</p>
 
@@ -1463,12 +1503,12 @@ export function AuthLanding() {
             <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">Order summary</p>
             <div className="mt-4 rounded-[1.35rem] border border-[#dfe7d6] bg-[#fbfcf8] p-4">
               <p className="text-sm font-bold text-[#1f2b21]">{selectedRestaurant.name}</p>
-              <p className="mt-1 text-sm text-[#5e6b5a]">{selectedRestaurant.cuisine} ┬╖ {selectedRestaurant.location}</p>
+              <p className="mt-1 text-sm text-[#5e6b5a]">{selectedRestaurant.cuisine} • {selectedRestaurant.location}</p>
               <div className="mt-4 grid gap-2">
                 {restaurantMenuCart.length > 0 ? restaurantMenuCart.map((item) => (
                   <div key={item.name} className="flex items-center justify-between text-sm text-[#5e6b5a]">
                     <span>{item.name} x{item.quantity}</span>
-                    <span className="font-semibold text-[#1f2b21]">Γé╣{(item.price * item.quantity).toFixed(0)}</span>
+                    <span className="font-semibold text-[#1f2b21]">₹{(item.price * item.quantity).toFixed(0)}</span>
                   </div>
                 )) : <p className="text-sm leading-7 text-[#5e6b5a]">Your cart is empty.</p>}
               </div>
@@ -1488,7 +1528,7 @@ export function AuthLanding() {
             <div className="mt-5 rounded-[1.35rem] border border-[#dfe7d6] bg-[#fbfcf8] p-4 shadow-[0_10px_24px_rgba(37,46,34,0.06)]">
               <div className="flex items-center justify-between gap-4">
                 <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#4f6750]">Total</p>
-                <span className="text-lg font-black text-[#1f2b21]">Γé╣{restaurantMenuSubtotal.toFixed(0)}</span>
+                <span className="text-lg font-black text-[#1f2b21]">₹{restaurantMenuSubtotal.toFixed(0)}</span>
               </div>
               <button type="button" className="mt-4 w-full rounded-full bg-[#223326] px-5 py-3 text-sm font-semibold text-[#f5f8f1]">
                 Confirm and send to rider
@@ -1523,24 +1563,24 @@ export function AuthLanding() {
               <p className="text-[12px] font-black uppercase tracking-[0.38em] text-[#334636]">Choose your role</p>
               <p className="mt-3 max-w-2xl text-[16px] leading-7 text-[#5e6b5a]">Select the role that best matches how you'll use SwiftBite.</p>
 
-              <div className="mt-8 flex items-center justify-center">
+              <div className="mt-10 flex items-center justify-center">
                 <button type="button" onClick={() => cycleRole("left")} className="mr-4 flex h-12 w-12 items-center justify-center rounded-full border border-[#e3ead7] bg-[#f9fbf5] text-[#314a32] shadow-[0_8px_20px_rgba(37,46,34,0.08)] transition hover:bg-white">
                   ◀
                 </button>
 
-                <div className="relative mx-2 h-[20rem] w-[min(86vw,58rem)] overflow-visible">
+                <div className="relative mx-2 h-[22rem] w-[min(90vw,62rem)] overflow-visible">
                   {roleWheelCards.map(({ card, offset }) => {
                     const absOffset = Math.abs(offset);
                     const isSelected = selectedRole === card.id;
-                    const translateX = absOffset === 2 ? "0%" : `${offset * 34}%`;
-                    const translateY = isSelected ? "0px" : absOffset === 2 ? "-92px" : "10px";
-                    const scale = isSelected ? 1 : absOffset === 2 ? 0.84 : 0.9;
-                    const zIndex = isSelected ? 40 : absOffset === 2 ? 12 : 22 - absOffset;
-                    const opacity = absOffset === 2 ? 0.7 : 1;
+                    const translateX = absOffset === 2 ? "0%" : `${offset * 46}%`;
+                    const translateY = isSelected ? "14px" : absOffset === 2 ? "-112px" : "16px";
+                    const scale = isSelected ? 1 : absOffset === 2 ? 0.86 : 0.92;
+                    const zIndex = isSelected ? 40 : absOffset === 2 ? 10 : 22 - absOffset;
+                    const opacity = absOffset === 2 ? 0.58 : 1;
                     const cardBg = isSelected ? "#e7f0df" : "#f7f8f3";
                     const cardBorder = isSelected ? "#cfe0c8" : "#e5eadf";
                     const boxShadow = isSelected ? "0 36px 86px rgba(34,51,34,0.16)" : "0 12px 28px rgba(37,46,34,0.06)";
-                    const width = isSelected ? "min(64%, 43rem)" : absOffset === 2 ? "min(54%, 38rem)" : "min(44%, 31rem)";
+                    const width = isSelected ? "min(62%, 41rem)" : absOffset === 2 ? "min(50%, 36rem)" : "min(48%, 32rem)";
 
                     return (
                       <button
@@ -1595,7 +1635,7 @@ export function AuthLanding() {
                 </button>
               </div>
 
-              <div className="mt-6 flex items-center justify-between border-t border-[#e5eadc] pt-5">
+              <div className="mt-8 flex items-center justify-between border-t border-[#e5eadc] pt-5">
                 <p className="text-sm text-[#5e6b5a]">Continue as <strong className="font-semibold text-[#243025]">{selectedRoleCard.title}</strong>.</p>
                 <div className="flex items-center gap-3">
                   <button type="button" onClick={() => { setStage("login"); switchAuthMode("login"); }} className="rounded-full bg-[#223326] px-4 py-2 text-sm font-semibold text-[#f5f8f1]">Next</button>
@@ -1617,7 +1657,7 @@ export function AuthLanding() {
 
         <section className="relative mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl items-center gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="rounded-[2rem] border border-[#5f7756]/55 bg-[rgba(225,212,193,0.92)] p-6 shadow-[0_24px_70px_rgba(45,61,44,0.14)] backdrop-blur-xl sm:p-8 lg:p-10">
-            <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite ┬╖ Step 2</p>
+            <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite • Step 2</p>
             <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">Welcome, {selectedRoleCard.title}</h1>
             <p className="mt-3 max-w-2xl text-sm leading-7 text-[#4d564a]">Your account is ready. The next app area can open from here.</p>
 
@@ -1660,7 +1700,7 @@ export function AuthLanding() {
 
         <section className="relative mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl items-center gap-6 lg:grid-cols-[0.95fr_1.05fr]">
           <div className="rounded-[2rem] border border-[#6f7f68]/45 bg-[rgba(248,251,246,0.94)] p-6 shadow-[0_24px_70px_rgba(45,61,44,0.1)] backdrop-blur-xl sm:p-8 lg:p-10">
-            <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite ┬╖ Restaurants</p>
+            <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite • Restaurants</p>
             <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">Pick a restaurant</h1>
             <p className="mt-3 max-w-2xl text-sm leading-7 text-[#5e6b5a]">
               This page is the next step after login. It loads restaurant options from the backend
@@ -1712,7 +1752,7 @@ export function AuthLanding() {
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <p className="text-lg font-black text-[#1f2b21]">{restaurant.name}</p>
-                      <p className="mt-1 text-sm text-[#5e6b5a]">{restaurant.cuisine} ┬╖ {restaurant.location}</p>
+                      <p className="mt-1 text-sm text-[#5e6b5a]">{restaurant.cuisine} • {restaurant.location}</p>
                     </div>
                     {restaurant.featured ? (
                       <span className="rounded-full bg-[#4f6b52] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.2em] text-[#f5f8f1]">
@@ -1741,8 +1781,8 @@ export function AuthLanding() {
     <main className="min-h-screen px-3 py-3 text-[#1f2b21] sm:px-4 sm:py-4 md:px-6 lg:px-8">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
 
-      <section className="relative mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl items-center gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-          <div className="mx-auto w-full max-w-2xl rounded-[2.2rem] border border-[#6f7f68]/45 bg-[rgba(248,251,246,0.94)] p-5 shadow-[0_24px_70px_rgba(45,61,44,0.1)] backdrop-blur-xl sm:p-7 lg:p-10 lg:max-w-none">
+      <section className="relative mx-auto flex min-h-[calc(100vh-2rem)] w-full max-w-6xl items-center justify-center">
+        <div className="mx-auto w-full max-w-2xl rounded-[2.4rem] border border-white/35 bg-[rgba(249,250,246,0.86)] p-5 shadow-[0_28px_90px_rgba(34,51,34,0.12)] backdrop-blur-2xl sm:p-7 lg:p-10">
           <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite</p>
@@ -1755,7 +1795,7 @@ export function AuthLanding() {
 
           <p className="mt-3 max-w-2xl text-sm leading-7 text-[#5e6b5a]">Use a clean sign-in flow with email or phone login, or create a new account for the selected role.</p>
 
-          <div className="mt-6 grid grid-cols-2 gap-2 rounded-full border border-[#6f7f68]/45 bg-[#e7efdf] p-1.5">
+          <div className="mt-6 grid grid-cols-2 gap-2 rounded-full border border-white/55 bg-white/35 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.45)] backdrop-blur-md">
             {(["login", "register"] as const).map((mode) => {
               const isActive = authMode === mode;
 
@@ -1764,8 +1804,8 @@ export function AuthLanding() {
                   key={mode}
                   type="button"
                   onClick={() => switchAuthMode(mode)}
-                  className={`rounded-full px-4 py-3 text-sm font-semibold transition ${
-                    isActive ? "bg-[#223326] text-[#f5f8f1] shadow-sm" : "text-[#4f5b47] hover:bg-white/78"
+                      className={`rounded-full px-4 py-3 text-sm font-semibold transition ${
+                    isActive ? "bg-[#223326] text-[#f5f8f1] shadow-[0_10px_24px_rgba(34,51,34,0.2)]" : "text-[#4f5b47] hover:bg-white/78"
                   }`}
                 >
                   {mode === "login" ? "Login" : "Register"}
@@ -1774,7 +1814,7 @@ export function AuthLanding() {
             })}
           </div>
 
-          <div className="mt-4 rounded-[1.25rem] border border-[#6f7f68]/45 bg-[#e7efdf] p-4 shadow-[0_10px_24px_rgba(37,46,34,0.05)]">
+          <div className="mt-4 rounded-[1.25rem] border border-white/45 bg-white/28 p-4 shadow-[0_10px_24px_rgba(37,46,34,0.08)] backdrop-blur-md">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#4f6750]">Sign in method</p>
@@ -1790,7 +1830,7 @@ export function AuthLanding() {
                       type="button"
                       onClick={() => setLoginMode(mode)}
                       className={`rounded-full px-4 py-2.5 text-sm font-semibold transition ${
-                        isActive ? "bg-[#223326] text-[#f5f8f1] shadow-sm" : "border border-[#6f7f68]/45 bg-white/88 text-[#4f5b47] hover:bg-white"
+                        isActive ? "bg-[#223326] text-[#f5f8f1] shadow-[0_10px_24px_rgba(34,51,34,0.2)]" : "border border-white/45 bg-white/72 text-[#4f5b47] hover:bg-white"
                       }`}
                     >
                       {mode === "email" ? "Email" : "Phone"}
@@ -1809,7 +1849,7 @@ export function AuthLanding() {
                   value={fullName}
                   onChange={(event) => setFullName(event.target.value)}
                   placeholder="Your name"
-                  className="w-full rounded-[1.15rem] border border-[#6f7f68]/45 bg-white px-4 py-3 text-[#1f2b21] outline-none placeholder:text-[#7f8a7a] focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10"
+                  className="w-full rounded-[1.15rem] border border-white/55 bg-white/72 px-4 py-3 text-[#1f2b21] outline-none placeholder:text-[#7f8a7a] focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10 backdrop-blur-sm"
                 />
               </label>
             ) : null}
@@ -1821,7 +1861,7 @@ export function AuthLanding() {
                   value={identifier}
                   onChange={(event) => setIdentifier(event.target.value)}
                   placeholder={helperText}
-                  className="w-full rounded-[1.15rem] border border-[#6f7f68]/45 bg-white px-4 py-3 text-[#1f2b21] outline-none placeholder:text-[#7f8a7a] focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10"
+                  className="w-full rounded-[1.15rem] border border-white/55 bg-white/72 px-4 py-3 text-[#1f2b21] outline-none placeholder:text-[#7f8a7a] focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10 backdrop-blur-sm"
                 />
               </label>
 
@@ -1832,7 +1872,7 @@ export function AuthLanding() {
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   placeholder="Password"
-                  className="w-full rounded-[1.15rem] border border-[#6f7f68]/45 bg-white px-4 py-3 text-[#243025] outline-none placeholder:text-[#8a927f] focus:border-[#7a8e63]/70 focus:ring-2 focus:ring-[#7a8e63]/10"
+                  className="w-full rounded-[1.15rem] border border-white/55 bg-white/72 px-4 py-3 text-[#243025] outline-none placeholder:text-[#8a927f] focus:border-[#7a8e63]/70 focus:ring-2 focus:ring-[#7a8e63]/10 backdrop-blur-sm"
                 />
               </label>
 
@@ -1844,7 +1884,7 @@ export function AuthLanding() {
                     value={confirmPassword}
                     onChange={(event) => setConfirmPassword(event.target.value)}
                     placeholder="Repeat password"
-                    className="w-full rounded-[1.15rem] border border-[#6f7f68]/45 bg-white px-4 py-3 text-[#1f2b21] outline-none placeholder:text-[#7f8a7a] focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10"
+                    className="w-full rounded-[1.15rem] border border-white/55 bg-white/72 px-4 py-3 text-[#1f2b21] outline-none placeholder:text-[#7f8a7a] focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10 backdrop-blur-sm"
                   />
                 </label>
               ) : null}
@@ -1857,11 +1897,11 @@ export function AuthLanding() {
                   value={captchaInput}
                   onChange={(event) => setCaptchaInput(event.target.value)}
                   placeholder="Answer"
-                  className="w-full rounded-[1.15rem] border border-[#6f7f68]/45 bg-white px-4 py-3 text-[#1f2b21] outline-none placeholder:text-[#7f8a7a] focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10"
+                  className="w-full rounded-[1.15rem] border border-white/55 bg-white/72 px-4 py-3 text-[#1f2b21] outline-none placeholder:text-[#7f8a7a] focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10 backdrop-blur-sm"
                 />
               </label>
 
-              <div className="rounded-[1.15rem] border border-[#6f7f68]/45 bg-[#e7efdf] px-4 py-3 text-[#1f2b21]">
+              <div className="rounded-[1.15rem] border border-white/45 bg-white/36 px-4 py-3 text-[#1f2b21] shadow-[0_10px_24px_rgba(37,46,34,0.08)] backdrop-blur-md">
                 <p className="text-[11px] uppercase tracking-[0.28em] text-[#4f6750]">Check</p>
                 <p className="mt-2 text-2xl font-black">{captcha.left} {captcha.operator} {captcha.right}</p>
                 <button type="button" onClick={refreshCaptcha} className="mt-2 text-xs font-bold uppercase tracking-[0.22em] text-[#4f6750]">
@@ -1873,10 +1913,14 @@ export function AuthLanding() {
             <button
               type="submit"
               disabled={isLoading || isBooting}
-              className="w-full rounded-full bg-[#223326] px-5 py-3.5 text-sm font-semibold text-[#f5f8f1] transition hover:bg-[#314537] disabled:cursor-not-allowed disabled:opacity-70"
+              className="w-full rounded-full bg-[#223326] px-5 py-3.5 text-sm font-semibold text-[#f5f8f1] shadow-[0_14px_30px_rgba(34,51,34,0.24)] transition hover:bg-[#314537] disabled:cursor-not-allowed disabled:opacity-70"
             >
               {isLoading ? "Working..." : authMode === "login" ? "Sign in" : "Create account"}
             </button>
+
+            <div className="pt-1">
+              <StatusBanner message={statusMessage} />
+            </div>
           </form>
 
           
