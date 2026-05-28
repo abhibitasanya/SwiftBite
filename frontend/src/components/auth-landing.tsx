@@ -1027,10 +1027,6 @@ export function AuthLanding() {
     window.localStorage.setItem("swiftbite.loginMode", loginMode);
   }, [loginMode]);
 
-  useEffect(() => {
-    setIsAppMenuOpen(false);
-  }, [stage]);
-
   // Synchronize stage state with browser history (popstate) and save to localStorage
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -1658,8 +1654,6 @@ export function AuthLanding() {
         setStage("continue");
       } else if (stage === "continue") {
         setStage("dashboard");
-      } else if (stage === "dashboard") {
-        setStage("role");
       } else if (stage === "login") {
         setStage("role");
       }
@@ -1667,14 +1661,17 @@ export function AuthLanding() {
   }
 
   function goToDashboardFromMenu() {
+    setIsAppMenuOpen(false);
     setStage("dashboard");
   }
 
   function browseRestaurantsFromMenu() {
+    setIsAppMenuOpen(false);
     setStage("restaurants");
   }
 
   function changeRoleFromMenu() {
+    setIsAppMenuOpen(false);
     setStage("role");
     setStatusMessage("Select your role to continue.");
   }
