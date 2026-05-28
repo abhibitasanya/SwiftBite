@@ -89,6 +89,7 @@ type ChatMessage = {
   id: number;
   role: "user" | "assistant";
   text: string;
+  timestamp?: string;
 };
 
 type ChatSuggestion = {
@@ -122,6 +123,17 @@ function isValidEmail(value: string) {
 
 function isValidPhone(value: string) {
   return /^[6-9]\d{9}$/.test(value);
+}
+
+function formatChatTimestamp(timestamp?: string) {
+  if (!timestamp) {
+    return "";
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(timestamp));
 }
 
 const fallbackRestaurantsForUi: RestaurantCard[] = [
@@ -232,7 +244,6 @@ function ChatWidget({
   isSending,
   messages,
   chatInput,
-    dock,
   onToggle,
   onInputChange,
   onSubmit,
@@ -242,7 +253,6 @@ function ChatWidget({
   isSending: boolean;
   messages: ChatMessage[];
   chatInput: string;
-    dock: "right" | "left";
   onToggle: () => void;
   onInputChange: (value: string) => void;
   onSubmit: () => void;
@@ -251,9 +261,14 @@ function ChatWidget({
   const latestUserMessage = [...messages].reverse().find((message) => message.role === "user");
   const hasUserMessage = Boolean(latestUserMessage);
   const suggestions = getChatSuggestions(latestUserMessage?.text ?? null, !hasUserMessage);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ block: "end", behavior: "smooth" });
+  }, [messages, isSending]);
 
   return (
-    <div className={`fixed z-50 flex flex-col gap-3 ${dock === "left" ? "bottom-4 left-4 items-start sm:bottom-5 sm:left-5" : "bottom-4 right-4 items-end sm:bottom-5 sm:right-5"}`}>
+    <div className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))] z-50 flex flex-col items-end gap-3 sm:bottom-[max(1.25rem,env(safe-area-inset-bottom))] sm:right-[max(1.25rem,env(safe-area-inset-right))]">
       {isOpen ? (
         <div className="w-[min(94vw,24.5rem)] overflow-hidden rounded-[1.85rem] border border-[#31543a]/35 bg-[#f9fbf5] shadow-[0_28px_76px_rgba(27,47,31,0.24)] backdrop-blur-xl">
           <div className="flex items-start justify-between gap-4 border-b border-[#24412c] bg-[linear-gradient(135deg,#35543a_0%,#23412b_55%,#13281b_100%)] px-4 py-4 text-[#f3f6f2]">
@@ -296,10 +311,20 @@ function ChatWidget({
                         <span className="absolute bottom-[0.2rem] left-1/2 h-0.8 w-2 -translate-x-1/2 rounded-full bg-[#5d6764]" />
                       </div>
                     </div>
-                    <div className="flex-1">{message.text}</div>
+                    <div className="flex-1">
+                      <div>{message.text}</div>
+                      {message.timestamp ? (
+                        <div className="mt-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#738078]">{formatChatTimestamp(message.timestamp)}</div>
+                      ) : null}
+                    </div>
                   </div>
                 ) : (
-                  message.text
+                  <div>
+                    <div>{message.text}</div>
+                    {message.timestamp ? (
+                      <div className="mt-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/65">{formatChatTimestamp(message.timestamp)}</div>
+                    ) : null}
+                  </div>
                 )}
               </div>
             ))}
@@ -318,6 +343,8 @@ function ChatWidget({
                 </div>
               </div>
             ) : null}
+
+            <div ref={messagesEndRef} />
           </div>
 
           <div className="border-t border-[#dfe7d6] bg-[#f1f6ec] px-4 py-3">
@@ -678,12 +705,28 @@ export function AuthLanding() {
   const [viewportWidth, setViewportWidth] = useState(1280);
   const [viewportHeight, setViewportHeight] = useState(900);
   const [isStandaloneMode, setIsStandaloneMode] = useState(false);
+  const [chatSessionId] = useState(() => {
+    if (typeof window === "undefined") {
+      return "";
+    }
+
+    const savedSessionId = window.localStorage.getItem("swiftbite.chatSessionId");
+
+    if (savedSessionId) {
+      return savedSessionId;
+    }
+
+    const generatedSessionId = window.crypto?.randomUUID?.() ?? `swiftbite-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    window.localStorage.setItem("swiftbite.chatSessionId", generatedSessionId);
+    return generatedSessionId;
+  });
   const [chatInput, setChatInput] = useState("");
   const [isChatSending, setIsChatSending] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
-    { id: 1, role: "assistant", text: "Hi, I can help with login, register, restaurant ordering, delivery tracking, or database setup." },
+    { id: 1, role: "assistant", text: "Hi, I can help with login, register, restaurant ordering, delivery tracking, or database setup.", timestamp: new Date().toISOString() },
   ]);
   const chatbotRootRef = useRef<Root | null>(null);
+  const chatMessagesRef = useRef(chatMessages);
 
   const selectedRoleCard = useMemo(
     () => roleCards.find((card) => card.id === selectedRole) ?? roleCards[0],
@@ -703,6 +746,10 @@ export function AuthLanding() {
   }, [selectedRole]);
 
   const helperText = loginMode === "email" ? "name@example.com" : "10-digit mobile number";
+
+  useEffect(() => {
+    chatMessagesRef.current = chatMessages;
+  }, [chatMessages]);
 
   useEffect(() => {
     window.localStorage.setItem("swiftbite.selectedRole", selectedRole);
@@ -1015,7 +1062,11 @@ export function AuthLanding() {
       id: Date.now(),
       role: "user",
       text: cleanMessage,
+      timestamp: new Date().toISOString(),
     };
+
+    const assistantMessageId = userMessage.id + 1;
+    const conversation = [...chatMessagesRef.current, userMessage].slice(-12);
 
     setChatMessages((current) => [...current, userMessage]);
     setChatInput("");
@@ -1025,26 +1076,99 @@ export function AuthLanding() {
       const response = await fetch(`${apiBaseUrl}/api/chatbot/assist`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: cleanMessage, role: selectedRole }),
+        body: JSON.stringify({ sessionId: chatSessionId, messages: conversation, role: selectedRole }),
       });
 
-      const payload = (await response.json()) as { reply?: string; message?: string };
+      if (!response.ok) {
+        const payload = (await response.json()) as { message?: string };
 
-      setChatMessages((current) => [
-        ...current,
-        {
-          id: Date.now() + 1,
-          role: "assistant",
-          text: response.ok ? (payload.reply ?? "I can help with that.") : (payload.message ?? "Sorry, I could not answer right now."),
-        },
-      ]);
+        setChatMessages((current) => [
+          ...current,
+          {
+            id: assistantMessageId,
+            role: "assistant",
+            text: payload.message ?? "Sorry, I could not answer right now.",
+            timestamp: new Date().toISOString(),
+          },
+        ]);
+        return;
+      }
+
+      if (!response.body) {
+        const fallbackReply = (await response.text()).trim() || "I can help with that.";
+
+        setChatMessages((current) => [
+          ...current,
+          {
+            id: assistantMessageId,
+            role: "assistant",
+            text: fallbackReply,
+            timestamp: new Date().toISOString(),
+          },
+        ]);
+        return;
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let accumulatedReply = "";
+      let assistantStarted = false;
+
+      while (true) {
+        const { done, value } = await reader.read();
+
+        if (done) {
+          break;
+        }
+
+        const chunk = decoder.decode(value, { stream: true });
+
+        if (!chunk) {
+          continue;
+        }
+
+        accumulatedReply += chunk;
+
+        if (!assistantStarted) {
+          assistantStarted = true;
+          setChatMessages((current) => [
+            ...current,
+            {
+              id: assistantMessageId,
+              role: "assistant",
+              text: accumulatedReply,
+              timestamp: new Date().toISOString(),
+            },
+          ]);
+          continue;
+        }
+
+        setChatMessages((current) =>
+          current.map((message) =>
+            message.id === assistantMessageId ? { ...message, text: accumulatedReply } : message
+          )
+        );
+      }
+
+      if (!assistantStarted) {
+        setChatMessages((current) => [
+          ...current,
+          {
+            id: assistantMessageId,
+            role: "assistant",
+            text: "I can help with that.",
+            timestamp: new Date().toISOString(),
+          },
+        ]);
+      }
     } catch {
       setChatMessages((current) => [
         ...current,
         {
-          id: Date.now() + 1,
+          id: assistantMessageId,
           role: "assistant",
           text: "I could not reach the chatbot service right now. Please try again.",
+          timestamp: new Date().toISOString(),
         },
       ]);
     } finally {
@@ -1058,7 +1182,6 @@ export function AuthLanding() {
       isSending={isChatSending}
       messages={chatMessages}
       chatInput={chatInput}
-        dock={stage === "role" ? "left" : "right"}
       onToggle={() => setIsChatOpen((current) => !current)}
       onInputChange={setChatInput}
       onSubmit={handleChatSubmit}
@@ -1595,8 +1718,8 @@ export function AuthLanding() {
     const isTabletViewport = viewportWidth >= 640 && viewportWidth < 1024;
     const isCompactHeight = viewportHeight < 760;
     const isCompactLayout = isPhoneViewport || (isStandaloneMode && viewportWidth < 820);
-    const roleShellMaxWidth = isCompactLayout ? "max-w-[26.5rem]" : isTabletViewport ? "max-w-[46rem]" : "max-w-[62rem]";
-    const roleShellPadding = isCompactLayout ? "px-8" : isTabletViewport ? "px-12" : "px-12 sm:px-16";
+    const roleShellMaxWidth = isCompactLayout ? "max-w-[26.5rem]" : isTabletViewport ? "max-w-[44rem]" : "max-w-[58rem]";
+    const roleShellPadding = isCompactLayout ? "px-8" : isTabletViewport ? "px-10" : "px-10 sm:px-12";
     const roleStackHeight = isCompactLayout ? "h-[12.8rem]" : isTabletViewport ? "h-[14.2rem]" : "h-[15.5rem] sm:h-[16.2rem] lg:h-[16.8rem]";
     const roleHeadingSize = isCompactLayout ? "text-3xl sm:text-4xl" : "text-4xl sm:text-5xl lg:text-[4.1rem]";
     const roleTitleSize = isCompactLayout ? "text-[1rem] sm:text-[1.08rem]" : "text-[1.2rem] sm:text-[1.35rem]";
@@ -1649,13 +1772,13 @@ export function AuthLanding() {
                 const isSelected = selectedRole === card.id;
                 const translateX = isCompactLayout
                   ? absOffset === 0
-                    ? "0%"
-                    : absOffset === 1
-                      ? `${offset * 13}%`
-                      : "0%"
+                      ? "0%"
+                      : absOffset === 1
+                        ? `${offset * 12}%`
+                        : "0%"
                   : absOffset === 2
-                    ? "0%"
-                    : `${offset * 36}%`;
+                      ? "0%"
+                      : `${offset * 32}%`;
                 const translateY = isCompactLayout
                   ? isSelected
                     ? "-2px"
@@ -1692,10 +1815,10 @@ export function AuthLanding() {
                     ? "min(88vw, 22rem)"
                     : "min(72vw, 18.5rem)"
                   : isSelected
-                    ? "clamp(20rem, 50vw, 38rem)"
+                    ? "clamp(18.5rem, 46vw, 36rem)"
                     : absOffset === 2
-                      ? "clamp(15rem, 38vw, 30rem)"
-                      : "clamp(14rem, 34vw, 26rem)";
+                      ? "clamp(13rem, 30vw, 24rem)"
+                      : "clamp(12.5rem, 28vw, 23rem)";
 
                 return (
                   <button
@@ -1753,10 +1876,22 @@ export function AuthLanding() {
           </div>
         </div>
 
-          <footer className={`border-t border-[#dfe6d7] ${isCompactLayout ? "pt-2.5" : "pt-3 sm:pt-4"}`}>
-            <div className={`flex flex-col sm:flex-row sm:items-end sm:justify-between ${isCompactLayout ? "gap-2.5" : "gap-4"}`}>
+          <footer className={`border-t border-[#dfe6d7] ${isCompactLayout ? "pt-2.5 pb-20" : "pt-3 pb-24 sm:pt-4"}`}>
+            <div className="space-y-3">
               <p className="text-[14px] text-[#6a7463] sm:text-sm">Continue as <strong className="font-semibold text-[#243025]">{selectedRoleCard.title}</strong>.</p>
-              <button type="button" onClick={() => { setStage("login"); switchAuthMode("login"); }} className={`ml-auto rounded-full bg-[#223326] text-sm font-semibold text-[#f5f8f1] shadow-[0_12px_28px_rgba(35,49,34,0.18)] transition hover:bg-[#1a291e] sm:mr-0 ${isCompactLayout ? "px-4 py-2.5" : "px-5 py-3"}`}>Next</button>
+
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStage("login");
+                    switchAuthMode("login");
+                  }}
+                  className="rounded-full bg-[#223326] px-5 py-3 text-sm font-semibold text-[#f5f8f1] shadow-[0_12px_28px_rgba(35,49,34,0.18)] transition hover:bg-[#1a291e]"
+                >
+                  Next
+                </button>
+              </div>
             </div>
           </footer>
 
@@ -1892,156 +2027,182 @@ export function AuthLanding() {
     );
   }
 
+  const authBackButton = (
+    <button
+      type="button"
+      onClick={() => {
+        setStage("role");
+        setStatusMessage("Select your role to continue.");
+      }}
+      className="fixed left-[max(1rem,env(safe-area-inset-left))] top-[max(1rem,env(safe-area-inset-top))] z-50 flex h-11 w-11 items-center justify-center rounded-full border border-white/45 bg-[rgba(244,247,239,0.82)] text-[#2f452d] shadow-[0_12px_28px_rgba(35,49,34,0.14)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-[rgba(238,243,231,0.92)] hover:shadow-[0_16px_34px_rgba(35,49,34,0.18)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5f7a4a] focus-visible:ring-offset-2 focus-visible:ring-offset-[#f6f3e8] sm:left-[max(1.25rem,env(safe-area-inset-left))] sm:top-[max(1.25rem,env(safe-area-inset-top))]"
+      aria-label="Back to role selection"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 fill-none stroke-current stroke-[2.5]">
+        <path d="M15 18l-6-6 6-6" />
+      </svg>
+    </button>
+  );
+
   return (
     <main className="min-h-screen px-3 py-3 text-[#1f2b21] sm:px-4 sm:py-4 md:px-6 lg:px-8">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.2),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.18),_transparent_18%),radial-gradient(circle_at_50%_55%,_rgba(255,252,243,0.2),_transparent_42%),linear-gradient(180deg,_#f7f4ea_0%,_#ece6d6_48%,_#e2d9c5_100%)]" />
 
-      <section className="relative mx-auto flex min-h-[calc(100vh-2rem)] w-full max-w-6xl items-center justify-center">
-        <div className="mx-auto w-full max-w-2xl rounded-[2.4rem] border border-white/35 bg-[rgba(249,250,246,0.86)] p-4 shadow-[0_28px_90px_rgba(34,51,34,0.12)] backdrop-blur-2xl sm:p-6 lg:p-8">
-          <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite</p>
-              <h1 className="mt-1 text-3xl font-black tracking-tight sm:text-4xl lg:text-5xl">Welcome back</h1>
-            </div>
-            <div className="hidden rounded-full border border-[#6f7f68]/45 bg-[#e7efdf] px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-[#4f6750] sm:block">
-              Login / Register
-            </div>
-          </div>
+      {authBackButton}
 
-          <p className="mt-2 max-w-2xl text-[13px] leading-6 text-[#5e6b5a] sm:text-sm">Use a clean sign-in flow with email or phone login, or create a new account for the selected role.</p>
-
-          <div className="mt-4 grid grid-cols-2 gap-2 rounded-full border border-white/55 bg-white/35 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.45)] backdrop-blur-md">
-            {(["login", "register"] as const).map((mode) => {
-              const isActive = authMode === mode;
-
-              return (
-                <button
-                  key={mode}
-                  type="button"
-                  onClick={() => switchAuthMode(mode)}
-                      className={`rounded-full px-4 py-2.5 text-sm font-semibold transition ${
-                    isActive ? "bg-[#223326] text-[#f5f8f1] shadow-[0_10px_24px_rgba(34,51,34,0.2)]" : "text-[#4f5b47] hover:bg-white/78"
-                  }`}
-                >
-                  {mode === "login" ? "Login" : "Register"}
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="mt-3 rounded-[1.15rem] border border-white/45 bg-white/28 p-3.5 shadow-[0_10px_24px_rgba(37,46,34,0.08)] backdrop-blur-md">
-            <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#4f6750]">Sign in method</p>
-                <p className="mt-1 text-[13px] text-[#5e6b5a]">Pick how you want to identify this account.</p>
+      <section className="relative mx-auto flex min-h-[calc(100vh-1.5rem)] w-full max-w-6xl items-center justify-center">
+        <div className="mx-auto w-full max-w-[68rem] rounded-[2.4rem] border border-white/40 bg-[rgba(250,251,247,0.82)] p-4 shadow-[0_30px_96px_rgba(34,51,34,0.12)] backdrop-blur-2xl sm:p-5 lg:p-6">
+          <div className="grid gap-4 lg:grid-cols-[0.82fr_1.18fr] lg:items-start">
+            <div className="space-y-3.5">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite</p>
+                  <h1 className="mt-1 text-3xl font-black tracking-tight sm:text-4xl lg:text-[3.6rem]">Welcome back</h1>
+                </div>
+                <div className="hidden rounded-full border border-[#7a8d63]/45 bg-[#deebd0] px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-[#2f452d] sm:block">
+                  Login / Register
+                </div>
               </div>
-              <div className="grid w-full gap-2 sm:w-auto sm:grid-cols-2">
-                {(["email", "phone"] as const).map((mode) => {
-                  const isActive = loginMode === mode;
+
+              <p className="max-w-xl text-[13px] leading-6 text-[#5e6b5a] sm:text-sm">Use a clean sign-in flow with email or phone login, or create a new account for the selected role.</p>
+
+              <div className="rounded-[1.35rem] border border-white/45 bg-white/32 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_10px_24px_rgba(37,46,34,0.06)] backdrop-blur-md">
+                <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#4f6750]">Selected role</p>
+                <p className="mt-1 text-lg font-black text-[#1f2b21]">{selectedRoleCard.title}</p>
+                <p className="mt-1 text-sm text-[#5e6b5a]">{selectedRoleCard.subtitle}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 rounded-full border border-white/55 bg-white/35 p-1.25 shadow-[inset_0_1px_0_rgba(255,255,255,0.45)] backdrop-blur-md">
+                {(["login", "register"] as const).map((mode) => {
+                  const isActive = authMode === mode;
 
                   return (
                     <button
                       key={mode}
                       type="button"
-                      onClick={() => setLoginMode(mode)}
+                      onClick={() => switchAuthMode(mode)}
                       className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                        isActive ? "bg-[#223326] text-[#f5f8f1] shadow-[0_10px_24px_rgba(34,51,34,0.2)]" : "border border-white/45 bg-white/72 text-[#4f5b47] hover:bg-white"
+                        isActive ? "bg-[#1f3925] text-[#f5f8f1] shadow-[0_12px_24px_rgba(31,57,37,0.24)]" : "text-[#4f5b47] hover:bg-white/78"
                       }`}
                     >
-                      {mode === "email" ? "Email" : "Phone"}
+                      {mode === "login" ? "Login" : "Register"}
                     </button>
                   );
                 })}
               </div>
-            </div>
-          </div>
 
-          <form className="mx-auto mt-5 w-full max-w-xl space-y-3.5" onSubmit={handleAuthSubmit}>
-            {authMode === "register" ? (
-              <label className="block space-y-2">
-                <span className="text-sm font-medium text-[#243025]">Full name</span>
-                <input
-                  value={fullName}
-                  onChange={(event) => setFullName(event.target.value)}
-                  placeholder="Your name"
-                  className="w-full rounded-[1.15rem] border border-white/55 bg-white/72 px-4 py-2.5 text-[#1f2b21] outline-none placeholder:text-[#7f8a7a] focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10 backdrop-blur-sm"
-                />
-              </label>
-            ) : null}
+              <div className="rounded-[1.35rem] border border-white/45 bg-white/28 p-3 shadow-[0_10px_24px_rgba(37,46,34,0.08)] backdrop-blur-md">
+                <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#4f6750]">Sign in method</p>
+                    <p className="mt-1 text-[13px] text-[#5e6b5a]">Pick how you want to identify this account.</p>
+                  </div>
+                  <div className="grid w-full gap-2 sm:w-auto sm:grid-cols-2">
+                    {(["email", "phone"] as const).map((mode) => {
+                      const isActive = loginMode === mode;
 
-            <div className="grid gap-3.5">
-              <label className="block space-y-2">
-                <span className="text-sm font-medium text-[#243025]">{loginMode === "email" ? "Email address" : "Mobile number"}</span>
-                <input
-                  value={identifier}
-                  onChange={(event) => setIdentifier(event.target.value)}
-                  placeholder={helperText}
-                  className="w-full rounded-[1.15rem] border border-white/55 bg-white/72 px-4 py-2.5 text-[#1f2b21] outline-none placeholder:text-[#7f8a7a] focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10 backdrop-blur-sm"
-                />
-              </label>
-
-              <label className="block space-y-2">
-                <span className="text-sm font-medium text-[#243025]">Password</span>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  placeholder="Password"
-                  className="w-full rounded-[1.15rem] border border-white/55 bg-white/72 px-4 py-2.5 text-[#243025] outline-none placeholder:text-[#8a927f] focus:border-[#7a8e63]/70 focus:ring-2 focus:ring-[#7a8e63]/10 backdrop-blur-sm"
-                />
-              </label>
-
-              {authMode === "register" ? (
-                <label className="block space-y-2">
-                  <span className="text-sm font-medium text-[#243025]">Confirm password</span>
-                  <input
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(event) => setConfirmPassword(event.target.value)}
-                    placeholder="Repeat password"
-                    className="w-full rounded-[1.15rem] border border-white/55 bg-white/72 px-4 py-2.5 text-[#1f2b21] outline-none placeholder:text-[#7f8a7a] focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10 backdrop-blur-sm"
-                  />
-                </label>
-              ) : null}
-            </div>
-
-            <div className="grid gap-2.5 sm:grid-cols-[1fr_auto] sm:items-end">
-              <label className="block space-y-2">
-                <span className="text-sm font-medium text-[#243025]">Captcha</span>
-                <input
-                  value={captchaInput}
-                  onChange={(event) => setCaptchaInput(event.target.value)}
-                  placeholder="Answer"
-                  className="w-full rounded-[1.15rem] border border-white/55 bg-white/72 px-4 py-2.5 text-[#1f2b21] outline-none placeholder:text-[#7f8a7a] focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10 backdrop-blur-sm"
-                />
-              </label>
-
-              <div className="rounded-[1.15rem] border border-white/45 bg-white/36 px-4 py-2.5 text-[#1f2b21] shadow-[0_10px_24px_rgba(37,46,34,0.08)] backdrop-blur-md">
-                <p className="text-[11px] uppercase tracking-[0.28em] text-[#4f6750]">Check</p>
-                <p className="mt-1.5 text-2xl font-black">{captcha.left} {captcha.operator} {captcha.right}</p>
-                <button type="button" onClick={refreshCaptcha} className="mt-2 text-xs font-bold uppercase tracking-[0.22em] text-[#4f6750]">
-                  Refresh
-                </button>
+                      return (
+                        <button
+                          key={mode}
+                          type="button"
+                          onClick={() => setLoginMode(mode)}
+                          className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                            isActive ? "bg-[#1f3925] text-[#f5f8f1] shadow-[0_12px_24px_rgba(31,57,37,0.24)]" : "border border-white/45 bg-white/72 text-[#4f5b47] hover:bg-white"
+                          }`}
+                        >
+                          {mode === "email" ? "Email" : "Phone"}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={isLoading || isBooting}
-              className="w-full rounded-full bg-[#223326] px-5 py-3 text-sm font-semibold text-[#f5f8f1] shadow-[0_14px_30px_rgba(34,51,34,0.24)] transition hover:bg-[#314537] disabled:cursor-not-allowed disabled:opacity-70"
-            >
-              {isLoading ? "Working..." : authMode === "login" ? "Sign in" : "Create account"}
-            </button>
+            <form className="grid gap-3.5 lg:gap-3" onSubmit={handleAuthSubmit}>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {authMode === "register" ? (
+                  <label className="block space-y-1.5 sm:col-span-2">
+                    <span className="text-sm font-medium text-[#243025]">Full name</span>
+                    <input
+                      value={fullName}
+                      onChange={(event) => setFullName(event.target.value)}
+                      placeholder="Your name"
+                      className="w-full rounded-[1.15rem] border border-white/55 bg-white/74 px-4 py-2.25 text-[#1f2b21] outline-none placeholder:text-[#7f8a7a] focus:border-[#5f7a4a]/75 focus:ring-2 focus:ring-[#5f7a4a]/12 backdrop-blur-sm"
+                    />
+                  </label>
+                ) : null}
 
-            <div className="pt-0.5">
-              <StatusBanner message={statusMessage} />
-            </div>
-          </form>
+                <label className="block space-y-1.5">
+                  <span className="text-sm font-medium text-[#243025]">{loginMode === "email" ? "Email address" : "Mobile number"}</span>
+                  <input
+                    value={identifier}
+                    onChange={(event) => setIdentifier(event.target.value)}
+                    placeholder={helperText}
+                    className="w-full rounded-[1.15rem] border border-white/55 bg-white/74 px-4 py-2.25 text-[#1f2b21] outline-none placeholder:text-[#7f8a7a] focus:border-[#5f7a4a]/75 focus:ring-2 focus:ring-[#5f7a4a]/12 backdrop-blur-sm"
+                  />
+                </label>
 
-          
+                <label className="block space-y-1.5">
+                  <span className="text-sm font-medium text-[#243025]">Password</span>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    placeholder="Password"
+                    className="w-full rounded-[1.15rem] border border-white/55 bg-white/74 px-4 py-2.25 text-[#243025] outline-none placeholder:text-[#8a927f] focus:border-[#5f7a4a]/75 focus:ring-2 focus:ring-[#5f7a4a]/12 backdrop-blur-sm"
+                  />
+                </label>
+
+                {authMode === "register" ? (
+                  <label className="block space-y-1.5 sm:col-span-2">
+                    <span className="text-sm font-medium text-[#243025]">Confirm password</span>
+                    <input
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(event) => setConfirmPassword(event.target.value)}
+                      placeholder="Repeat password"
+                      className="w-full rounded-[1.15rem] border border-white/55 bg-white/74 px-4 py-2.25 text-[#1f2b21] outline-none placeholder:text-[#7f8a7a] focus:border-[#5f7a4a]/75 focus:ring-2 focus:ring-[#5f7a4a]/12 backdrop-blur-sm"
+                    />
+                  </label>
+                ) : null}
+
+                <label className="block space-y-1.5 sm:col-span-2">
+                  <span className="text-sm font-medium text-[#243025]">Captcha</span>
+                  <input
+                    value={captchaInput}
+                    onChange={(event) => setCaptchaInput(event.target.value)}
+                    placeholder="Answer"
+                    className="w-full rounded-[1.15rem] border border-white/55 bg-white/74 px-4 py-2.25 text-[#1f2b21] outline-none placeholder:text-[#7f8a7a] focus:border-[#5f7a4a]/75 focus:ring-2 focus:ring-[#5f7a4a]/12 backdrop-blur-sm"
+                  />
+                </label>
+
+                <div className="sm:col-span-2 rounded-[1.15rem] border border-white/45 bg-white/36 px-4 py-2.5 text-[#1f2b21] shadow-[0_10px_24px_rgba(37,46,34,0.08)] backdrop-blur-md">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-[11px] uppercase tracking-[0.28em] text-[#4f6750]">Check</p>
+                      <p className="mt-1 text-xl font-black sm:text-2xl">{captcha.left} {captcha.operator} {captcha.right}</p>
+                    </div>
+                    <button type="button" onClick={refreshCaptcha} className="text-xs font-bold uppercase tracking-[0.22em] text-[#416332]">
+                      Refresh
+                    </button>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isLoading || isBooting}
+                  className="sm:col-span-2 w-full rounded-full bg-[#1f3925] px-5 py-3 text-sm font-semibold text-[#f5f8f1] shadow-[0_14px_30px_rgba(31,57,37,0.26)] transition hover:bg-[#314537] disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  {isLoading ? "Working..." : authMode === "login" ? "Sign in" : "Create account"}
+                </button>
+              </div>
+
+              <div>
+                <StatusBanner message={statusMessage} />
+              </div>
+            </form>
+          </div>
         </div>
-
-        
       </section>
     </main>
   );

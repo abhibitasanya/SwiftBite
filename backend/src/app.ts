@@ -1,10 +1,12 @@
 import cors from "cors";
 import dotenv from "dotenv";
 import express, { type Request, type Response } from "express";
-import { createHash } from "crypto";
+import { createHash, randomUUID } from "crypto";
+import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import morgan from "morgan";
 import type { RowDataPacket } from "mysql2/promise";
+import OpenAI from "openai";
 import { db } from "./db.js";
 import { z } from "zod";
 
@@ -25,9 +27,16 @@ const registerSchema = z.object({
   loginMode: z.enum(["email", "phone"]),
 });
 
+const chatbotMessageSchema = z.object({
+  role: z.enum(["user", "assistant"]),
+  text: z.string().trim().min(1).max(4000),
+  timestamp: z.string().optional(),
+});
+
 const chatbotSchema = z.object({
-  message: z.string().min(1),
+  sessionId: z.string().trim().min(8).optional(),
   role: z.enum(["customer", "delivery", "restaurant", "platform"]).optional(),
+  messages: z.array(chatbotMessageSchema).min(1).max(20),
 });
 
 const restaurantSchema = z.object({
@@ -76,6 +85,17 @@ type PlatformUser = {
   fullName: string;
   identifier: string;
   role: DashboardRole;
+};
+
+type ChatbotMessage = {
+  role: "user" | "assistant";
+  text: string;
+  timestamp?: string;
+};
+
+type ChatbotSession = {
+  messages: ChatbotMessage[];
+  updatedAt: number;
 };
 
 type HealthStatus = {
@@ -168,6 +188,51 @@ const fallbackPlatformUsers: PlatformUser[] = [
   { fullName: "Platform Demo", identifier: "platform@example.com", role: "platform" },
 ];
 
+const openaiClient = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
+const openaiModel = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
+const chatbotSessionStore = new Map<string, ChatbotSession>();
+const chatbotLimiter = rateLimit({
+  windowMs: 60_000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Too many chatbot requests. Please try again shortly." },
+});
+
+function trimChatbotMessages(messages: ChatbotMessage[]) {
+  return messages.filter((message) => message.text.trim().length > 0).slice(-16);
+}
+
+function buildChatbotSystemPrompt(role?: DashboardRole) {
+  const roleContext =
+    role === "delivery"
+      ? "The user is using the delivery experience. Help with routes, ETA, trip status, deliveries, and account navigation."
+      : role === "restaurant"
+        ? "The user is using the restaurant experience. Help with menu management, orders, kitchen flow, and account navigation."
+        : role === "platform"
+          ? "The user is using the platform team experience. Help with administration, monitoring, users, restaurants, and system navigation."
+          : "The user is using the customer experience. Help with ordering food, browsing restaurants, checkout, delivery tracking, and account navigation.";
+
+  return [
+    "You are SwiftBite Assistant, a polished conversational AI embedded inside the SwiftBite app.",
+    "Speak naturally, keep the tone warm and concise, and answer in a helpful, human-like way.",
+    "Support food suggestions, navigation help, order assistance, delivery questions, account help, and light casual conversation.",
+    "Use recent conversation context to resolve follow-up questions. If the user asks a vague follow-up like 'not chicken', infer it from the previous turn.",
+    "Do not act like a static FAQ bot. Avoid listing generic canned options unless the user asks for them.",
+    roleContext,
+  ].join(" ");
+}
+
+function buildChatbotConversation(messages: ChatbotMessage[], role?: DashboardRole) {
+  return [
+    { role: "system" as const, content: buildChatbotSystemPrompt(role) },
+    ...messages.map((message) => ({
+      role: message.role,
+      content: message.text,
+    })),
+  ];
+}
+
 function sha256Hex(value: string) {
   return createHash("sha256").update(value).digest("hex");
 }
@@ -196,51 +261,6 @@ function buildMenuForRestaurant(name: string, cuisine: string) {
   }
 
   return ["Chef Special Bowl", "Daily Wrap", "Seasonal Plate", "House Drink"];
-}
-
-function buildChatbotReply(message: string, role?: DashboardRole) {
-  const normalizedMessage = message.toLowerCase();
-  const rolePrefix = role ? `${role}: ` : "";
-
-  if (normalizedMessage.includes("register") || normalizedMessage.includes("sign up") || normalizedMessage.includes("create account")) {
-    return {
-      reply: `${rolePrefix}To register, choose your role, fill in your name, email or phone, password, and captcha, then submit the form.`,
-      intent: "registration-help",
-    };
-  }
-
-  if (normalizedMessage.includes("login") || normalizedMessage.includes("sign in")) {
-    return {
-      reply: `${rolePrefix}To log in, select your role, choose email or phone, enter the same details you used while registering, and submit the form.`,
-      intent: "login-help",
-    };
-  }
-
-  if (normalizedMessage.includes("restaurant") || normalizedMessage.includes("menu") || normalizedMessage.includes("order")) {
-    return {
-      reply: `${rolePrefix}Use the restaurant cards to open menus, add items to the cart, and continue to checkout when you are ready.`,
-      intent: "ordering-help",
-    };
-  }
-
-  if (normalizedMessage.includes("delivery") || normalizedMessage.includes("track") || normalizedMessage.includes("eta")) {
-    return {
-      reply: `${rolePrefix}Open the delivery dashboard to see active trips, current location, and ETA for the next drop.`,
-      intent: "delivery-help",
-    };
-  }
-
-  if (normalizedMessage.includes("database") || normalizedMessage.includes("mysql") || normalizedMessage.includes("save")) {
-    return {
-      reply: `${rolePrefix}The backend stores user accounts and restaurant data in MySQL when the cloud database is connected.`,
-      intent: "database-help",
-    };
-  }
-
-  return {
-    reply: `${rolePrefix}I can help with login, register, restaurant browsing, delivery tracking, or database setup. Ask me a specific question and I will guide you.`,
-    intent: "starter-assistant",
-  };
 }
 
 async function loadRestaurants() {
@@ -620,7 +640,7 @@ export function createApp() {
     }
   });
 
-  app.post("/api/chatbot/assist", (request: Request, response: Response) => {
+  app.post("/api/chatbot/assist", chatbotLimiter, async (request: Request, response: Response) => {
     const parsed = chatbotSchema.safeParse(request.body);
 
     if (!parsed.success) {
@@ -631,7 +651,81 @@ export function createApp() {
       return;
     }
 
-    response.json(buildChatbotReply(parsed.data.message, parsed.data.role));
+    if (!openaiClient) {
+      response.status(503).json({
+        message: "SwiftBite AI is not configured yet. Set OPENAI_API_KEY to enable the chatbot.",
+      });
+      return;
+    }
+
+    const sessionId = parsed.data.sessionId ?? randomUUID();
+    const incomingMessages = trimChatbotMessages(
+      parsed.data.messages.map((message) =>
+        message.timestamp
+          ? { role: message.role, text: message.text, timestamp: message.timestamp }
+          : { role: message.role, text: message.text }
+      )
+    );
+
+    if (incomingMessages.length === 0 || incomingMessages[incomingMessages.length - 1]?.role !== "user") {
+      response.status(400).json({
+        message: "The chatbot conversation must end with a user message.",
+      });
+      return;
+    }
+
+    const storedConversation = chatbotSessionStore.get(sessionId)?.messages ?? [];
+    const conversation = trimChatbotMessages([...storedConversation, ...incomingMessages]);
+    const promptMessages = buildChatbotConversation(conversation, parsed.data.role);
+
+    response.status(200);
+    response.setHeader("Content-Type", "text/plain; charset=utf-8");
+    response.setHeader("Cache-Control", "no-cache, no-transform");
+    response.setHeader("X-Chatbot-Session-Id", sessionId);
+    response.flushHeaders();
+
+    try {
+      const stream = await openaiClient.chat.completions.create({
+        model: openaiModel,
+        messages: promptMessages as never,
+        temperature: 0.7,
+        stream: true,
+      });
+
+      let assistantReply = "";
+
+      for await (const chunk of stream) {
+        const delta = chunk.choices[0]?.delta?.content ?? "";
+
+        if (!delta) {
+          continue;
+        }
+
+        assistantReply += delta;
+        response.write(delta);
+      }
+
+      const finalReply = assistantReply.trim() || "I’m here to help with whatever you need next.";
+      chatbotSessionStore.set(sessionId, {
+        messages: trimChatbotMessages([...conversation, { role: "assistant", text: finalReply, timestamp: new Date().toISOString() }]),
+        updatedAt: Date.now(),
+      });
+
+      if (!assistantReply.trim()) {
+        response.write(finalReply);
+      }
+
+      response.end();
+    } catch {
+      if (!response.headersSent) {
+        response.status(502).json({
+          message: "The SwiftBite AI assistant could not respond right now.",
+        });
+        return;
+      }
+
+      response.end();
+    }
   });
 
   app.use((_request: Request, response: Response) => {

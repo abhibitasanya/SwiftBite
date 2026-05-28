@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f3f0e4;
+  --background: #f6f3e8;
   --foreground: #182118;
 }
 
@@ -14,10 +14,10 @@
 
 html {
   background:
-    radial-gradient(circle at top left, rgba(70, 93, 63, 0.14), transparent 20%),
-    radial-gradient(circle at 80% 12%, rgba(118, 134, 104, 0.12), transparent 16%),
-    radial-gradient(circle at 18% 84%, rgba(101, 118, 92, 0.08), transparent 18%),
-    linear-gradient(180deg, #f7f4ea 0%, #f1eddc 50%, #e6e0cd 100%);
+    radial-gradient(circle at top left, rgba(70, 93, 63, 0.12), transparent 20%),
+    radial-gradient(circle at 80% 12%, rgba(118, 134, 104, 0.1), transparent 16%),
+    radial-gradient(circle at 18% 84%, rgba(101, 118, 92, 0.06), transparent 18%),
+    linear-gradient(180deg, #f8f5ed 0%, #f1eedf 50%, #e8e2d1 100%);
   color-scheme: light;
 }
 
