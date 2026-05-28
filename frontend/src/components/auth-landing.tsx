@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { PwaInstallButton } from "./pwa-install-button";
 
 type LoginMode = "email" | "phone";
 type AuthMode = "login" | "register";
@@ -231,6 +232,7 @@ function ChatWidget({
   isSending,
   messages,
   chatInput,
+    dock,
   onToggle,
   onInputChange,
   onSubmit,
@@ -240,6 +242,7 @@ function ChatWidget({
   isSending: boolean;
   messages: ChatMessage[];
   chatInput: string;
+    dock: "right" | "left";
   onToggle: () => void;
   onInputChange: (value: string) => void;
   onSubmit: () => void;
@@ -250,7 +253,7 @@ function ChatWidget({
   const suggestions = getChatSuggestions(latestUserMessage?.text ?? null, !hasUserMessage);
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-3 sm:bottom-5 sm:right-5">
+    <div className={`fixed z-50 flex flex-col gap-3 ${dock === "left" ? "bottom-4 left-4 items-start sm:bottom-5 sm:left-5" : "bottom-4 right-4 items-end sm:bottom-5 sm:right-5"}`}>
       {isOpen ? (
         <div className="w-[min(94vw,24.5rem)] overflow-hidden rounded-[1.85rem] border border-[#31543a]/35 bg-[#f9fbf5] shadow-[0_28px_76px_rgba(27,47,31,0.24)] backdrop-blur-xl">
           <div className="flex items-start justify-between gap-4 border-b border-[#24412c] bg-[linear-gradient(135deg,#35543a_0%,#23412b_55%,#13281b_100%)] px-4 py-4 text-[#f3f6f2]">
@@ -1029,6 +1032,7 @@ export function AuthLanding() {
       isSending={isChatSending}
       messages={chatMessages}
       chatInput={chatInput}
+        dock={stage === "role" ? "left" : "right"}
       onToggle={() => setIsChatOpen((current) => !current)}
       onInputChange={setChatInput}
       onSubmit={handleChatSubmit}
@@ -1565,42 +1569,45 @@ export function AuthLanding() {
       <main className="relative h-[100svh] overflow-hidden px-4 py-4 text-[#243025] sm:px-6 sm:py-6 lg:px-8">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
 
-        <section className="relative mx-auto flex h-full w-full max-w-7xl flex-col gap-4 lg:gap-5">
+        <section className="relative mx-auto flex h-full w-full max-w-7xl flex-col gap-3 lg:gap-4">
           <header className="flex items-start justify-between gap-4">
             <div className="max-w-3xl">
               <p className="text-[11px] font-black uppercase tracking-[0.34em] text-[#6b7864] sm:text-[12px]">SwiftBite setup</p>
-              <h1 className="mt-2 text-4xl font-black tracking-[-0.08em] text-[#182118] sm:text-5xl lg:text-[4.4rem]">Choose your role</h1>
-              <p className="mt-3 max-w-2xl text-[14px] leading-6 text-[#6a7463] sm:text-[15px]">Select the profile you want to use. The next screen will show login or register for that role.</p>
+              <h1 className="mt-1.5 text-4xl font-black tracking-[-0.08em] text-[#182118] sm:text-5xl lg:text-[4.1rem]">Choose your role</h1>
+              <p className="mt-2 max-w-2xl text-[14px] leading-6 text-[#6a7463] sm:text-[15px]">Select the profile you want to use. The next screen will show login or register for that role.</p>
             </div>
 
-            <div className="shrink-0 rounded-full border border-[#cfd9c7] bg-[#eef2e4] px-4 py-1.5 text-[11px] font-black uppercase tracking-[0.28em] text-[#425142] shadow-[0_8px_18px_rgba(37,46,34,0.06)]">
-              Step 1 of 2
+            <div className="flex shrink-0 items-center gap-2.5 sm:gap-3">
+              <PwaInstallButton />
+              <div className="rounded-full border border-[#cfd9c7] bg-[#eef2e4] px-4 py-1.5 text-[11px] font-black uppercase tracking-[0.28em] text-[#425142] shadow-[0_8px_18px_rgba(37,46,34,0.06)]">
+                Step 1 of 2
+              </div>
             </div>
           </header>
 
-          <div className="flex min-h-0 flex-1 items-center justify-center">
-            <div className="relative flex w-full max-w-[74rem] items-center justify-center px-10 sm:px-14">
-              <div className="pointer-events-none absolute inset-x-10 top-1/2 h-[18rem] -translate-y-1/2 rounded-[3rem] bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.46),rgba(243,239,227,0.1)_72%,transparent_100%)] blur-3xl" />
+          <div className="flex min-h-0 flex-1 items-center justify-center py-1">
+            <div className="relative flex w-full max-w-[62rem] items-center justify-center px-12 sm:px-16">
+              <div className="pointer-events-none absolute inset-x-10 top-1/2 h-[15rem] -translate-y-1/2 rounded-[3rem] bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.46),rgba(243,239,227,0.1)_72%,transparent_100%)] blur-3xl" />
 
-              <button type="button" onClick={() => cycleRole("left")} className="group absolute left-0 top-1/2 z-30 flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full border border-[#a8b79c] bg-[#24361f] text-[#f7f4ea] shadow-[0_16px_34px_rgba(25,39,24,0.24)] transition hover:-translate-y-1/2 hover:bg-[#314a29] hover:shadow-[0_20px_42px_rgba(25,39,24,0.3)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#24361f] focus-visible:ring-offset-2 focus-visible:ring-offset-[#f2f0e5]" aria-label="Previous role">
+              <button type="button" onClick={() => cycleRole("left")} className="group absolute -left-2 top-1/2 z-50 flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full border border-[#9aaf91] bg-[#24361f] text-[#f7f4ea] shadow-[0_16px_34px_rgba(25,39,24,0.28)] transition hover:-translate-y-1/2 hover:bg-[#314a29] hover:shadow-[0_20px_42px_rgba(25,39,24,0.34)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#24361f] focus-visible:ring-offset-2 focus-visible:ring-offset-[#f2f0e5] sm:-left-3" aria-label="Previous role">
                 <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 fill-none stroke-current stroke-[2.5] transition group-hover:-translate-x-0.5">
                   <path d="M15 5l-7 7 7 7" />
                 </svg>
               </button>
 
-              <div className="relative h-[20rem] w-full overflow-visible sm:h-[21rem] lg:h-[22rem]">
+              <div className="relative h-[15.5rem] w-full overflow-visible sm:h-[16.2rem] lg:h-[16.8rem]">
               {roleWheelCards.map(({ card, offset }) => {
                 const absOffset = Math.abs(offset);
                 const isSelected = selectedRole === card.id;
-                const translateX = absOffset === 2 ? "0%" : `${offset * 40}%`;
-                const translateY = isSelected ? "0px" : absOffset === 2 ? "-88px" : "12px";
-                const scale = isSelected ? 1 : absOffset === 2 ? 0.86 : 0.93;
+                const translateX = absOffset === 2 ? "0%" : `${offset * 36}%`;
+                const translateY = isSelected ? "-4px" : absOffset === 2 ? "-68px" : "4px";
+                const scale = isSelected ? 1 : absOffset === 2 ? 0.88 : 0.94;
                 const zIndex = isSelected ? 40 : absOffset === 2 ? 10 : 22 - absOffset;
                 const opacity = absOffset === 2 ? 0.72 : 1;
                 const cardBg = isSelected ? "rgba(220,232,207,0.98)" : "rgba(247,247,241,0.92)";
                 const cardBorder = isSelected ? "#9eb08a" : "#cfd7c4";
                 const boxShadow = isSelected ? "0 30px 78px rgba(27,43,24,0.22)" : "0 18px 38px rgba(27,43,24,0.12)";
-                const width = isSelected ? "min(60vw, 41rem)" : absOffset === 2 ? "min(46vw, 33rem)" : "min(38vw, 28rem)";
+                const width = isSelected ? "clamp(20rem, 50vw, 38rem)" : absOffset === 2 ? "clamp(15rem, 38vw, 30rem)" : "clamp(14rem, 34vw, 26rem)";
 
                 return (
                   <button
@@ -1609,7 +1616,7 @@ export function AuthLanding() {
                     onClick={() => {
                       chooseRole(card.id);
                     }}
-                    className="absolute left-1/2 top-1/2 transform-gpu rounded-[2rem] border p-5 text-left transition-all sm:p-6"
+                    className="absolute left-1/2 top-1/2 transform-gpu rounded-[1.75rem] border p-3.5 text-left transition-all sm:p-4"
                     style={{
                       transform: `translateX(${translateX}) translateY(calc(-50% + ${translateY})) scale(${scale})`,
                       zIndex,
@@ -1622,34 +1629,34 @@ export function AuthLanding() {
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <p className="text-[1.35rem] font-black tracking-[-0.05em] text-[#112514] sm:text-[1.55rem]">{card.title}</p>
-                        <p className="mt-1 text-[13px] text-[#5c6a59] sm:text-sm">{card.subtitle}</p>
+                        <p className="text-[1.2rem] font-black tracking-[-0.05em] text-[#112514] sm:text-[1.35rem]">{card.title}</p>
+                        <p className="mt-0.5 text-[12px] text-[#5c6a59] sm:text-[13px]">{card.subtitle}</p>
                       </div>
                       {isSelected ? (
-                        <span className="rounded-full bg-[#254b34] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white shadow-[0_8px_18px_rgba(37,46,34,0.18)]">Selected</span>
+                        <span className="rounded-full bg-[#254b34] px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.18em] text-white shadow-[0_8px_18px_rgba(37,46,34,0.18)]">Selected</span>
                       ) : null}
                     </div>
 
-                    <div className="mt-4 rounded-[1.15rem] border border-[#dce3d4] bg-white/95 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+                    <div className="mt-2.5 rounded-[1rem] border border-[#dce3d4] bg-white/95 p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
                       <div className="flex items-start justify-between gap-3">
-                        <div className="space-y-2.5">
-                          <div className="h-2.5 w-28 rounded-full bg-[#d5ded0]" />
-                          <div className="h-2.5 w-20 rounded-full bg-[#e2e8dc]" />
-                          <div className="h-2.5 w-24 rounded-full bg-[#d5ded0]" />
+                        <div className="space-y-2">
+                          <div className="h-2 w-24 rounded-full bg-[#d5ded0]" />
+                          <div className="h-2 w-16 rounded-full bg-[#e2e8dc]" />
+                          <div className="h-2 w-20 rounded-full bg-[#d5ded0]" />
                         </div>
-                        <div className="h-14 w-14 rounded-[1rem] bg-[radial-gradient(circle_at_35%_35%,rgba(181,194,159,0.96),rgba(125,145,99,0.92))] shadow-[inset_0_1px_1px_rgba(255,255,255,0.25),0_10px_24px_rgba(75,95,60,0.22)]" />
+                        <div className="h-12 w-12 rounded-[0.9rem] bg-[radial-gradient(circle_at_35%_35%,rgba(181,194,159,0.96),rgba(125,145,99,0.92))] shadow-[inset_0_1px_1px_rgba(255,255,255,0.25),0_10px_24px_rgba(75,95,60,0.22)]" />
                       </div>
                     </div>
 
-                    <div className="mt-4 flex items-center justify-between text-[10px] font-black uppercase tracking-[0.28em] text-[#72836b]">
+                    <div className="mt-2.5 flex items-center justify-between text-[9px] font-black uppercase tracking-[0.24em] text-[#72836b]">
                       <span>Preview</span>
-                      <span className="rounded-full bg-[#dde7d2] px-3 py-1 tracking-[0.16em] text-[#59704f]">Swipe card</span>
+                      <span className="rounded-full bg-[#dde7d2] px-2.5 py-0.5 tracking-[0.14em] text-[#59704f]">Swipe card</span>
                     </div>
                   </button>
                 );
               })}
 
-              <button type="button" onClick={() => cycleRole("right")} className="group absolute right-0 top-1/2 z-30 flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full border border-[#a8b79c] bg-[#24361f] text-[#f7f4ea] shadow-[0_16px_34px_rgba(25,39,24,0.24)] transition hover:-translate-y-1/2 hover:bg-[#314a29] hover:shadow-[0_20px_42px_rgba(25,39,24,0.3)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#24361f] focus-visible:ring-offset-2 focus-visible:ring-offset-[#f2f0e5]" aria-label="Next role">
+              <button type="button" onClick={() => cycleRole("right")} className="group absolute -right-2 top-1/2 z-50 flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full border border-[#9aaf91] bg-[#24361f] text-[#f7f4ea] shadow-[0_16px_34px_rgba(25,39,24,0.28)] transition hover:-translate-y-1/2 hover:bg-[#314a29] hover:shadow-[0_20px_42px_rgba(25,39,24,0.34)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#24361f] focus-visible:ring-offset-2 focus-visible:ring-offset-[#f2f0e5] sm:-right-3" aria-label="Next role">
                 <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 fill-none stroke-current stroke-[2.5] transition group-hover:translate-x-0.5">
                   <path d="M9 5l7 7-7 7" />
                 </svg>
@@ -1658,10 +1665,10 @@ export function AuthLanding() {
           </div>
         </div>
 
-          <footer className="border-t border-[#dfe6d7] pt-4 sm:pt-5">
+          <footer className="border-t border-[#dfe6d7] pt-3 sm:pt-4">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <p className="text-[14px] text-[#6a7463] sm:text-sm">Continue as <strong className="font-semibold text-[#243025]">{selectedRoleCard.title}</strong>.</p>
-              <button type="button" onClick={() => { setStage("login"); switchAuthMode("login"); }} className="ml-auto rounded-full bg-[#223326] px-5 py-3 text-sm font-semibold text-[#f5f8f1] shadow-[0_12px_28px_rgba(35,49,34,0.18)] transition hover:bg-[#1a291e]">Next</button>
+              <button type="button" onClick={() => { setStage("login"); switchAuthMode("login"); }} className="ml-auto rounded-full bg-[#223326] px-5 py-3 text-sm font-semibold text-[#f5f8f1] shadow-[0_12px_28px_rgba(35,49,34,0.18)] transition hover:bg-[#1a291e] sm:mr-0">Next</button>
             </div>
           </footer>
 
