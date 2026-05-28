@@ -2,7 +2,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f7efe3;
+  /* Moss-green base — adjusted to match requested sample (slightly lighter moss) */
+  --background: #cfe6cf;
   --foreground: #182118;
 }
 
@@ -15,10 +16,10 @@
 
 html {
   background:
-    radial-gradient(circle at top left, rgba(70, 93, 63, 0.08), transparent 20%),
-    radial-gradient(circle at 80% 12%, rgba(118, 134, 104, 0.06), transparent 16%),
-    radial-gradient(circle at 18% 84%, rgba(101, 118, 92, 0.04), transparent 18%),
-    linear-gradient(180deg, #fbf5ee 0%, #f7efe3 50%, #efe6d0 100%);
+    radial-gradient(circle at top left, rgba(63, 90, 61, 0.14), transparent 20%),
+    radial-gradient(circle at 80% 12%, rgba(111, 135, 100, 0.12), transparent 16%),
+    radial-gradient(circle at 18% 84%, rgba(101, 118, 92, 0.10), transparent 18%),
+    linear-gradient(180deg, #f2f8f2 0%, #cfe6cf 50%, #c0dcbf 100%);
   color-scheme: light;
 }
 

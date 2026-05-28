@@ -2710,13 +2710,44 @@ export function AuthLanding() {
                             <div className="mx-7 mt-7 rounded-[1.4rem] bg-white p-5 shadow-inner">
 
                               <div className="flex items-center justify-between">
-                                <div className="space-y-3">
-                                  <div className="h-3 w-32 rounded-full bg-[#d6dfce]" />
-                                  <div className="h-3 w-24 rounded-full bg-[#dfe6d7]" />
-                                  <div className="h-3 w-28 rounded-full bg-[#d6dfce]" />
+                                <div className="space-y-3 w-[65%]">
+                                  <div className="h-4 w-full rounded-full bg-[#e9f0e6]" />
+                                  <div className="h-3 w-3/4 rounded-full bg-[#f0f5ef]" />
+                                  <div className="h-3 w-5/6 rounded-full bg-[#e9f0e6]" />
                                 </div>
 
-                                <div className="h-20 w-20 rounded-[1.2rem] bg-[linear-gradient(135deg,#dbe6cf,#93a780)]" />
+                                <div className="flex items-center justify-center h-20 w-20 rounded-[1.2rem] bg-white shadow-inner">
+                                  {card.id === "customer" && (
+                                    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-[#4f6b52]">
+                                      <path d="M6 2h11l-1.2 6H7.2L6 2z" fill="#e9f4e9" stroke="#4f6b52" strokeWidth="0.8"/>
+                                      <path d="M3 8h17v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8z" fill="#dfe9db" stroke="#4f6b52" strokeWidth="0.8"/>
+                                    </svg>
+                                  )}
+
+                                  {card.id === "delivery" && (
+                                    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                      <path d="M3 13h11v4H3z" fill="#dfeee0" stroke="#46624b" strokeWidth="0.8"/>
+                                      <path d="M16 11h4l1 3h-5z" fill="#e9f4e9" stroke="#46624b" strokeWidth="0.8"/>
+                                      <circle cx="7" cy="18" r="1.8" fill="#46624b"/>
+                                      <circle cx="19" cy="18" r="1.8" fill="#46624b"/>
+                                    </svg>
+                                  )}
+
+                                  {card.id === "restaurant" && (
+                                    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                      <path d="M6 3c0 2.5-1 3.5-1 5 0 2 1 4 4 4s4-2 4-4c0-1.5-1-2.5-1-5H6z" fill="#f6f7ef" stroke="#58745b" strokeWidth="0.8"/>
+                                      <path d="M4 15c0 1.7 2 3 4 3s4-1.3 4-3" stroke="#58745b" strokeWidth="0.8"/>
+                                    </svg>
+                                  )}
+
+                                  {card.id === "platform" && (
+                                    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                      <path d="M12 8v2" stroke="#3f5a43" strokeWidth="1.2" strokeLinecap="round"/>
+                                      <path d="M12 14v2" stroke="#3f5a43" strokeWidth="1.2" strokeLinecap="round"/>
+                                      <circle cx="12" cy="11" r="5" fill="#eef4ea" stroke="#3f5a43" strokeWidth="0.8"/>
+                                    </svg>
+                                  )}
+                                </div>
                               </div>
                             </div>
 
@@ -2745,10 +2776,10 @@ export function AuthLanding() {
         </div>
 
           <footer className={`border-t border-[#dfe6d7] ${isCompactLayout ? "pt-2.5 pb-20" : "pt-3 pb-24 sm:pt-4"}`}>
-            <div className="space-y-3">
+            <div className="flex items-center justify-between gap-4">
               <p className="text-[14px] text-[#6a7463] sm:text-sm">Continue as <strong className="font-semibold text-[#243025]">{selectedRoleCard.title}</strong>.</p>
 
-              <div className="flex justify-end">
+              <div className="flex-shrink-0">
                 <button
                   type="button"
                   onClick={() => {
