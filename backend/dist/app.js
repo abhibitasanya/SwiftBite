@@ -295,76 +295,201 @@ const chatbotProvider = {
 function trimChatbotMessages(messages) {
     return messages.filter((message) => message.text.trim().length > 0).slice(-16);
 }
+function normalizeChatbotInput(value) {
+    return value
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+function hasAny(text, keywords) {
+    return keywords.some((keyword) => text.includes(keyword));
+}
 function createLocalChatbotReply(prompt) {
     const messages = prompt.messages;
     const latestUserMessage = [...messages].reverse().find((message) => message.role === "user")?.text ?? "";
-    const previousAssistantMessage = [...messages].reverse().find((message) => message.role === "assistant")?.text ?? "";
-    const normalizedMessage = latestUserMessage.toLowerCase();
-    const previousContext = [...messages].slice(0, -1).reverse().find((message) => message.role === "user")?.text.toLowerCase() ?? "";
-    const rolePrefix = prompt.role ? `${prompt.role}: ` : "";
-    const foodOpeners = [
-        "Sure, here’s a good option",
-        "I’d try this",
-        "A solid pick would be",
-        "Here’s a friendly suggestion",
-    ];
-    const helpOpeners = [
-        "Absolutely",
-        "Yep",
-        "Of course",
-        "I can help with that",
-    ];
-    function pickVariant(options) {
-        const index = Math.abs([...latestUserMessage].reduce((sum, character) => sum + character.charCodeAt(0), 0)) % options.length;
-        return options[index];
+    const normalizedMessage = normalizeChatbotInput(latestUserMessage);
+    const previousContext = normalizeChatbotInput([...messages].slice(0, -1).reverse().find((message) => message.role === "user")?.text ?? "");
+    const roleName = prompt.role === "delivery"
+        ? "Delivery Partner"
+        : prompt.role === "restaurant"
+            ? "Restaurant Owner"
+            : prompt.role === "platform"
+                ? "Main Team"
+                : "Order Maker";
+    function lines(items) {
+        return items.join("\n");
     }
     function mentionRoleHint() {
         if (prompt.role === "delivery") {
-            return "I can help with trip status, ETA, delivery flow, or app navigation.";
+            return "In Delivery Partner mode I can guide active trips, ETA, current location, online status, rider profile fields, and delivery flow.";
         }
         if (prompt.role === "restaurant") {
-            return "I can help with menu management, orders, and kitchen workflow.";
+            return "In Restaurant Owner mode I can guide profile details, logo uploads, menu items, dish availability, pending orders, and kitchen workflow.";
         }
         if (prompt.role === "platform") {
-            return "I can help with admin screens, users, restaurants, and system views.";
+            return "In Main Team mode I can guide users, restaurant lists, rider profiles, restaurant profiles, activity, and admin views.";
         }
-        return "I can help with ordering, restaurant choices, checkout, delivery tracking, or account questions.";
+        return "In Order Maker mode I can guide restaurant browsing, adding food to cart, checkout, order tracking, and account actions.";
     }
     if (!normalizedMessage) {
-        return `${rolePrefix}${pickVariant(helpOpeners)} — tell me what you want to do in SwiftBite.`;
+        return "Tell me what you want to do in SwiftBite, and I will point you to the right screen and button.";
     }
-    if (normalizedMessage.includes("register") || normalizedMessage.includes("sign up") || normalizedMessage.includes("create account")) {
-        return `${rolePrefix}${pickVariant(helpOpeners)}. Choose your role, pick email or phone, fill in your details, and submit the form.`;
+    if (hasAny(normalizedMessage, ["api key", "apikey", "openai", "gemini", "internet", "offline", "local chatbot", "locally"])) {
+        return "This assistant is local. It does not need API keys. It answers from SwiftBite's built-in app help, role rules, and troubleshooting notes.";
     }
-    if (normalizedMessage.includes("login") || normalizedMessage.includes("sign in")) {
-        return `${rolePrefix}${pickVariant(helpOpeners)}. Select your role, use the same email or phone you registered with, and sign in.`;
+    if (hasAny(normalizedMessage, ["hello", "hi", "hey"])) {
+        return `Hi. You are in ${roleName} mode. Ask me where to tap for ordering, checkout, tracking, menus, roles, or signing out.`;
     }
-    if (normalizedMessage.includes("restaurant") || normalizedMessage.includes("menu") || normalizedMessage.includes("order")) {
-        return `${rolePrefix}${pickVariant(foodOpeners)}: browse the restaurant cards, open a menu, add items to the cart, then continue to checkout.`;
+    if (hasAny(normalizedMessage, ["what can you do", "help", "guide me", "options", "how can you help"])) {
+        return lines([
+            mentionRoleHint(),
+            "You can ask things like: how do I order food, where is sign out, how do I change role, how do I add a menu item, why login failed, or where is my order.",
+        ]);
     }
-    if (normalizedMessage.includes("delivery") || normalizedMessage.includes("track") || normalizedMessage.includes("eta")) {
-        return `${rolePrefix}${pickVariant(helpOpeners)}. Open the delivery view to see the current location, next drop, and ETA.`;
+    if (hasAny(normalizedMessage, ["which role", "role should", "choose role", "all roles", "order maker", "delivery partner", "restaurant owner", "main team"])) {
+        return lines([
+            "SwiftBite has four roles:",
+            "1. Order Maker: browse restaurants, order food, checkout, and track orders.",
+            "2. Delivery Partner: see active trips, route status, ETA, and rider profile.",
+            "3. Restaurant Owner: manage profile, menu items, availability, and pending orders.",
+            "4. Main Team: view users, restaurants, riders, activity, and admin data.",
+        ]);
     }
-    if (normalizedMessage.includes("spicy")) {
-        const restriction = normalizedMessage.includes("not chicken") || previousContext.includes("not chicken") ? "without chicken" : "";
-        return `${rolePrefix}${pickVariant(foodOpeners)}${restriction ? ` ${restriction}` : ""}: try a spicy paneer bowl, a peppery wrap, or a masala platter.`;
+    if (hasAny(normalizedMessage, ["demo account", "demo login", "demo password", "test account", "sample login", "credentials"])) {
+        return lines([
+            "Demo password: Password123",
+            "Order Maker: customer@example.com",
+            "Delivery Partner: 9876543210",
+            "Restaurant Owner: restaurant@example.com",
+            "Main Team: platform@example.com",
+            "Use the matching role when you log in.",
+        ]);
     }
-    if (normalizedMessage.includes("not chicken") || normalizedMessage.includes("no chicken")) {
-        if (previousAssistantMessage.toLowerCase().includes("spicy") || previousContext.includes("spicy")) {
-            return `${rolePrefix}Got it. Keep the spicy vibe, but skip chicken. I’d suggest spicy paneer, chili potato, or a masala veg bowl.`;
+    if (hasAny(normalizedMessage, ["register", "sign up", "signup", "create account", "new account"])) {
+        return lines([
+            "To register:",
+            "1. Choose your role on the first screen.",
+            "2. Tap Next.",
+            "3. Switch the form from Login to Register.",
+            "4. Enter name, email or phone, password, confirm password, and captcha.",
+            "5. Tap Create account, then log in with the same role.",
+        ]);
+    }
+    if (hasAny(normalizedMessage, ["captcha", "wrong answer", "captcha fails", "captcha failed"])) {
+        return "If captcha fails, solve the small math question exactly, type only the number, or tap Refresh for a new captcha.";
+    }
+    if (hasAny(normalizedMessage, ["login failed", "cannot login", "cant login", "invalid credentials", "not logging", "why login"])) {
+        return "If login fails, check three things: the selected role must match the account, email or phone must be the same one used during registration, and the password/captcha must be correct.";
+    }
+    if (hasAny(normalizedMessage, ["forgot password", "reset password", "change password"])) {
+        return "Password reset is not built yet. For now, create a new account or use the demo accounts. A real reset flow would need email/SMS verification later.";
+    }
+    if (hasAny(normalizedMessage, ["login", "log in", "signin", "sign in"])) {
+        return lines([
+            "To log in:",
+            "1. Choose the same role you registered with.",
+            "2. Tap Next.",
+            "3. Select Email or Phone.",
+            "4. Enter identifier, password, and captcha.",
+            "5. Tap Sign in.",
+        ]);
+    }
+    if (hasAny(normalizedMessage, ["sign out", "logout", "log out", "switch account"])) {
+        return "To sign out, open the menu button in the top right and tap Sign out. Pressing the phone back button from Home will not sign you out.";
+    }
+    if (hasAny(normalizedMessage, ["change role", "switch role", "different role"])) {
+        return "To change role, open the menu button in the top right and tap Change role. Then choose Order Maker, Delivery Partner, Restaurant Owner, or Main Team.";
+    }
+    if (hasAny(normalizedMessage, ["burger", "hamburger", "menu button", "three line", "three lines"])) {
+        return "The menu button is the three-line button at the top right after login. It contains Home, Browse restaurants, Change role, and Sign out.";
+    }
+    if (hasAny(normalizedMessage, ["back button", "phone back", "back arrow", "goes back", "logged out by back"])) {
+        return "The back button should move inside the app flow only. On the role home screen it should not log you out; use the top-right menu if you actually want Sign out or Change role.";
+    }
+    if (hasAny(normalizedMessage, ["home page", "home screen", "dashboard", "go home"])) {
+        return "Use the top-right menu and tap Home. That returns you to the current role's main screen without logging out.";
+    }
+    if (hasAny(normalizedMessage, ["cart", "add item", "add items", "add food", "plus button", "quantity", "remove item", "minus button"])) {
+        return lines([
+            "To manage cart:",
+            "1. Open Browse restaurants.",
+            "2. Tap a restaurant card.",
+            "3. Tap + beside a dish to add it.",
+            "4. Tap - to reduce quantity.",
+            "5. Tap the cart button on the right or use the checkout preview to review items.",
+        ]);
+    }
+    if (hasAny(normalizedMessage, ["checkout", "payment", "pay", "upi", "cash", "card", "place order", "address", "landmark", "contact number"])) {
+        return lines([
+            "To checkout:",
+            "1. Add items from a restaurant menu.",
+            "2. Tap Proceed to checkout.",
+            "3. Confirm delivery address, landmark, contact number, and rider notes.",
+            "4. Choose UPI, card, or cash.",
+            "5. Tap Place order.",
+        ]);
+    }
+    if (hasAny(normalizedMessage, ["track", "tracking", "where is my order", "order status", "rider", "eta", "active order"])) {
+        if (prompt.role === "delivery") {
+            return "As a Delivery Partner, your home screen shows Route status, active deliveries, selected trip details, customer dropoff, current location, and ETA.";
         }
-        return `${rolePrefix}No chicken noted. I can steer you toward paneer, veg, seafood, or egg-based options instead.`;
+        return "To track your order, go to Home after placing it. The Track your order card shows restaurant, order status, rider name, ETA, and delivery address.";
     }
-    if (normalizedMessage.includes("budget") || normalizedMessage.includes("cheap") || normalizedMessage.includes("affordable")) {
-        return `${rolePrefix}For a budget-friendly order, go for wraps, bowls, or combo meals. They’re usually the best value.`;
+    if (hasAny(normalizedMessage, ["order food", "food order", "make order", "order", "browse restaurant", "restaurants", "open menu"])) {
+        if (prompt.role === "restaurant" && !hasAny(normalizedMessage, ["order food", "customer order"])) {
+            return "As a Restaurant Owner, use your home screen to view pending orders and manage the menu. Customer food ordering is in Order Maker mode.";
+        }
+        return lines([
+            "To order food:",
+            "1. Open Browse restaurants.",
+            "2. Tap a restaurant card.",
+            "3. Add dishes with the + button.",
+            "4. Review the cart or checkout preview.",
+            "5. Tap Proceed to checkout and Place order.",
+        ]);
     }
-    if (normalizedMessage.includes("what can you do") || normalizedMessage.includes("help")) {
-        return `${rolePrefix}${mentionRoleHint()}`;
+    if (hasAny(normalizedMessage, ["rider profile", "delivery profile", "online", "offline", "availability", "vehicle", "license", "earnings", "active trips"])) {
+        return "In Delivery Partner mode, use the home screen to edit rider profile fields, toggle Online, update vehicle/license details, check earnings, and select active trips.";
     }
-    if (normalizedMessage.includes("hello") || normalizedMessage.includes("hi") || normalizedMessage.includes("hey")) {
-        return `${rolePrefix}Hi. Tell me what you’re trying to do in SwiftBite, and I’ll guide you.`;
+    if (hasAny(normalizedMessage, ["restaurant profile", "owner profile", "logo", "cover image", "gst", "opening hours", "delivery radius"])) {
+        return "In Restaurant Owner mode, the profile section lets you edit restaurant name, logo, cover image, owner details, address, cuisine, GST/license, opening hours, delivery radius, and description.";
     }
-    return `${rolePrefix}${pickVariant(helpOpeners)} — ${mentionRoleHint()}`;
+    if (hasAny(normalizedMessage, ["menu item", "dish", "add dish", "edit dish", "delete dish", "price", "spice", "veg", "non veg", "available", "bestseller", "recommended"])) {
+        return "To manage dishes, use Restaurant Owner mode. Fill dish name, price, category, prep time, spice level, veg type, description, availability, and tags, then tap Add item or Update item.";
+    }
+    if (hasAny(normalizedMessage, ["pending order", "pending orders", "kitchen", "restaurant orders"])) {
+        return "Restaurant pending orders appear on the Restaurant Owner home screen. Use that area to see customer name, ordered items, status, and due time.";
+    }
+    if (hasAny(normalizedMessage, ["admin", "main team", "platform", "users", "activity", "rider profiles", "restaurant profiles"])) {
+        return "In Main Team mode, use the dashboard to review totals, activity stream, recent users, rider profiles, restaurant profiles, and selected restaurant details.";
+    }
+    if (hasAny(normalizedMessage, ["database", "mysql", "saved", "stored", "backend", "api offline", "server offline", "data online"])) {
+        return "SwiftBite tries the backend/MySQL first. If MySQL is not available, it uses fallback demo data so the app still works locally. Real persistent data needs the backend and database running.";
+    }
+    if (hasAny(normalizedMessage, ["install", "pwa", "app install", "mobile app", "add to home screen"])) {
+        return "To install SwiftBite, use the install button if it appears, or use your browser's Add to Home Screen option. It works like a PWA on mobile.";
+    }
+    if (hasAny(normalizedMessage, ["spicy", "hot food", "masala", "chilli", "chili"])) {
+        const noChicken = hasAny(normalizedMessage, ["no chicken", "not chicken", "without chicken"]) || hasAny(previousContext, ["no chicken", "not chicken", "without chicken"]);
+        return noChicken
+            ? "For spicy food without chicken, open restaurant menus and look for paneer, chili potato, masala veg bowls, or spicy seafood options."
+            : "For spicy food, open a restaurant menu and look for masala, chili, tandoori, pepper, or hot dishes. Add the item with the + button.";
+    }
+    if (hasAny(normalizedMessage, ["no chicken", "not chicken", "without chicken", "veg", "vegetarian"])) {
+        return "For non-chicken or veg orders, browse menus for paneer, veg bowls, rice boxes, seafood, egg, or salad/wrap options. Add your choice with the + button.";
+    }
+    if (hasAny(normalizedMessage, ["budget", "cheap", "affordable", "low price", "less money"])) {
+        return "For a budget-friendly order, choose wraps, bowls, or combo meals. Check the price beside each dish before adding it to cart.";
+    }
+    if (hasAny(normalizedMessage, ["thank", "thanks", "ok", "okay"])) {
+        return "Anytime. Ask me the screen or action you are stuck on, and I will guide you inside SwiftBite.";
+    }
+    return lines([
+        "I can answer SwiftBite app questions locally.",
+        mentionRoleHint(),
+        "Try asking: how do I order food, where is sign out, how do I add items, how do I track my order, or how do I manage menu items.",
+    ]);
 }
 function sha256Hex(value) {
     return createHash("sha256").update(value).digest("hex");

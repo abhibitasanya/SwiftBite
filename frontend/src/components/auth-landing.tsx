@@ -198,6 +198,13 @@ function formatChatTimestamp(timestamp?: string) {
   }).format(new Date(timestamp));
 }
 
+function cleanChatbotReply(reply: string) {
+  return reply
+    .trim()
+    .replace(/^(customer|delivery|restaurant|platform|assistant)\s*:\s*/i, "")
+    .trim();
+}
+
 const fallbackRestaurantsForUi: RestaurantCard[] = [
   {
     id: 1,
@@ -250,9 +257,9 @@ const fallbackRestaurantsForUi: RestaurantCard[] = [
 function getChatSuggestions(intent: string | null, isStarter: boolean): ChatSuggestion[] {
   if (isStarter) {
     return [
-      { label: "How do I register?", value: "How do I register?" },
-      { label: "How do I log in?", value: "How do I log in?" },
       { label: "How do I order food?", value: "How do I order food?" },
+      { label: "Where is sign out?", value: "Where is the sign out option?" },
+      { label: "What can you do?", value: "What can you help me with in SwiftBite?" },
     ];
   }
 
@@ -287,6 +294,14 @@ function getChatSuggestions(intent: string | null, isStarter: boolean): ChatSugg
       { label: "How to track rider?", value: "How do I track the rider?" },
       { label: "What does ETA mean?", value: "What does ETA mean?" },
       { label: "Where is my order?", value: "Where is my order right now?" },
+    ];
+  }
+
+  if (normalizedIntent.includes("sign out") || normalizedIntent.includes("logout") || normalizedIntent.includes("menu")) {
+    return [
+      { label: "Change role?", value: "How do I change role?" },
+      { label: "Back button?", value: "Will the phone back button sign me out?" },
+      { label: "Go home?", value: "How do I go back to home?" },
     ];
   }
 
@@ -358,7 +373,7 @@ function ChatWidget({
             {messages.map((message) => (
               <div
                 key={message.id}
-                className={`max-w-[88%] rounded-[1.2rem] px-4 py-3 text-sm leading-6 shadow-[0_8px_22px_rgba(37,46,34,0.08)] ${
+                className={`max-w-[88%] whitespace-pre-line rounded-[1.2rem] px-4 py-3 text-sm leading-6 shadow-[0_8px_22px_rgba(37,46,34,0.08)] ${
                   message.role === "user"
                     ? "ml-auto bg-[#254b34] text-[#f5f8f1]"
                     : "border border-[#cfd5d0] bg-[linear-gradient(180deg,#ffffff_0%,#eef2f1_100%)] text-[#243025]"
@@ -908,7 +923,7 @@ export function AuthLanding() {
   const [chatInput, setChatInput] = useState("");
   const [isChatSending, setIsChatSending] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
-    { id: 1, role: "assistant", text: "Hi, I can help with login, register, restaurant ordering, delivery tracking, or database setup.", timestamp: new Date().toISOString() },
+    { id: 1, role: "assistant", text: "Hi. Ask me where to tap in SwiftBite for login, ordering, checkout, tracking, menu updates, or signing out.", timestamp: new Date().toISOString() },
   ]);
   const chatbotRootRef = useRef<Root | null>(null);
   const chatMessagesRef = useRef(chatMessages);
@@ -1026,6 +1041,18 @@ export function AuthLanding() {
     if (typeof window === "undefined") return;
     window.localStorage.setItem("swiftbite.loginMode", loginMode);
   }, [loginMode]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const frameId = window.requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    });
+
+    return () => window.cancelAnimationFrame(frameId);
+  }, [stage, selectedRestaurantId, selectedRole]);
 
   // Synchronize stage state with browser history (popstate) and save to localStorage
   useEffect(() => {
@@ -1525,7 +1552,7 @@ export function AuthLanding() {
           {
             id: assistantMessageId,
             role: "assistant",
-            text: payload.message ?? "Sorry, I could not answer right now.",
+            text: cleanChatbotReply(payload.message ?? "Sorry, I could not answer right now."),
             timestamp: new Date().toISOString(),
           },
         ]);
@@ -1533,7 +1560,7 @@ export function AuthLanding() {
       }
 
       if (!response.body) {
-        const fallbackReply = (await response.text()).trim() || "I can help with that.";
+        const fallbackReply = cleanChatbotReply(await response.text()) || "I can help with that.";
 
         setChatMessages((current) => [
           ...current,
@@ -1566,6 +1593,7 @@ export function AuthLanding() {
         }
 
         accumulatedReply += chunk;
+        const displayReply = cleanChatbotReply(accumulatedReply) || "I can help with that.";
 
         if (!assistantStarted) {
           assistantStarted = true;
@@ -1574,7 +1602,7 @@ export function AuthLanding() {
             {
               id: assistantMessageId,
               role: "assistant",
-              text: accumulatedReply,
+              text: displayReply,
               timestamp: new Date().toISOString(),
             },
           ]);
@@ -1583,7 +1611,7 @@ export function AuthLanding() {
 
         setChatMessages((current) =>
           current.map((message) =>
-            message.id === assistantMessageId ? { ...message, text: accumulatedReply } : message
+            message.id === assistantMessageId ? { ...message, text: displayReply } : message
           )
         );
       }
