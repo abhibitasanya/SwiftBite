@@ -83,6 +83,68 @@ type MenuCartItem = {
   price: number;
 };
 
+type RiderProfileDraft = {
+  userIdentifier: string;
+  fullName: string;
+  profileImageUrl: string;
+  age: string;
+  gender: string;
+  phoneNumber: string;
+  alternatePhoneNumber: string;
+  email: string;
+  residentialAddress: string;
+  cityState: string;
+  emergencyContact: string;
+  vehicleType: string;
+  vehicleNumber: string;
+  drivingLicenseNumber: string;
+  availabilityStatus: "available" | "busy" | "offline";
+  isOnline: boolean;
+  deliveryZone: string;
+  joiningDate: string;
+  completedOrdersCount: string;
+  activeDeliveries: string;
+  earningsToday: string;
+  verificationStatus: "pending" | "verified" | "rejected";
+  idProofUrl: string;
+  drivingLicenseUrl: string;
+  profilePhotoUrl: string;
+};
+
+type RestaurantProfileDraft = {
+  userIdentifier: string;
+  restaurantName: string;
+  restaurantLogoUrl: string;
+  coverImageUrl: string;
+  ownerName: string;
+  contactNumber: string;
+  email: string;
+  restaurantAddress: string;
+  cityState: string;
+  cuisineType: string;
+  gstLicenseNumber: string;
+  openingHours: string;
+  deliveryRadius: string;
+  description: string;
+  verificationStatus: "pending" | "verified" | "rejected";
+};
+
+type MenuItemDraft = {
+  restaurantIdentifier: string;
+  dishName: string;
+  dishImageUrl: string;
+  price: string;
+  category: string;
+  description: string;
+  spiceLevel: "mild" | "medium" | "hot" | "extra-hot";
+  vegType: "veg" | "non-veg";
+  isAvailable: boolean;
+  preparationTimeMinutes: string;
+  isFeatured: boolean;
+  isBestseller: boolean;
+  isRecommended: boolean;
+};
+
 type CheckoutMethod = "cash" | "card" | "upi";
 
 type ChatMessage = {
@@ -692,6 +754,7 @@ export function AuthLanding() {
   const [contactNumber, setContactNumber] = useState("9876543210");
   const [checkoutMethod, setCheckoutMethod] = useState<CheckoutMethod>("upi");
   const [restaurantFormStatus, setRestaurantFormStatus] = useState("");
+  const [selectedMenuItemId, setSelectedMenuItemId] = useState<number | null>(null);
   const [newRestaurantName, setNewRestaurantName] = useState("");
   const [newRestaurantCuisine, setNewRestaurantCuisine] = useState("");
   const [newRestaurantLocation, setNewRestaurantLocation] = useState("");
@@ -705,6 +768,69 @@ export function AuthLanding() {
   const [viewportWidth, setViewportWidth] = useState(1280);
   const [viewportHeight, setViewportHeight] = useState(900);
   const [isStandaloneMode, setIsStandaloneMode] = useState(false);
+  const [riderProfileDraft, setRiderProfileDraft] = useState<RiderProfileDraft>({
+    userIdentifier: "9876543210",
+    fullName: "Delivery Demo",
+    profileImageUrl: "/message-icon.svg",
+    age: "29",
+    gender: "Male",
+    phoneNumber: "9876543210",
+    alternatePhoneNumber: "9876500000",
+    email: "delivery@example.com",
+    residentialAddress: "Sector 12, Block C",
+    cityState: "Kolkata, West Bengal",
+    emergencyContact: "Ravi: 9876501234",
+    vehicleType: "Scooter",
+    vehicleNumber: "WB20AB1234",
+    drivingLicenseNumber: "DL-DEL-123456",
+    availabilityStatus: "available",
+    isOnline: true,
+    deliveryZone: "Central Kolkata",
+    joiningDate: "2024-01-12",
+    completedOrdersCount: "284",
+    activeDeliveries: "2",
+    earningsToday: "₹1,240",
+    verificationStatus: "verified",
+    idProofUrl: "",
+    drivingLicenseUrl: "",
+    profilePhotoUrl: "",
+  });
+  const [restaurantProfileDraft, setRestaurantProfileDraft] = useState<RestaurantProfileDraft>({
+    userIdentifier: "restaurant@example.com",
+    restaurantName: "Restaurant Demo Kitchen",
+    restaurantLogoUrl: "/message-icon.svg",
+    coverImageUrl: "",
+    ownerName: "Restaurant Demo",
+    contactNumber: "9876543211",
+    email: "restaurant@example.com",
+    restaurantAddress: "Market Road, Kolkata",
+    cityState: "Kolkata, West Bengal",
+    cuisineType: "North Indian",
+    gstLicenseNumber: "GST-DEMO-001",
+    openingHours: "10:00 AM - 11:30 PM",
+    deliveryRadius: "8",
+    description: "Comfort meals, curries, and tandoor plates for dinner.",
+    verificationStatus: "verified",
+  });
+  const [menuItemDraft, setMenuItemDraft] = useState<MenuItemDraft>({
+    restaurantIdentifier: "restaurant@example.com",
+    dishName: "",
+    dishImageUrl: "",
+    price: "0",
+    category: "Featured",
+    description: "",
+    spiceLevel: "medium",
+    vegType: "veg",
+    isAvailable: true,
+    preparationTimeMinutes: "15",
+    isFeatured: false,
+    isBestseller: false,
+    isRecommended: false,
+  });
+  const [riderProfileStatus, setRiderProfileStatus] = useState("");
+  const [restaurantProfileStatus, setRestaurantProfileStatus] = useState("");
+  const [menuItemStatus, setMenuItemStatus] = useState("");
+  const [uploadStatus, setUploadStatus] = useState("");
   const [chatSessionId] = useState(() => {
     if (typeof window === "undefined") {
       return "";
@@ -750,6 +876,82 @@ export function AuthLanding() {
   useEffect(() => {
     chatMessagesRef.current = chatMessages;
   }, [chatMessages]);
+
+  useEffect(() => {
+    const activeDashboard = dashboardData as any;
+
+    if (selectedRole === "delivery" && activeDashboard?.riderProfile) {
+      const riderProfile = activeDashboard.riderProfile;
+      setRiderProfileDraft({
+        userIdentifier: riderProfile.userIdentifier ?? riderProfile.phoneNumber ?? "9876543210",
+        fullName: riderProfile.fullName ?? "Delivery Demo",
+        profileImageUrl: riderProfile.profileImageUrl ?? "",
+        age: String(riderProfile.age ?? 29),
+        gender: riderProfile.gender ?? "Male",
+        phoneNumber: riderProfile.phoneNumber ?? "9876543210",
+        alternatePhoneNumber: riderProfile.alternatePhoneNumber ?? "",
+        email: riderProfile.email ?? "",
+        residentialAddress: riderProfile.residentialAddress ?? "",
+        cityState: riderProfile.cityState ?? "",
+        emergencyContact: riderProfile.emergencyContact ?? "",
+        vehicleType: riderProfile.vehicleType ?? "Scooter",
+        vehicleNumber: riderProfile.vehicleNumber ?? "",
+        drivingLicenseNumber: riderProfile.drivingLicenseNumber ?? "",
+        availabilityStatus: riderProfile.availabilityStatus ?? "available",
+        isOnline: Boolean(riderProfile.isOnline),
+        deliveryZone: riderProfile.deliveryZone ?? "",
+        joiningDate: riderProfile.joiningDate ?? "2024-01-12",
+        completedOrdersCount: String(riderProfile.completedOrdersCount ?? 0),
+        activeDeliveries: String(riderProfile.activeDeliveries ?? 0),
+        earningsToday: riderProfile.earningsToday ?? "₹0",
+        verificationStatus: riderProfile.verificationStatus ?? "pending",
+        idProofUrl: riderProfile.idProofUrl ?? "",
+        drivingLicenseUrl: riderProfile.drivingLicenseUrl ?? "",
+        profilePhotoUrl: riderProfile.profilePhotoUrl ?? "",
+      });
+    }
+
+    if (selectedRole === "restaurant" && activeDashboard?.restaurantProfile) {
+      const restaurantProfile = activeDashboard.restaurantProfile;
+      setRestaurantProfileDraft({
+        userIdentifier: restaurantProfile.userIdentifier ?? "restaurant@example.com",
+        restaurantName: restaurantProfile.restaurantName ?? "Restaurant Demo Kitchen",
+        restaurantLogoUrl: restaurantProfile.restaurantLogoUrl ?? "",
+        coverImageUrl: restaurantProfile.coverImageUrl ?? "",
+        ownerName: restaurantProfile.ownerName ?? "Restaurant Demo",
+        contactNumber: restaurantProfile.contactNumber ?? "",
+        email: restaurantProfile.email ?? "",
+        restaurantAddress: restaurantProfile.restaurantAddress ?? "",
+        cityState: restaurantProfile.cityState ?? "",
+        cuisineType: restaurantProfile.cuisineType ?? "",
+        gstLicenseNumber: restaurantProfile.gstLicenseNumber ?? "",
+        openingHours: restaurantProfile.openingHours ?? "",
+        deliveryRadius: String(restaurantProfile.deliveryRadius ?? 8),
+        description: restaurantProfile.description ?? "",
+        verificationStatus: restaurantProfile.verificationStatus ?? "pending",
+      });
+
+      const nextMenuItem = activeDashboard.menuItems?.[0];
+      if (nextMenuItem) {
+        setSelectedMenuItemId(nextMenuItem.id ?? null);
+        setMenuItemDraft({
+          restaurantIdentifier: nextMenuItem.restaurantIdentifier ?? restaurantProfile.userIdentifier ?? "restaurant@example.com",
+          dishName: nextMenuItem.dishName ?? "",
+          dishImageUrl: nextMenuItem.dishImageUrl ?? "",
+          price: String(nextMenuItem.price ?? 0),
+          category: nextMenuItem.category ?? "Featured",
+          description: nextMenuItem.description ?? "",
+          spiceLevel: nextMenuItem.spiceLevel ?? "medium",
+          vegType: nextMenuItem.vegType ?? "veg",
+          isAvailable: Boolean(nextMenuItem.isAvailable),
+          preparationTimeMinutes: String(nextMenuItem.preparationTimeMinutes ?? 15),
+          isFeatured: Boolean(nextMenuItem.isFeatured),
+          isBestseller: Boolean(nextMenuItem.isBestseller),
+          isRecommended: Boolean(nextMenuItem.isRecommended),
+        });
+      }
+    }
+  }, [dashboardData, selectedRole]);
 
   useEffect(() => {
     window.localStorage.setItem("swiftbite.selectedRole", selectedRole);
@@ -1051,6 +1253,135 @@ export function AuthLanding() {
     }
   }
 
+  async function uploadImageFile(file: File, ownerType: "rider" | "restaurant" | "menu-item", ownerIdentifier: string, purpose: string, onSuccess: (publicUrl: string) => void) {
+    const previewUrl = URL.createObjectURL(file);
+    onSuccess(previewUrl);
+
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result ?? ""));
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/uploads/image`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ownerType,
+          ownerIdentifier,
+          purpose,
+          fileName: file.name,
+          mimeType: file.type || "image/png",
+          dataUrl,
+        }),
+      });
+
+      const payload = (await response.json()) as { image?: { publicUrl?: string }; message?: string };
+
+      if (!response.ok) {
+        setUploadStatus(payload.message ?? "Image upload failed.");
+        return;
+      }
+
+      const publicUrl = payload.image?.publicUrl ?? previewUrl;
+      onSuccess(publicUrl);
+      setUploadStatus(`${purpose} image uploaded.`);
+    } catch {
+      setUploadStatus("Unable to upload the image right now.");
+    }
+  }
+
+  async function handleRiderProfileSave() {
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/rider-profiles/${encodeURIComponent(riderProfileDraft.userIdentifier)}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(riderProfileDraft),
+      });
+
+      const payload = (await response.json()) as { message?: string };
+
+      if (!response.ok) {
+        setRiderProfileStatus(payload.message ?? "Unable to save rider profile.");
+        return;
+      }
+
+      setRiderProfileStatus(payload.message ?? "Rider profile saved.");
+    } catch {
+      setRiderProfileStatus("Unable to save rider profile right now.");
+    }
+  }
+
+  async function handleRestaurantProfileSave() {
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/restaurant-profiles/${encodeURIComponent(restaurantProfileDraft.userIdentifier)}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(restaurantProfileDraft),
+      });
+
+      const payload = (await response.json()) as { message?: string };
+
+      if (!response.ok) {
+        setRestaurantProfileStatus(payload.message ?? "Unable to save restaurant profile.");
+        return;
+      }
+
+      setRestaurantProfileStatus(payload.message ?? "Restaurant profile saved.");
+    } catch {
+      setRestaurantProfileStatus("Unable to save restaurant profile right now.");
+    }
+  }
+
+  async function handleMenuItemSave() {
+    const endpoint = selectedMenuItemId ? `${apiBaseUrl}/api/menu-items/${selectedMenuItemId}` : `${apiBaseUrl}/api/restaurant-profiles/${encodeURIComponent(menuItemDraft.restaurantIdentifier)}/menu-items`;
+    const method = selectedMenuItemId ? "PUT" : "POST";
+
+    try {
+      const response = await fetch(endpoint, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(menuItemDraft),
+      });
+
+      const payload = (await response.json()) as { message?: string; item?: { id?: number } };
+
+      if (!response.ok) {
+        setMenuItemStatus(payload.message ?? "Unable to save menu item.");
+        return;
+      }
+
+      if (payload.item?.id) {
+        setSelectedMenuItemId(payload.item.id);
+      }
+
+      setMenuItemStatus(payload.message ?? "Menu item saved.");
+    } catch {
+      setMenuItemStatus("Unable to save menu item right now.");
+    }
+  }
+
+  async function handleMenuItemDelete(itemId: number) {
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/menu-items/${itemId}`, { method: "DELETE" });
+      const payload = (await response.json()) as { message?: string };
+
+      if (!response.ok) {
+        setMenuItemStatus(payload.message ?? "Unable to delete menu item.");
+        return;
+      }
+
+      setMenuItemStatus(payload.message ?? "Menu item deleted.");
+      if (selectedMenuItemId === itemId) {
+        setSelectedMenuItemId(null);
+      }
+    } catch {
+      setMenuItemStatus("Unable to delete menu item right now.");
+    }
+  }
+
   async function handleChatSubmit() {
     const cleanMessage = chatInput.trim();
 
@@ -1269,6 +1600,92 @@ export function AuthLanding() {
                   </>
                 ) : null}
               </div>
+
+              <div className="mt-5 rounded-[1.35rem] border border-[#c9d7bf] bg-[linear-gradient(180deg,#f6faf2_0%,#e8f1df_100%)] p-4 shadow-[0_12px_28px_rgba(63,78,56,0.08)]">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#4f6750]">Rider profile</p>
+                    <p className="mt-1 text-sm text-[#5e6b5a]">Edit personal, professional, and verification details.</p>
+                  </div>
+                  <label className="flex items-center gap-2 rounded-full bg-white/90 px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#4f6750]">
+                    <input type="checkbox" checked={riderProfileDraft.isOnline} onChange={(event) => setRiderProfileDraft((current) => ({ ...current, isOnline: event.target.checked }))} />
+                    Online
+                  </label>
+                </div>
+
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <input value={riderProfileDraft.fullName} onChange={(event) => setRiderProfileDraft((current) => ({ ...current, fullName: event.target.value }))} placeholder="Full name" className="rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10" />
+                  <input value={riderProfileDraft.age} onChange={(event) => setRiderProfileDraft((current) => ({ ...current, age: event.target.value }))} placeholder="Age" className="rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10" />
+                  <input value={riderProfileDraft.gender} onChange={(event) => setRiderProfileDraft((current) => ({ ...current, gender: event.target.value }))} placeholder="Gender" className="rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10" />
+                  <input value={riderProfileDraft.phoneNumber} onChange={(event) => setRiderProfileDraft((current) => ({ ...current, phoneNumber: event.target.value }))} placeholder="Phone number" className="rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10" />
+                  <input value={riderProfileDraft.alternatePhoneNumber} onChange={(event) => setRiderProfileDraft((current) => ({ ...current, alternatePhoneNumber: event.target.value }))} placeholder="Alternate phone" className="rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10" />
+                  <input value={riderProfileDraft.email} onChange={(event) => setRiderProfileDraft((current) => ({ ...current, email: event.target.value }))} placeholder="Email" className="rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10" />
+                  <input value={riderProfileDraft.residentialAddress} onChange={(event) => setRiderProfileDraft((current) => ({ ...current, residentialAddress: event.target.value }))} placeholder="Residential address" className="sm:col-span-2 rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10" />
+                  <input value={riderProfileDraft.cityState} onChange={(event) => setRiderProfileDraft((current) => ({ ...current, cityState: event.target.value }))} placeholder="City / state" className="rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10" />
+                  <input value={riderProfileDraft.emergencyContact} onChange={(event) => setRiderProfileDraft((current) => ({ ...current, emergencyContact: event.target.value }))} placeholder="Emergency contact" className="rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10" />
+                  <input value={riderProfileDraft.vehicleType} onChange={(event) => setRiderProfileDraft((current) => ({ ...current, vehicleType: event.target.value }))} placeholder="Vehicle type" className="rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10" />
+                  <input value={riderProfileDraft.vehicleNumber} onChange={(event) => setRiderProfileDraft((current) => ({ ...current, vehicleNumber: event.target.value }))} placeholder="Vehicle number" className="rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10" />
+                  <input value={riderProfileDraft.drivingLicenseNumber} onChange={(event) => setRiderProfileDraft((current) => ({ ...current, drivingLicenseNumber: event.target.value }))} placeholder="Driving license number" className="rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10" />
+                  <input value={riderProfileDraft.deliveryZone} onChange={(event) => setRiderProfileDraft((current) => ({ ...current, deliveryZone: event.target.value }))} placeholder="Delivery zone" className="rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10" />
+                  <input value={riderProfileDraft.joiningDate} onChange={(event) => setRiderProfileDraft((current) => ({ ...current, joiningDate: event.target.value }))} placeholder="Joining date" className="rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10" />
+                  <input value={riderProfileDraft.completedOrdersCount} onChange={(event) => setRiderProfileDraft((current) => ({ ...current, completedOrdersCount: event.target.value }))} placeholder="Completed orders" className="rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10" />
+                  <input value={riderProfileDraft.activeDeliveries} onChange={(event) => setRiderProfileDraft((current) => ({ ...current, activeDeliveries: event.target.value }))} placeholder="Active deliveries" className="rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10" />
+                  <input value={riderProfileDraft.earningsToday} onChange={(event) => setRiderProfileDraft((current) => ({ ...current, earningsToday: event.target.value }))} placeholder="Earnings today" className="rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10" />
+                  <select value={riderProfileDraft.availabilityStatus} onChange={(event) => setRiderProfileDraft((current) => ({ ...current, availabilityStatus: event.target.value as RiderProfileDraft["availabilityStatus"] }))} className="rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10">
+                    <option value="available">Available</option>
+                    <option value="busy">Busy</option>
+                    <option value="offline">Offline</option>
+                  </select>
+                  <select value={riderProfileDraft.verificationStatus} onChange={(event) => setRiderProfileDraft((current) => ({ ...current, verificationStatus: event.target.value as RiderProfileDraft["verificationStatus"] }))} className="rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10">
+                    <option value="pending">Pending</option>
+                    <option value="verified">Verified</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
+                </div>
+
+                <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                  <div className="rounded-[1rem] border border-dashed border-[#c9d7bf] bg-white px-3 py-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#4f6750]">Preview</p>
+                    <div className="mt-2 overflow-hidden rounded-[0.9rem] border border-[#dfe7d6] bg-[#eef3e8]">
+                      <img src={riderProfileDraft.profilePhotoUrl || riderProfileDraft.profileImageUrl || "/message-icon.svg"} alt="Rider preview" className="h-24 w-full object-cover" />
+                    </div>
+                  </div>
+                  <label className="rounded-[1rem] border border-dashed border-[#c9d7bf] bg-white px-3 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#4f6750]">
+                    Profile photo
+                    <input type="file" accept="image/*" className="mt-2 block w-full text-[11px] normal-case tracking-normal" onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      if (file) {
+                        uploadImageFile(file, "rider", riderProfileDraft.userIdentifier, "profile-photo", (url) => setRiderProfileDraft((current) => ({ ...current, profilePhotoUrl: url, profileImageUrl: url })));
+                      }
+                    }} />
+                  </label>
+                  <label className="rounded-[1rem] border border-dashed border-[#c9d7bf] bg-white px-3 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#4f6750]">
+                    ID proof
+                    <input type="file" accept="image/*" className="mt-2 block w-full text-[11px] normal-case tracking-normal" onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      if (file) {
+                        uploadImageFile(file, "rider", riderProfileDraft.userIdentifier, "id-proof", (url) => setRiderProfileDraft((current) => ({ ...current, idProofUrl: url })));
+                      }
+                    }} />
+                  </label>
+                  <label className="rounded-[1rem] border border-dashed border-[#c9d7bf] bg-white px-3 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#4f6750]">
+                    License upload
+                    <input type="file" accept="image/*" className="mt-2 block w-full text-[11px] normal-case tracking-normal" onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      if (file) {
+                        uploadImageFile(file, "rider", riderProfileDraft.userIdentifier, "license", (url) => setRiderProfileDraft((current) => ({ ...current, drivingLicenseUrl: url })));
+                      }
+                    }} />
+                  </label>
+                </div>
+
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                  <div className="text-sm text-[#5e6b5a]">{riderProfileStatus || uploadStatus}</div>
+                  <button type="button" onClick={handleRiderProfileSave} className="rounded-full bg-[#223326] px-5 py-3 text-sm font-semibold text-[#f5f8f1] shadow-[0_10px_24px_rgba(63,90,61,0.18)]">
+                    Save rider profile
+                  </button>
+                </div>
+              </div>
             </SoftScreen>
           </section>
         </main>
@@ -1276,8 +1693,9 @@ export function AuthLanding() {
     }
 
     if (selectedRole === "restaurant") {
-      const restaurantDashboard = (dashboard.role === "restaurant" ? dashboard : createFallbackDashboard("restaurant", fallbackRestaurantsForUi)) as Extract<DashboardData, { role: "restaurant" }>;
+      const restaurantDashboard = (dashboard.role === "restaurant" ? dashboard : createFallbackDashboard("restaurant", fallbackRestaurantsForUi)) as any;
       const selectedRestaurantOption = restaurantDashboard.restaurantOptions.find((restaurant) => restaurant.id === selectedRestaurantOptionId) ?? restaurantDashboard.restaurantOptions[0] ?? null;
+      const menuItems = restaurantDashboard.menuItems ?? [];
 
       return (
         <main className="min-h-screen px-4 py-4 text-[#243025] sm:px-6 sm:py-6 lg:px-8">
@@ -1301,16 +1719,168 @@ export function AuthLanding() {
                 <button type="submit" className="rounded-full bg-[#223326] px-5 py-3 text-sm font-semibold text-[#f5f8f1] shadow-[0_10px_24px_rgba(63,90,61,0.18)]">Add restaurant</button>
               </form>
 
+              <div className="mt-6 rounded-[1.35rem] border border-[#c9d7bf] bg-[linear-gradient(180deg,#f6faf2_0%,#e8f1df_100%)] p-4 shadow-[0_12px_28px_rgba(63,78,56,0.08)]">
+                <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#4f6750]">Restaurant profile</p>
+                <p className="mt-1 text-sm text-[#5e6b5a]">Edit owner, contact, and brand details.</p>
+
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <input value={restaurantProfileDraft.restaurantName} onChange={(event) => setRestaurantProfileDraft((current) => ({ ...current, restaurantName: event.target.value }))} placeholder="Restaurant name" className="rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10" />
+                  <input value={restaurantProfileDraft.ownerName} onChange={(event) => setRestaurantProfileDraft((current) => ({ ...current, ownerName: event.target.value }))} placeholder="Owner name" className="rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10" />
+                  <input value={restaurantProfileDraft.contactNumber} onChange={(event) => setRestaurantProfileDraft((current) => ({ ...current, contactNumber: event.target.value }))} placeholder="Contact number" className="rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10" />
+                  <input value={restaurantProfileDraft.email} onChange={(event) => setRestaurantProfileDraft((current) => ({ ...current, email: event.target.value }))} placeholder="Email" className="rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10" />
+                  <input value={restaurantProfileDraft.restaurantAddress} onChange={(event) => setRestaurantProfileDraft((current) => ({ ...current, restaurantAddress: event.target.value }))} placeholder="Restaurant address" className="sm:col-span-2 rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10" />
+                  <input value={restaurantProfileDraft.cityState} onChange={(event) => setRestaurantProfileDraft((current) => ({ ...current, cityState: event.target.value }))} placeholder="City / state" className="rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10" />
+                  <input value={restaurantProfileDraft.cuisineType} onChange={(event) => setRestaurantProfileDraft((current) => ({ ...current, cuisineType: event.target.value }))} placeholder="Cuisine type" className="rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10" />
+                  <input value={restaurantProfileDraft.gstLicenseNumber} onChange={(event) => setRestaurantProfileDraft((current) => ({ ...current, gstLicenseNumber: event.target.value }))} placeholder="GST / license number" className="rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10" />
+                  <input value={restaurantProfileDraft.openingHours} onChange={(event) => setRestaurantProfileDraft((current) => ({ ...current, openingHours: event.target.value }))} placeholder="Opening hours" className="rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10" />
+                  <input value={restaurantProfileDraft.deliveryRadius} onChange={(event) => setRestaurantProfileDraft((current) => ({ ...current, deliveryRadius: event.target.value }))} placeholder="Delivery radius (km)" className="rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10" />
+                  <select value={restaurantProfileDraft.verificationStatus} onChange={(event) => setRestaurantProfileDraft((current) => ({ ...current, verificationStatus: event.target.value as RestaurantProfileDraft["verificationStatus"] }))} className="rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10">
+                    <option value="pending">Pending</option>
+                    <option value="verified">Verified</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
+                </div>
+
+                <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                  <div className="rounded-[1rem] border border-dashed border-[#c9d7bf] bg-white px-3 py-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#4f6750]">Logo preview</p>
+                    <div className="mt-2 overflow-hidden rounded-[0.9rem] border border-[#dfe7d6] bg-[#eef3e8]">
+                      <img src={restaurantProfileDraft.restaurantLogoUrl || "/message-icon.svg"} alt="Restaurant logo preview" className="h-24 w-full object-cover" />
+                    </div>
+                  </div>
+                  <div className="rounded-[1rem] border border-dashed border-[#c9d7bf] bg-white px-3 py-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#4f6750]">Banner preview</p>
+                    <div className="mt-2 overflow-hidden rounded-[0.9rem] border border-[#dfe7d6] bg-[#eef3e8]">
+                      <img src={restaurantProfileDraft.coverImageUrl || "/message-icon.svg"} alt="Restaurant banner preview" className="h-24 w-full object-cover" />
+                    </div>
+                  </div>
+                  <label className="rounded-[1rem] border border-dashed border-[#c9d7bf] bg-white px-3 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#4f6750]">
+                    Logo upload
+                    <input type="file" accept="image/*" className="mt-2 block w-full text-[11px] normal-case tracking-normal" onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      if (file) {
+                        uploadImageFile(file, "restaurant", restaurantProfileDraft.userIdentifier, "restaurant-logo", (url) => setRestaurantProfileDraft((current) => ({ ...current, restaurantLogoUrl: url })));
+                      }
+                    }} />
+                  </label>
+                  <label className="rounded-[1rem] border border-dashed border-[#c9d7bf] bg-white px-3 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#4f6750]">
+                    Banner upload
+                    <input type="file" accept="image/*" className="mt-2 block w-full text-[11px] normal-case tracking-normal" onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      if (file) {
+                        uploadImageFile(file, "restaurant", restaurantProfileDraft.userIdentifier, "restaurant-banner", (url) => setRestaurantProfileDraft((current) => ({ ...current, coverImageUrl: url })));
+                      }
+                    }} />
+                  </label>
+                  <label className="rounded-[1rem] border border-dashed border-[#c9d7bf] bg-white px-3 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#4f6750]">
+                    Menu item image
+                    <input type="file" accept="image/*" className="mt-2 block w-full text-[11px] normal-case tracking-normal" onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      if (file) {
+                        uploadImageFile(file, "menu-item", menuItemDraft.restaurantIdentifier, "menu-item", (url) => setMenuItemDraft((current) => ({ ...current, dishImageUrl: url })));
+                      }
+                    }} />
+                  </label>
+                </div>
+
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                  <div className="text-sm text-[#5e6b5a]">{restaurantProfileStatus || uploadStatus}</div>
+                  <button type="button" onClick={handleRestaurantProfileSave} className="rounded-full bg-[#223326] px-5 py-3 text-sm font-semibold text-[#f5f8f1] shadow-[0_10px_24px_rgba(63,90,61,0.18)]">
+                    Save restaurant profile
+                  </button>
+                </div>
+              </div>
+
               
             </SoftScreen>
 
             <SoftScreen>
-              <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">Current restaurants</p>
-              <div className="mt-4 grid gap-3">
+              <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">Menu management</p>
+              <div className="mt-4 rounded-[1.35rem] border border-[#c9d7bf] bg-[linear-gradient(180deg,#f6faf2_0%,#e8f1df_100%)] p-4 shadow-[0_12px_28px_rgba(63,78,56,0.08)]">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <input value={menuItemDraft.dishName} onChange={(event) => setMenuItemDraft((current) => ({ ...current, dishName: event.target.value }))} placeholder="Dish name" className="rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10" />
+                  <input value={menuItemDraft.price} onChange={(event) => setMenuItemDraft((current) => ({ ...current, price: event.target.value }))} placeholder="Price" className="rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10" />
+                  <input value={menuItemDraft.category} onChange={(event) => setMenuItemDraft((current) => ({ ...current, category: event.target.value }))} placeholder="Category" className="rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10" />
+                  <input value={menuItemDraft.preparationTimeMinutes} onChange={(event) => setMenuItemDraft((current) => ({ ...current, preparationTimeMinutes: event.target.value }))} placeholder="Prep time (min)" className="rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10" />
+                  <select value={menuItemDraft.spiceLevel} onChange={(event) => setMenuItemDraft((current) => ({ ...current, spiceLevel: event.target.value as MenuItemDraft["spiceLevel"] }))} className="rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10">
+                    <option value="mild">Mild</option>
+                    <option value="medium">Medium</option>
+                    <option value="hot">Hot</option>
+                    <option value="extra-hot">Extra hot</option>
+                  </select>
+                  <select value={menuItemDraft.vegType} onChange={(event) => setMenuItemDraft((current) => ({ ...current, vegType: event.target.value as MenuItemDraft["vegType"] }))} className="rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10">
+                    <option value="veg">Veg</option>
+                    <option value="non-veg">Non-veg</option>
+                  </select>
+                  <label className="flex items-center gap-2 rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm text-[#4f5b47]"><input type="checkbox" checked={menuItemDraft.isAvailable} onChange={(event) => setMenuItemDraft((current) => ({ ...current, isAvailable: event.target.checked }))} /> Available</label>
+                  <label className="flex items-center gap-2 rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm text-[#4f5b47]"><input type="checkbox" checked={menuItemDraft.isFeatured} onChange={(event) => setMenuItemDraft((current) => ({ ...current, isFeatured: event.target.checked }))} /> Featured</label>
+                  <label className="flex items-center gap-2 rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm text-[#4f5b47]"><input type="checkbox" checked={menuItemDraft.isBestseller} onChange={(event) => setMenuItemDraft((current) => ({ ...current, isBestseller: event.target.checked }))} /> Bestseller</label>
+                  <label className="flex items-center gap-2 rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm text-[#4f5b47]"><input type="checkbox" checked={menuItemDraft.isRecommended} onChange={(event) => setMenuItemDraft((current) => ({ ...current, isRecommended: event.target.checked }))} /> Recommended</label>
+                </div>
+                <textarea value={menuItemDraft.description} onChange={(event) => setMenuItemDraft((current) => ({ ...current, description: event.target.value }))} placeholder="Menu item description" className="mt-3 min-h-24 w-full rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10" />
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+                  <div className="text-sm text-[#5e6b5a]">{menuItemStatus}</div>
+                  <div className="flex flex-wrap gap-2">
+                    <button type="button" onClick={handleMenuItemSave} className="rounded-full bg-[#223326] px-5 py-3 text-sm font-semibold text-[#f5f8f1] shadow-[0_10px_24px_rgba(63,90,61,0.18)]">
+                      {selectedMenuItemId ? "Update item" : "Add item"}
+                    </button>
+                    {selectedMenuItemId ? (
+                      <button type="button" onClick={() => handleMenuItemDelete(selectedMenuItemId)} className="rounded-full border border-[#c9d7bf] bg-white px-5 py-3 text-sm font-semibold text-[#4f5b47]">
+                        Delete item
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-5 grid gap-3">
                 {restaurantDashboard.restaurantOptions.map((restaurant) => (
                   <button
                     key={restaurant.id}
                     type="button"
+
+              <div className="mt-5 rounded-[1.35rem] border border-[#c9d7bf] bg-[linear-gradient(180deg,#f6faf2_0%,#e8f1df_100%)] p-4 shadow-[0_12px_28px_rgba(63,78,56,0.08)]">
+                <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#4f6750]">Live menu items</p>
+                <div className="mt-3 grid gap-2">
+                  {menuItems.map((item: any) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedMenuItemId(item.id);
+                        setMenuItemDraft({
+                          restaurantIdentifier: item.restaurantIdentifier ?? restaurantProfileDraft.userIdentifier,
+                          dishName: item.dishName ?? "",
+                          dishImageUrl: item.dishImageUrl ?? "",
+                          price: String(item.price ?? 0),
+                          category: item.category ?? "Featured",
+                          description: item.description ?? "",
+                          spiceLevel: item.spiceLevel ?? "medium",
+                          vegType: item.vegType ?? "veg",
+                          isAvailable: Boolean(item.isAvailable),
+                          preparationTimeMinutes: String(item.preparationTimeMinutes ?? 15),
+                          isFeatured: Boolean(item.isFeatured),
+                          isBestseller: Boolean(item.isBestseller),
+                          isRecommended: Boolean(item.isRecommended),
+                        });
+                      }}
+                      className={`rounded-xl border px-3 py-2 text-left transition ${
+                        selectedMenuItemId === item.id
+                          ? "border-[#bdd0b2] bg-[linear-gradient(180deg,#f3f7ef_0%,#e7f0df_100%)] text-[#1f2b21]"
+                          : "border-[#d3dfca] bg-[linear-gradient(180deg,#fbfdf8_0%,#eef4e6_100%)] text-[#5e6b5a] hover:bg-[#f7faf4]"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="font-semibold text-[#1f2b21]">{item.dishName}</p>
+                          <p className="text-xs uppercase tracking-[0.18em] text-[#4f6750]">{item.category} • {item.vegType} • {item.spiceLevel}</p>
+                        </div>
+                        <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-[#4f6750]">₹{Number(item.price).toFixed(0)}</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
                     onClick={() => setSelectedRestaurantOptionId(restaurant.id)}
                     className={`rounded-[1.35rem] border p-4 text-left shadow-[0_10px_24px_rgba(63,78,56,0.08)] transition ${
                       selectedRestaurantOption?.id === restaurant.id
@@ -1356,9 +1926,11 @@ export function AuthLanding() {
     }
 
     if (selectedRole === "platform") {
-      const platformDashboard = (dashboard.role === "platform" ? dashboard : createFallbackDashboard("platform", fallbackRestaurantsForUi)) as Extract<DashboardData, { role: "platform" }>;
+      const platformDashboard = (dashboard.role === "platform" ? dashboard : createFallbackDashboard("platform", fallbackRestaurantsForUi)) as any;
       const selectedPlatformUser = platformDashboard.recentUsers.find((user) => user.identifier === selectedPlatformUserIdentifier) ?? platformDashboard.recentUsers[0] ?? null;
       const selectedPlatformRestaurant = platformDashboard.recentRestaurants.find((restaurant) => restaurant.id === selectedPlatformRestaurantId) ?? platformDashboard.recentRestaurants[0] ?? null;
+      const riderProfiles = platformDashboard.riderProfiles ?? [];
+      const restaurantProfiles = platformDashboard.restaurantProfiles ?? [];
 
       return (
         <main className="min-h-screen px-4 py-4 text-[#243025] sm:px-6 sm:py-6 lg:px-8">
@@ -1426,6 +1998,32 @@ export function AuthLanding() {
                     </div>
                   </>
                 ) : null}
+              </div>
+
+              <div className="mt-5 rounded-[1.35rem] border border-[#c9d7bf] bg-[linear-gradient(180deg,#f6faf2_0%,#e8f1df_100%)] p-4 shadow-[0_12px_28px_rgba(63,78,56,0.08)]">
+                <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#4f6750]">Rider profiles</p>
+                <div className="mt-3 grid gap-2">
+                  {riderProfiles.map((rider: any) => (
+                    <div key={rider.userIdentifier} className="rounded-xl border border-[#d3dfca] bg-white/92 px-3 py-2 text-sm text-[#5e6b5a] shadow-[0_10px_24px_rgba(63,78,56,0.06)]">
+                      <p className="font-semibold text-[#1f2b21]">{rider.fullName}</p>
+                      <p className="text-xs uppercase tracking-[0.18em] text-[#4f6750]">{rider.vehicleType} • {rider.deliveryZone}</p>
+                      <p className="mt-1">{rider.availabilityStatus} • {rider.isOnline ? "Online" : "Offline"} • {rider.completedOrdersCount} completed</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-5 rounded-[1.35rem] border border-[#c9d7bf] bg-[linear-gradient(180deg,#f6faf2_0%,#e8f1df_100%)] p-4 shadow-[0_12px_28px_rgba(63,78,56,0.08)]">
+                <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#4f6750]">Restaurant profiles</p>
+                <div className="mt-3 grid gap-2">
+                  {restaurantProfiles.map((restaurant: any) => (
+                    <div key={restaurant.userIdentifier} className="rounded-xl border border-[#d3dfca] bg-white/92 px-3 py-2 text-sm text-[#5e6b5a] shadow-[0_10px_24px_rgba(63,78,56,0.06)]">
+                      <p className="font-semibold text-[#1f2b21]">{restaurant.restaurantName}</p>
+                      <p className="text-xs uppercase tracking-[0.18em] text-[#4f6750]">{restaurant.cuisineType} • {restaurant.cityState}</p>
+                      <p className="mt-1">{restaurant.ownerName} • radius {restaurant.deliveryRadius} km</p>
+                    </div>
+                  ))}
+                </div>
               </div>
             </SoftScreen>
           </section>
@@ -1728,6 +2326,7 @@ export function AuthLanding() {
     const arrowSize = isCompactLayout ? "h-11 w-11" : "h-14 w-14";
     const arrowOffset = isCompactLayout ? "left-0" : "-left-2 sm:-left-3";
     const rightArrowOffset = isCompactLayout ? "right-0" : "-right-2 sm:-right-3";
+    const stackNudgeX = isCompactLayout ? "0%" : "-4%";
 
     return (
       <main
@@ -1829,7 +2428,7 @@ export function AuthLanding() {
                     }}
                     className={`absolute left-1/2 top-1/2 transform-gpu rounded-[1.75rem] border text-left backdrop-blur-[12px] transition-all ${roleCardPadding}`}
                     style={{
-                      transform: `translateX(${translateX}) translateY(calc(-50% + ${translateY})) scale(${scale})`,
+                      transform: `translateX(calc(${translateX} + ${stackNudgeX})) translateY(calc(-50% + ${translateY})) scale(${scale})`,
                       zIndex,
                       opacity,
                       background: cardBg,
@@ -2049,29 +2648,32 @@ export function AuthLanding() {
 
       {authBackButton}
 
-      <section className="relative mx-auto flex min-h-[calc(100vh-1.5rem)] w-full max-w-6xl items-center justify-center">
-        <div className="mx-auto w-full max-w-[68rem] rounded-[2.4rem] border border-white/40 bg-[rgba(250,251,247,0.82)] p-4 shadow-[0_30px_96px_rgba(34,51,34,0.12)] backdrop-blur-2xl sm:p-5 lg:p-6">
-          <div className="grid gap-4 lg:grid-cols-[0.82fr_1.18fr] lg:items-start">
-            <div className="space-y-3.5">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite</p>
-                  <h1 className="mt-1 text-3xl font-black tracking-tight sm:text-4xl lg:text-[3.6rem]">Welcome back</h1>
-                </div>
-                <div className="hidden rounded-full border border-[#7a8d63]/45 bg-[#deebd0] px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-[#2f452d] sm:block">
-                  Login / Register
+      <section className="relative mx-auto flex min-h-[calc(100vh-1.5rem)] w-full max-w-4xl items-center justify-center">
+        <div className="mx-auto flex w-full max-w-[34rem] flex-col gap-4 sm:gap-5">
+          <header className="space-y-2 text-center sm:text-left">
+            <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite</p>
+            <h1 className="text-3xl font-black tracking-tight text-[#172217] sm:text-4xl lg:text-[3.55rem]">Welcome back</h1>
+            <p className="mx-auto max-w-[31rem] text-[13px] leading-6 text-[#5e6b5a] sm:mx-0 sm:text-sm">
+              Use a calm, compact sign-in flow with email or phone login, or create a new account for the selected role.
+            </p>
+          </header>
+
+          <div className="rounded-[2.1rem] border border-white/40 bg-[rgba(250,251,247,0.84)] p-3.5 shadow-[0_28px_90px_rgba(34,51,34,0.12)] backdrop-blur-2xl sm:p-4">
+            <form className="space-y-3.5 sm:space-y-4" onSubmit={handleAuthSubmit}>
+              <div className="rounded-[1.35rem] border border-white/45 bg-white/34 px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.5)] backdrop-blur-md">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-[#4f6750]">Selected role</p>
+                    <p className="mt-1 text-base font-black text-[#1f2b21] sm:text-[1.05rem]">{selectedRoleCard.title}</p>
+                    <p className="mt-1 text-sm text-[#5e6b5a]">{selectedRoleCard.subtitle}</p>
+                  </div>
+                  <div className="hidden rounded-full border border-[#7a8d63]/45 bg-[#deebd0] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.22em] text-[#2f452d] sm:block">
+                    Login / Register
+                  </div>
                 </div>
               </div>
 
-              <p className="max-w-xl text-[13px] leading-6 text-[#5e6b5a] sm:text-sm">Use a clean sign-in flow with email or phone login, or create a new account for the selected role.</p>
-
-              <div className="rounded-[1.35rem] border border-white/45 bg-white/32 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_10px_24px_rgba(37,46,34,0.06)] backdrop-blur-md">
-                <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#4f6750]">Selected role</p>
-                <p className="mt-1 text-lg font-black text-[#1f2b21]">{selectedRoleCard.title}</p>
-                <p className="mt-1 text-sm text-[#5e6b5a]">{selectedRoleCard.subtitle}</p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 rounded-full border border-white/55 bg-white/35 p-1.25 shadow-[inset_0_1px_0_rgba(255,255,255,0.45)] backdrop-blur-md">
+              <div className="grid grid-cols-2 gap-1.5 rounded-full border border-white/55 bg-white/38 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.45)] backdrop-blur-md">
                 {(["login", "register"] as const).map((mode) => {
                   const isActive = authMode === mode;
 
@@ -2081,7 +2683,7 @@ export function AuthLanding() {
                       type="button"
                       onClick={() => switchAuthMode(mode)}
                       className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                        isActive ? "bg-[#1f3925] text-[#f5f8f1] shadow-[0_12px_24px_rgba(31,57,37,0.24)]" : "text-[#4f5b47] hover:bg-white/78"
+                        isActive ? "bg-[#1f3925] text-[#f5f8f1] shadow-[0_10px_20px_rgba(31,57,37,0.22)]" : "text-[#4f5b47] hover:bg-white/78"
                       }`}
                     >
                       {mode === "login" ? "Login" : "Register"}
@@ -2090,13 +2692,13 @@ export function AuthLanding() {
                 })}
               </div>
 
-              <div className="rounded-[1.35rem] border border-white/45 bg-white/28 p-3 shadow-[0_10px_24px_rgba(37,46,34,0.08)] backdrop-blur-md">
-                <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="rounded-[1.35rem] border border-white/45 bg-white/30 px-3 py-3 shadow-[0_10px_24px_rgba(37,46,34,0.07)] backdrop-blur-md">
+                <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#4f6750]">Sign in method</p>
-                    <p className="mt-1 text-[13px] text-[#5e6b5a]">Pick how you want to identify this account.</p>
+                    <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-[#4f6750]">Sign in method</p>
+                    <p className="mt-1 text-[13px] text-[#5e6b5a]">Choose how this account is identified.</p>
                   </div>
-                  <div className="grid w-full gap-2 sm:w-auto sm:grid-cols-2">
+                  <div className="grid grid-cols-2 gap-1.5">
                     {(["email", "phone"] as const).map((mode) => {
                       const isActive = loginMode === mode;
 
@@ -2105,8 +2707,8 @@ export function AuthLanding() {
                           key={mode}
                           type="button"
                           onClick={() => setLoginMode(mode)}
-                          className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                            isActive ? "bg-[#1f3925] text-[#f5f8f1] shadow-[0_12px_24px_rgba(31,57,37,0.24)]" : "border border-white/45 bg-white/72 text-[#4f5b47] hover:bg-white"
+                          className={`rounded-full px-3.5 py-2 text-sm font-semibold transition ${
+                            isActive ? "bg-[#1f3925] text-[#f5f8f1] shadow-[0_10px_20px_rgba(31,57,37,0.22)]" : "border border-white/45 bg-white/72 text-[#4f5b47] hover:bg-white"
                           }`}
                         >
                           {mode === "email" ? "Email" : "Phone"}
@@ -2116,88 +2718,86 @@ export function AuthLanding() {
                   </div>
                 </div>
               </div>
-            </div>
 
-            <form className="grid gap-3.5 lg:gap-3" onSubmit={handleAuthSubmit}>
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-3">
                 {authMode === "register" ? (
-                  <label className="block space-y-1.5 sm:col-span-2">
-                    <span className="text-sm font-medium text-[#243025]">Full name</span>
+                  <label className="block space-y-1.5">
+                    <span className="text-[13px] font-medium text-[#243025]">Full name</span>
                     <input
                       value={fullName}
                       onChange={(event) => setFullName(event.target.value)}
                       placeholder="Your name"
-                      className="w-full rounded-[1.15rem] border border-white/55 bg-white/74 px-4 py-2.25 text-[#1f2b21] outline-none placeholder:text-[#7f8a7a] focus:border-[#5f7a4a]/75 focus:ring-2 focus:ring-[#5f7a4a]/12 backdrop-blur-sm"
+                      className="w-full rounded-[1.05rem] border border-white/55 bg-white/74 px-4 py-2 text-[#1f2b21] outline-none placeholder:text-[#7f8a7a] focus:border-[#5f7a4a]/75 focus:ring-2 focus:ring-[#5f7a4a]/12 backdrop-blur-sm"
                     />
                   </label>
                 ) : null}
 
                 <label className="block space-y-1.5">
-                  <span className="text-sm font-medium text-[#243025]">{loginMode === "email" ? "Email address" : "Mobile number"}</span>
+                  <span className="text-[13px] font-medium text-[#243025]">{loginMode === "email" ? "Email address" : "Mobile number"}</span>
                   <input
                     value={identifier}
                     onChange={(event) => setIdentifier(event.target.value)}
                     placeholder={helperText}
-                    className="w-full rounded-[1.15rem] border border-white/55 bg-white/74 px-4 py-2.25 text-[#1f2b21] outline-none placeholder:text-[#7f8a7a] focus:border-[#5f7a4a]/75 focus:ring-2 focus:ring-[#5f7a4a]/12 backdrop-blur-sm"
+                    className="w-full rounded-[1.05rem] border border-white/55 bg-white/74 px-4 py-2 text-[#1f2b21] outline-none placeholder:text-[#7f8a7a] focus:border-[#5f7a4a]/75 focus:ring-2 focus:ring-[#5f7a4a]/12 backdrop-blur-sm"
                   />
                 </label>
 
                 <label className="block space-y-1.5">
-                  <span className="text-sm font-medium text-[#243025]">Password</span>
+                  <span className="text-[13px] font-medium text-[#243025]">Password</span>
                   <input
                     type="password"
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
                     placeholder="Password"
-                    className="w-full rounded-[1.15rem] border border-white/55 bg-white/74 px-4 py-2.25 text-[#243025] outline-none placeholder:text-[#8a927f] focus:border-[#5f7a4a]/75 focus:ring-2 focus:ring-[#5f7a4a]/12 backdrop-blur-sm"
+                    className="w-full rounded-[1.05rem] border border-white/55 bg-white/74 px-4 py-2 text-[#243025] outline-none placeholder:text-[#8a927f] focus:border-[#5f7a4a]/75 focus:ring-2 focus:ring-[#5f7a4a]/12 backdrop-blur-sm"
                   />
                 </label>
 
                 {authMode === "register" ? (
-                  <label className="block space-y-1.5 sm:col-span-2">
-                    <span className="text-sm font-medium text-[#243025]">Confirm password</span>
+                  <label className="block space-y-1.5">
+                    <span className="text-[13px] font-medium text-[#243025]">Confirm password</span>
                     <input
                       type="password"
                       value={confirmPassword}
                       onChange={(event) => setConfirmPassword(event.target.value)}
                       placeholder="Repeat password"
-                      className="w-full rounded-[1.15rem] border border-white/55 bg-white/74 px-4 py-2.25 text-[#1f2b21] outline-none placeholder:text-[#7f8a7a] focus:border-[#5f7a4a]/75 focus:ring-2 focus:ring-[#5f7a4a]/12 backdrop-blur-sm"
+                      className="w-full rounded-[1.05rem] border border-white/55 bg-white/74 px-4 py-2 text-[#1f2b21] outline-none placeholder:text-[#7f8a7a] focus:border-[#5f7a4a]/75 focus:ring-2 focus:ring-[#5f7a4a]/12 backdrop-blur-sm"
                     />
                   </label>
                 ) : null}
 
-                <label className="block space-y-1.5 sm:col-span-2">
-                  <span className="text-sm font-medium text-[#243025]">Captcha</span>
+                <label className="block space-y-1.5">
+                  <span className="text-[13px] font-medium text-[#243025]">Captcha</span>
                   <input
                     value={captchaInput}
                     onChange={(event) => setCaptchaInput(event.target.value)}
                     placeholder="Answer"
-                    className="w-full rounded-[1.15rem] border border-white/55 bg-white/74 px-4 py-2.25 text-[#1f2b21] outline-none placeholder:text-[#7f8a7a] focus:border-[#5f7a4a]/75 focus:ring-2 focus:ring-[#5f7a4a]/12 backdrop-blur-sm"
+                    className="w-full rounded-[1.05rem] border border-white/55 bg-white/74 px-4 py-2 text-[#1f2b21] outline-none placeholder:text-[#7f8a7a] focus:border-[#5f7a4a]/75 focus:ring-2 focus:ring-[#5f7a4a]/12 backdrop-blur-sm"
                   />
                 </label>
 
-                <div className="sm:col-span-2 rounded-[1.15rem] border border-white/45 bg-white/36 px-4 py-2.5 text-[#1f2b21] shadow-[0_10px_24px_rgba(37,46,34,0.08)] backdrop-blur-md">
+                <div className="rounded-[1.05rem] border border-white/45 bg-white/35 px-3.5 py-3 text-[#1f2b21] shadow-[0_10px_24px_rgba(37,46,34,0.07)] backdrop-blur-md">
                   <div className="flex items-center justify-between gap-4">
                     <div>
-                      <p className="text-[11px] uppercase tracking-[0.28em] text-[#4f6750]">Check</p>
-                      <p className="mt-1 text-xl font-black sm:text-2xl">{captcha.left} {captcha.operator} {captcha.right}</p>
+                      <p className="text-[10px] uppercase tracking-[0.3em] text-[#4f6750]">Check</p>
+                      <p className="mt-1 text-lg font-black sm:text-xl">{captcha.left} {captcha.operator} {captcha.right}</p>
                     </div>
-                    <button type="button" onClick={refreshCaptcha} className="text-xs font-bold uppercase tracking-[0.22em] text-[#416332]">
+                    <button type="button" onClick={refreshCaptcha} className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#416332]">
                       Refresh
                     </button>
                   </div>
                 </div>
-
-                <button
-                  type="submit"
-                  disabled={isLoading || isBooting}
-                  className="sm:col-span-2 w-full rounded-full bg-[#1f3925] px-5 py-3 text-sm font-semibold text-[#f5f8f1] shadow-[0_14px_30px_rgba(31,57,37,0.26)] transition hover:bg-[#314537] disabled:cursor-not-allowed disabled:opacity-70"
-                >
-                  {isLoading ? "Working..." : authMode === "login" ? "Sign in" : "Create account"}
-                </button>
               </div>
 
-              <div>
+              <button
+                type="submit"
+                disabled={isLoading || isBooting}
+                className="w-full rounded-full bg-[#1f3925] px-5 py-3 text-sm font-semibold text-[#f5f8f1] shadow-[0_14px_30px_rgba(31,57,37,0.24)] transition hover:bg-[#314537] disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {isLoading ? "Working..." : authMode === "login" ? "Sign in" : "Create account"}
+              </button>
+
+              <div className="pt-0.5">
                 <StatusBanner message={statusMessage} />
               </div>
             </form>
