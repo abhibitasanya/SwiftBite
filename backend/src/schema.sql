@@ -197,3 +197,20 @@ CREATE TABLE IF NOT EXISTS uploaded_images (
   KEY idx_uploaded_images_owner (owner_type, owner_identifier),
   KEY idx_uploaded_images_purpose (purpose)
 );
+
+CREATE TABLE IF NOT EXISTS orders (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  restaurant_id BIGINT UNSIGNED NOT NULL,
+  customer_identifier VARCHAR(191) NOT NULL,
+  items_json JSON NOT NULL,
+  total_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
+  status VARCHAR(40) NOT NULL DEFAULT 'placed',
+  address VARCHAR(255) NOT NULL,
+  contact_number VARCHAR(32) NOT NULL,
+  notes TEXT DEFAULT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_orders_restaurant_id (restaurant_id),
+  KEY idx_orders_status (status),
+  CONSTRAINT fk_orders_restaurant FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE ON UPDATE CASCADE
+);

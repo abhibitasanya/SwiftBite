@@ -189,6 +189,20 @@ type DeliveryTask = {
   currentLocation: string;
 };
 
+type OrderRecord = {
+  id: number;
+  restaurantId: number;
+  restaurantName: string;
+  customerIdentifier: string;
+  items: Array<{ name: string; quantity: number; price: number }>;
+  total: number;
+  status: string;
+  address: string;
+  contactNumber: string;
+  notes?: string;
+  createdAt: string;
+};
+
 type PlatformUser = {
   fullName: string;
   identifier: string;
@@ -300,6 +314,8 @@ const fallbackDeliveryTasks: DeliveryTask[] = [
     currentLocation: "Main Road checkpoint",
   },
 ];
+
+let fallbackOrders: OrderRecord[] = [];
 
 const fallbackPlatformUsers: PlatformUser[] = [
   { fullName: "Customer Demo", identifier: "customer@example.com", role: "customer" },
@@ -988,6 +1004,56 @@ async function loadRestaurants() {
   }
 }
 
+async function loadOrders() {
+  try {
+    const [rows] = await db.query<RowDataPacket[]>(
+      "SELECT o.id, o.restaurant_id, r.name as restaurant_name, o.customer_identifier, o.items_json, o.total_amount, o.status, o.address, o.contact_number, o.notes, o.created_at FROM orders o LEFT JOIN restaurants r ON r.id = o.restaurant_id ORDER BY o.created_at DESC"
+    );
+
+    return {
+      orders: rows.map((row) => ({
+        id: Number(row.id),
+        restaurantId: Number(row.restaurant_id),
+        restaurantName: String(row.restaurant_name || ""),
+        customerIdentifier: String(row.customer_identifier),
+        items: JSON.parse(String(row.items_json || "[]")),
+        total: Number(row.total_amount),
+        status: String(row.status),
+        address: String(row.address),
+        contactNumber: String(row.contact_number),
+        notes: normalizeEmpty(row.notes ? String(row.notes) : ""),
+        createdAt: new Date(row.created_at as string).toISOString(),
+      })),
+      source: "mysql" as const,
+    };
+  } catch {
+    return { orders: fallbackOrders, source: "fallback" as const };
+  }
+}
+
+async function saveOrder(order: OrderRecord) {
+  try {
+    await db.query(
+      "INSERT INTO orders (restaurant_id, customer_identifier, items_json, total_amount, status, address, contact_number, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      [
+        order.restaurantId,
+        order.customerIdentifier,
+        JSON.stringify(order.items),
+        order.total,
+        order.status,
+        order.address,
+        order.contactNumber,
+        order.notes || null,
+      ]
+    );
+
+    return { source: "mysql" as const };
+  } catch {
+    fallbackOrders.unshift(order);
+    return { source: "fallback" as const };
+  }
+}
+
 function buildDashboard(
   role: DashboardRole,
   restaurants: RestaurantRecord[],
@@ -1420,6 +1486,45 @@ export function createApp() {
     }
   });
 
+  app.post("/api/orders", async (request: Request, response: Response) => {
+    try {
+      const body = request.body as {
+        restaurantId: number;
+        restaurantName?: string;
+        customerIdentifier?: string;
+        items: Array<{ name: string; quantity: number; price: number }>;
+        address: string;
+        contactNumber: string;
+        notes?: string;
+      };
+
+      if (!body || !Array.isArray(body.items) || body.items.length === 0) {
+        response.status(400).json({ message: "Invalid order payload." });
+        return;
+      }
+
+      const total = body.items.reduce((s, i) => s + (i.price || 0) * (i.quantity || 1), 0);
+      const nextOrder: OrderRecord = {
+        id: Date.now(),
+        restaurantId: Number(body.restaurantId || 0),
+        restaurantName: body.restaurantName || "",
+        customerIdentifier: normalizeEmpty(body.customerIdentifier) || "guest",
+        items: body.items.map((it) => ({ name: it.name, quantity: Number(it.quantity || 1), price: Number(it.price || 0) })),
+        total,
+        status: "placed",
+        address: normalizeEmpty(body.address),
+        contactNumber: normalizeEmpty(body.contactNumber),
+        notes: normalizeEmpty(body.notes),
+        createdAt: new Date().toISOString(),
+      };
+
+      const result = await saveOrder(nextOrder);
+      response.status(201).json({ message: "Order placed.", order: nextOrder, source: result.source });
+    } catch (err) {
+      response.status(500).json({ message: "Unable to place order right now." });
+    }
+  });
+
   app.get("/api/dashboard/:role", async (request: Request, response: Response) => {
     const role = request.params.role as DashboardRole;
 
@@ -1444,12 +1549,25 @@ export function createApp() {
         users = fallbackPlatformUsers;
       }
     }
+    // include active orders count when available
+    let ordersCount = 0;
+    try {
+      const orderResult = await loadOrders();
+      ordersCount = orderResult.orders.length;
+    } catch {
+      ordersCount = fallbackOrders.length;
+    }
 
     const riderResult = role === "delivery" || role === "platform" ? await loadRiderProfiles() : { profiles: fallbackRiderProfiles, source: "fallback" as const };
     const restaurantProfileResult = role === "restaurant" || role === "platform" ? await loadRestaurantProfiles() : { profiles: fallbackRestaurantProfiles, source: "fallback" as const };
     const menuResult = role === "restaurant" || role === "platform" ? await loadMenuItems() : { items: fallbackMenuItems, source: "fallback" as const };
 
-    response.json(buildDashboard(role, restaurantResult.restaurants, users, riderResult.profiles, restaurantProfileResult.profiles, menuResult.items, fallbackRestaurantCategories));
+    const dashboard = buildDashboard(role, restaurantResult.restaurants, users, riderResult.profiles, restaurantProfileResult.profiles, menuResult.items, fallbackRestaurantCategories);
+    if ((dashboard as any).totals) {
+      (dashboard as any).totals.activeOrders = ordersCount;
+    }
+
+    response.json(dashboard);
   });
 
   app.post("/api/auth/login", async (request: Request, response: Response) => {

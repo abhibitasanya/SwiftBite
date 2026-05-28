@@ -2,7 +2,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;900&display=swap');
 
 :root {
-  --background: #f6f3e8;
+  --background: #f7efe3;
   --foreground: #182118;
 }
 
@@ -15,10 +15,10 @@
 
 html {
   background:
-    radial-gradient(circle at top left, rgba(70, 93, 63, 0.12), transparent 20%),
-    radial-gradient(circle at 80% 12%, rgba(118, 134, 104, 0.1), transparent 16%),
-    radial-gradient(circle at 18% 84%, rgba(101, 118, 92, 0.06), transparent 18%),
-    linear-gradient(180deg, #f8f5ed 0%, #f1eedf 50%, #e8e2d1 100%);
+    radial-gradient(circle at top left, rgba(70, 93, 63, 0.08), transparent 20%),
+    radial-gradient(circle at 80% 12%, rgba(118, 134, 104, 0.06), transparent 16%),
+    radial-gradient(circle at 18% 84%, rgba(101, 118, 92, 0.04), transparent 18%),
+    linear-gradient(180deg, #fbf5ee 0%, #f7efe3 50%, #efe6d0 100%);
   color-scheme: light;
 }
 

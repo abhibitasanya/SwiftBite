@@ -1164,6 +1164,33 @@ export function AuthLanding() {
     };
   }, [apiBaseUrl, selectedRole]);
 
+  // Poll dashboard periodically while on the dashboard to show realtime changes
+  useEffect(() => {
+    let intervalId: number | null = null;
+
+    async function fetchDashboard() {
+      try {
+        const response = await fetch(`${apiBaseUrl}/api/dashboard/${selectedRole}`);
+        if (!response.ok) return;
+        const payload = await response.json();
+        setDashboardData(payload);
+      } catch {
+        // ignore
+      }
+    }
+
+    if (stage === "dashboard") {
+      // initial fetch
+      fetchDashboard();
+      // poll every 6 seconds
+      intervalId = window.setInterval(fetchDashboard, 6000);
+    }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [apiBaseUrl, selectedRole, stage]);
+
   useEffect(() => {
     const rootId = "swiftbite-chatbot-root";
     let mountPoint = document.getElementById(rootId) as HTMLDivElement | null;
@@ -1196,6 +1223,45 @@ export function AuthLanding() {
   function openRestaurantCheckout() {
     setIsRestaurantCartOpen(false);
     setStage("checkout");
+  }
+
+  async function placeOrder() {
+    if (!selectedRestaurantId || restaurantMenuCart.length === 0) {
+      setStatusMessage("Add items to cart before placing an order.");
+      return;
+    }
+
+    const payload = {
+      restaurantId: selectedRestaurantId,
+      restaurantName: dashboard?.restaurants?.find((r: any) => r.id === selectedRestaurantId)?.name ?? "",
+      customerIdentifier: identifier || "guest",
+      items: restaurantMenuCart.map((it) => ({ name: it.name, quantity: it.quantity, price: it.price })),
+      address: deliveryAddress,
+      contactNumber,
+      notes: riderNotes,
+    };
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/orders`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        setStatusMessage(body.message ?? "Unable to place order.");
+        return;
+      }
+
+      const result = await response.json();
+      setStatusMessage(result.message ?? "Order placed.");
+      setRestaurantMenuCart([]);
+      setIsRestaurantCartOpen(false);
+      setStage("dashboard");
+    } catch (err) {
+      setStatusMessage("Network error placing order.");
+    }
   }
 
   function getMenuPrice(restaurantId: number, dishIndex: number) {
@@ -2466,7 +2532,7 @@ export function AuthLanding() {
               <button type="button" onClick={() => setStage("restaurant-menu")} className="rounded-full border border-[#6a8160]/45 bg-[#f4efe4] px-5 py-3 text-sm font-semibold text-[#354033]">
                 Edit cart
               </button>
-              <button type="button" onClick={() => setStage("dashboard")} className="rounded-full bg-[#223326] px-5 py-3 text-sm font-semibold text-[#f5f1e7]">
+              <button type="button" onClick={placeOrder} className="rounded-full bg-[#223326] px-5 py-3 text-sm font-semibold text-[#f5f1e7]">
                 Place order
               </button>
             </div>
@@ -2503,8 +2569,15 @@ export function AuthLanding() {
                 <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#4f6750]">Total</p>
                 <span className="text-lg font-black text-[#1f2b21]">₹{restaurantMenuSubtotal.toFixed(0)}</span>
               </div>
-              <button type="button" className="mt-4 w-full rounded-full bg-[#223326] px-5 py-3 text-sm font-semibold text-[#f5f8f1]">
-                Confirm and send to rider
+              <button
+                type="button"
+                onClick={() => {
+                  setStage("dashboard");
+                  setStatusMessage("Order confirmed.");
+                }}
+                className="mt-4 w-full rounded-full bg-[#223326] px-5 py-3 text-sm font-semibold text-[#f5f8f1]"
+              >
+                Confirm order
               </button>
             </div>
           </SoftScreen>
@@ -2532,14 +2605,14 @@ export function AuthLanding() {
 
     return (
       <main
-        className="relative h-[100dvh] overflow-hidden px-3 text-[#243025] sm:px-6 lg:px-8"
+        className="relative h-[100dvh] overflow-x-hidden px-3 text-[#243025] sm:px-6 lg:px-8"
         style={{
           paddingTop: "max(0.7rem, env(safe-area-inset-top))",
           paddingBottom: "max(0.7rem, env(safe-area-inset-bottom))",
         }}
       >
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(48,72,49,0.18),_transparent_22%),radial-gradient(circle_at_78%_10%,_rgba(111,135,92,0.16),_transparent_18%),radial-gradient(circle_at_50%_55%,_rgba(255,252,243,0.24),_transparent_42%),linear-gradient(180deg,_#f1eddc_0%,_#e4dcc5_46%,_#d8d0b4_100%)]" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.16),transparent_58%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,#efe6d0_0%,#e7dcc0_100%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.12),transparent_58%)]" />
 
         <section className={`relative mx-auto flex h-full w-full max-w-7xl flex-col ${isCompactLayout ? "gap-2.5" : "gap-3 lg:gap-4"}`}>
           <header className={`flex gap-3 ${isCompactLayout ? "flex-col items-start" : "items-start justify-between gap-4"}`}>
@@ -2597,12 +2670,13 @@ export function AuthLanding() {
                             type="button"
                             onClick={() => chooseRole(card.id)}
                             className={`
-                              relative h-[240px] w-[420px]
+                              relative h-[250px] w-[420px]
                               overflow-hidden rounded-[2rem]
                               border transition-all duration-500
+                              transform-gpu will-change-transform
                               ${isActive
-                                ? "border-[#88a07e] bg-[#eef5e7] shadow-[0_30px_80px_rgba(74,93,62,0.24)]"
-                                : "border-[#d9dfd2] bg-[#f8f8f3] shadow-[0_12px_32px_rgba(0,0,0,0.08)]"}
+                                ? "border-[#88a07e] bg-[#eef5e7] shadow-[0_36px_96px_rgba(74,93,62,0.28)]"
+                                : "border-[#d9dfd2] bg-[#f8f8f3] shadow-[0_16px_40px_rgba(0,0,0,0.10)]"}
                             `}
                           >
 
@@ -2918,12 +2992,13 @@ export function AuthLanding() {
                 </label>
 
                 <label className="block space-y-1.5">
-                  <span className="text-[13px] font-medium text-[#243025]">Password</span>
+                  <span className="text-[13px] font-medium text-[#243025]">Password (min 6 characters needed)</span>
                   <input
                     type="password"
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
                     placeholder="Password"
+                    minLength={6}
                     className="w-full rounded-[1.05rem] border border-white/55 bg-white/74 px-4 py-2 text-[#243025] outline-none placeholder:text-[#8a927f] focus:border-[#5f7a4a]/75 focus:ring-2 focus:ring-[#5f7a4a]/12 backdrop-blur-sm"
                   />
                 </label>
@@ -2936,6 +3011,7 @@ export function AuthLanding() {
                       value={confirmPassword}
                       onChange={(event) => setConfirmPassword(event.target.value)}
                       placeholder="Repeat password"
+                      minLength={6}
                       className="w-full rounded-[1.05rem] border border-white/55 bg-white/74 px-4 py-2 text-[#1f2b21] outline-none placeholder:text-[#7f8a7a] focus:border-[#5f7a4a]/75 focus:ring-2 focus:ring-[#5f7a4a]/12 backdrop-blur-sm"
                     />
                   </label>
