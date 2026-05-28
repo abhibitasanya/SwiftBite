@@ -1233,7 +1233,14 @@ export function AuthLanding() {
 
     const payload = {
       restaurantId: selectedRestaurantId,
-      restaurantName: dashboard?.restaurants?.find((r: any) => r.id === selectedRestaurantId)?.name ?? "",
+      // `dashboard` is a union type - only some variants include `restaurants`.
+      // Safely derive a restaurant list: prefer dashboard restaurants when present,
+      // otherwise fall back to the UI fallback list.
+      restaurantName: (
+        ((dashboard && (dashboard as any).restaurants) ?? fallbackRestaurantsForUi)
+          .find((r: any) => r.id === selectedRestaurantId)
+          ?.name ?? ""
+      ,
       customerIdentifier: identifier || "guest",
       items: restaurantMenuCart.map((it) => ({ name: it.name, quantity: it.quantity, price: it.price })),
       address: deliveryAddress,
