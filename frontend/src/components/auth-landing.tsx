@@ -675,6 +675,9 @@ export function AuthLanding() {
   const [isBooting, setIsBooting] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [viewportWidth, setViewportWidth] = useState(1280);
+  const [viewportHeight, setViewportHeight] = useState(900);
+  const [isStandaloneMode, setIsStandaloneMode] = useState(false);
   const [chatInput, setChatInput] = useState("");
   const [isChatSending, setIsChatSending] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
@@ -712,6 +715,29 @@ export function AuthLanding() {
   useEffect(() => {
     window.localStorage.setItem("swiftbite.loginMode", loginMode);
   }, [loginMode]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const media = window.matchMedia("(display-mode: standalone)");
+
+    const updateViewport = () => {
+      setViewportWidth(window.innerWidth);
+      setViewportHeight(window.innerHeight);
+      setIsStandaloneMode(media.matches || Boolean((window.navigator as Navigator & { standalone?: boolean }).standalone));
+    };
+
+    updateViewport();
+    window.addEventListener("resize", updateViewport);
+    media.addEventListener("change", updateViewport);
+
+    return () => {
+      window.removeEventListener("resize", updateViewport);
+      media.removeEventListener("change", updateViewport);
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -1565,19 +1591,41 @@ export function AuthLanding() {
   }
 
   if (stage === "role") {
-    return (
-      <main className="relative h-[100svh] overflow-hidden px-4 py-4 text-[#243025] sm:px-6 sm:py-6 lg:px-8">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
+    const isPhoneViewport = viewportWidth < 640;
+    const isTabletViewport = viewportWidth >= 640 && viewportWidth < 1024;
+    const isCompactHeight = viewportHeight < 760;
+    const isCompactLayout = isPhoneViewport || (isStandaloneMode && viewportWidth < 820);
+    const roleShellMaxWidth = isCompactLayout ? "max-w-[26.5rem]" : isTabletViewport ? "max-w-[46rem]" : "max-w-[62rem]";
+    const roleShellPadding = isCompactLayout ? "px-8" : isTabletViewport ? "px-12" : "px-12 sm:px-16";
+    const roleStackHeight = isCompactLayout ? "h-[12.8rem]" : isTabletViewport ? "h-[14.2rem]" : "h-[15.5rem] sm:h-[16.2rem] lg:h-[16.8rem]";
+    const roleHeadingSize = isCompactLayout ? "text-3xl sm:text-4xl" : "text-4xl sm:text-5xl lg:text-[4.1rem]";
+    const roleTitleSize = isCompactLayout ? "text-[1rem] sm:text-[1.08rem]" : "text-[1.2rem] sm:text-[1.35rem]";
+    const roleSubtitleSize = isCompactLayout ? "text-[11px] sm:text-[12px]" : "text-[12px] sm:text-[13px]";
+    const roleCardPadding = isCompactLayout ? "p-2.5 sm:p-3" : "p-3.5 sm:p-4";
+    const arrowSize = isCompactLayout ? "h-11 w-11" : "h-14 w-14";
+    const arrowOffset = isCompactLayout ? "left-0" : "-left-2 sm:-left-3";
+    const rightArrowOffset = isCompactLayout ? "right-0" : "-right-2 sm:-right-3";
 
-        <section className="relative mx-auto flex h-full w-full max-w-7xl flex-col gap-3 lg:gap-4">
-          <header className="flex items-start justify-between gap-4">
+    return (
+      <main
+        className="relative h-[100dvh] overflow-hidden px-3 text-[#243025] sm:px-6 lg:px-8"
+        style={{
+          paddingTop: "max(0.7rem, env(safe-area-inset-top))",
+          paddingBottom: "max(0.7rem, env(safe-area-inset-bottom))",
+        }}
+      >
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(48,72,49,0.18),_transparent_22%),radial-gradient(circle_at_78%_10%,_rgba(111,135,92,0.16),_transparent_18%),radial-gradient(circle_at_50%_55%,_rgba(255,252,243,0.24),_transparent_42%),linear-gradient(180deg,_#f1eddc_0%,_#e4dcc5_46%,_#d8d0b4_100%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.16),transparent_58%)]" />
+
+        <section className={`relative mx-auto flex h-full w-full max-w-7xl flex-col ${isCompactLayout ? "gap-2.5" : "gap-3 lg:gap-4"}`}>
+          <header className={`flex gap-3 ${isCompactLayout ? "flex-col items-start" : "items-start justify-between gap-4"}`}>
             <div className="max-w-3xl">
               <p className="text-[11px] font-black uppercase tracking-[0.34em] text-[#6b7864] sm:text-[12px]">SwiftBite setup</p>
-              <h1 className="mt-1.5 text-4xl font-black tracking-[-0.08em] text-[#182118] sm:text-5xl lg:text-[4.1rem]">Choose your role</h1>
+              <h1 className={`mt-1.5 font-black tracking-[-0.08em] text-[#182118] ${roleHeadingSize}`}>Choose your role</h1>
               <p className="mt-2 max-w-2xl text-[14px] leading-6 text-[#6a7463] sm:text-[15px]">Select the profile you want to use. The next screen will show login or register for that role.</p>
             </div>
 
-            <div className="flex shrink-0 items-center gap-2.5 sm:gap-3">
+            <div className={`flex shrink-0 items-center ${isCompactLayout ? "gap-2" : "gap-2.5 sm:gap-3"}`}>
               <PwaInstallButton />
               <div className="rounded-full border border-[#cfd9c7] bg-[#eef2e4] px-4 py-1.5 text-[11px] font-black uppercase tracking-[0.28em] text-[#425142] shadow-[0_8px_18px_rgba(37,46,34,0.06)]">
                 Step 1 of 2
@@ -1585,29 +1633,69 @@ export function AuthLanding() {
             </div>
           </header>
 
-          <div className="flex min-h-0 flex-1 items-center justify-center py-1">
-            <div className="relative flex w-full max-w-[62rem] items-center justify-center px-12 sm:px-16">
-              <div className="pointer-events-none absolute inset-x-10 top-1/2 h-[15rem] -translate-y-1/2 rounded-[3rem] bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.46),rgba(243,239,227,0.1)_72%,transparent_100%)] blur-3xl" />
+          <div className={`flex min-h-0 flex-1 items-center justify-center ${isCompactLayout ? "py-0.5" : "py-1"}`}>
+            <div className={`relative flex w-full ${roleShellMaxWidth} items-center justify-center ${roleShellPadding}`}>
+              <div className={`pointer-events-none absolute top-1/2 -translate-y-1/2 rounded-[3rem] bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.46),rgba(243,239,227,0.1)_72%,transparent_100%)] blur-3xl ${isCompactLayout ? "inset-x-4 h-[10.4rem]" : "inset-x-10 h-[15rem]"}`} />
 
-              <button type="button" onClick={() => cycleRole("left")} className="group absolute -left-2 top-1/2 z-50 flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full border border-[#9aaf91] bg-[#24361f] text-[#f7f4ea] shadow-[0_16px_34px_rgba(25,39,24,0.28)] transition hover:-translate-y-1/2 hover:bg-[#314a29] hover:shadow-[0_20px_42px_rgba(25,39,24,0.34)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#24361f] focus-visible:ring-offset-2 focus-visible:ring-offset-[#f2f0e5] sm:-left-3" aria-label="Previous role">
+              <button type="button" onClick={() => cycleRole("left")} className={`group absolute top-1/2 z-50 flex ${arrowSize} -translate-y-1/2 items-center justify-center rounded-full border border-[#9aaf91] bg-[#24361f] text-[#f7f4ea] shadow-[0_16px_34px_rgba(25,39,24,0.28)] transition hover:-translate-y-1/2 hover:bg-[#314a29] hover:shadow-[0_20px_42px_rgba(25,39,24,0.34)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#24361f] focus-visible:ring-offset-2 focus-visible:ring-offset-[#f2f0e5] ${arrowOffset}`} aria-label="Previous role">
                 <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 fill-none stroke-current stroke-[2.5] transition group-hover:-translate-x-0.5">
                   <path d="M15 5l-7 7 7 7" />
                 </svg>
               </button>
 
-              <div className="relative h-[15.5rem] w-full overflow-visible sm:h-[16.2rem] lg:h-[16.8rem]">
+              <div className={`relative w-full overflow-visible ${roleStackHeight}`}>
               {roleWheelCards.map(({ card, offset }) => {
                 const absOffset = Math.abs(offset);
                 const isSelected = selectedRole === card.id;
-                const translateX = absOffset === 2 ? "0%" : `${offset * 36}%`;
-                const translateY = isSelected ? "-4px" : absOffset === 2 ? "-68px" : "4px";
-                const scale = isSelected ? 1 : absOffset === 2 ? 0.88 : 0.94;
+                const translateX = isCompactLayout
+                  ? absOffset === 0
+                    ? "0%"
+                    : absOffset === 1
+                      ? `${offset * 13}%`
+                      : "0%"
+                  : absOffset === 2
+                    ? "0%"
+                    : `${offset * 36}%`;
+                const translateY = isCompactLayout
+                  ? isSelected
+                    ? "-2px"
+                    : absOffset === 1
+                      ? "3px"
+                      : "-38px"
+                  : isSelected
+                    ? "-4px"
+                    : absOffset === 2
+                      ? "-68px"
+                      : "4px";
+                const scale = isCompactLayout
+                  ? isSelected
+                    ? 1.03
+                    : absOffset === 1
+                      ? 0.92
+                      : 0.82
+                  : isSelected
+                    ? 1.02
+                    : absOffset === 2
+                      ? 0.88
+                      : 0.94;
                 const zIndex = isSelected ? 40 : absOffset === 2 ? 10 : 22 - absOffset;
-                const opacity = absOffset === 2 ? 0.72 : 1;
-                const cardBg = isSelected ? "rgba(220,232,207,0.98)" : "rgba(247,247,241,0.92)";
-                const cardBorder = isSelected ? "#9eb08a" : "#cfd7c4";
-                const boxShadow = isSelected ? "0 30px 78px rgba(27,43,24,0.22)" : "0 18px 38px rgba(27,43,24,0.12)";
-                const width = isSelected ? "clamp(20rem, 50vw, 38rem)" : absOffset === 2 ? "clamp(15rem, 38vw, 30rem)" : "clamp(14rem, 34vw, 26rem)";
+                const opacity = isCompactLayout ? (absOffset >= 2 ? 0 : absOffset === 1 ? 0.65 : 1) : absOffset === 2 ? 0.72 : 1;
+                const cardBg = isSelected
+                  ? "linear-gradient(180deg,rgba(252,255,248,0.96) 0%,rgba(223,236,210,0.88) 100%)"
+                  : "linear-gradient(180deg,rgba(250,248,241,0.78) 0%,rgba(238,243,231,0.66) 100%)";
+                const cardBorder = isSelected ? "rgba(134,156,112,0.84)" : "rgba(170,183,157,0.62)";
+                const boxShadow = isSelected
+                  ? "0 28px 72px rgba(31,49,24,0.26), 0 0 0 1px rgba(120,144,100,0.12), inset 0 1px 0 rgba(255,255,255,0.58)"
+                  : "0 18px 40px rgba(31,49,24,0.13), 0 0 0 1px rgba(136,152,120,0.08), inset 0 1px 0 rgba(255,255,255,0.52)";
+                const width = isCompactLayout
+                  ? isSelected
+                    ? "min(88vw, 22rem)"
+                    : "min(72vw, 18.5rem)"
+                  : isSelected
+                    ? "clamp(20rem, 50vw, 38rem)"
+                    : absOffset === 2
+                      ? "clamp(15rem, 38vw, 30rem)"
+                      : "clamp(14rem, 34vw, 26rem)";
 
                 return (
                   <button
@@ -1616,7 +1704,7 @@ export function AuthLanding() {
                     onClick={() => {
                       chooseRole(card.id);
                     }}
-                    className="absolute left-1/2 top-1/2 transform-gpu rounded-[1.75rem] border p-3.5 text-left transition-all sm:p-4"
+                    className={`absolute left-1/2 top-1/2 transform-gpu rounded-[1.75rem] border text-left backdrop-blur-[12px] transition-all ${roleCardPadding}`}
                     style={{
                       transform: `translateX(${translateX}) translateY(calc(-50% + ${translateY})) scale(${scale})`,
                       zIndex,
@@ -1629,34 +1717,34 @@ export function AuthLanding() {
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <p className="text-[1.2rem] font-black tracking-[-0.05em] text-[#112514] sm:text-[1.35rem]">{card.title}</p>
-                        <p className="mt-0.5 text-[12px] text-[#5c6a59] sm:text-[13px]">{card.subtitle}</p>
+                        <p className={`font-black tracking-[-0.05em] text-[#112514] ${roleTitleSize}`}>{card.title}</p>
+                        <p className={`mt-0.5 text-[#5c6a59] ${roleSubtitleSize}`}>{card.subtitle}</p>
                       </div>
                       {isSelected ? (
                         <span className="rounded-full bg-[#254b34] px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.18em] text-white shadow-[0_8px_18px_rgba(37,46,34,0.18)]">Selected</span>
                       ) : null}
                     </div>
 
-                    <div className="mt-2.5 rounded-[1rem] border border-[#dce3d4] bg-white/95 p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+                    <div className={`rounded-[1rem] border border-white/70 bg-[rgba(255,255,252,0.92)] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_8px_18px_rgba(42,59,29,0.06)] ${isCompactLayout ? "mt-2 p-2" : "mt-2.5 p-2.5"}`}>
                       <div className="flex items-start justify-between gap-3">
-                        <div className="space-y-2">
-                          <div className="h-2 w-24 rounded-full bg-[#d5ded0]" />
-                          <div className="h-2 w-16 rounded-full bg-[#e2e8dc]" />
-                          <div className="h-2 w-20 rounded-full bg-[#d5ded0]" />
+                        <div className={`space-y-${isCompactLayout ? "1.5" : "2"}`}>
+                          <div className={`${isCompactLayout ? "h-1.5 w-20" : "h-2 w-24"} rounded-full bg-[#d5ded0]`} />
+                          <div className={`${isCompactLayout ? "h-1.5 w-14" : "h-2 w-16"} rounded-full bg-[#e2e8dc]`} />
+                          <div className={`${isCompactLayout ? "h-1.5 w-16" : "h-2 w-20"} rounded-full bg-[#d5ded0]`} />
                         </div>
-                        <div className="h-12 w-12 rounded-[0.9rem] bg-[radial-gradient(circle_at_35%_35%,rgba(181,194,159,0.96),rgba(125,145,99,0.92))] shadow-[inset_0_1px_1px_rgba(255,255,255,0.25),0_10px_24px_rgba(75,95,60,0.22)]" />
+                        <div className={`${isCompactLayout ? "h-10 w-10 rounded-[0.75rem]" : "h-12 w-12 rounded-[0.9rem]"} bg-[radial-gradient(circle_at_35%_35%,rgba(181,194,159,0.96),rgba(125,145,99,0.92))] shadow-[inset_0_1px_1px_rgba(255,255,255,0.25),0_10px_24px_rgba(75,95,60,0.22)]`} />
                       </div>
                     </div>
 
-                    <div className="mt-2.5 flex items-center justify-between text-[9px] font-black uppercase tracking-[0.24em] text-[#72836b]">
+                    <div className={`flex items-center justify-between font-black uppercase text-[#72836b] ${isCompactLayout ? "mt-2 text-[8px] tracking-[0.2em]" : "mt-2.5 text-[9px] tracking-[0.24em]"}`}>
                       <span>Preview</span>
-                      <span className="rounded-full bg-[#dde7d2] px-2.5 py-0.5 tracking-[0.14em] text-[#59704f]">Swipe card</span>
+                      <span className={`rounded-full bg-[#dde7d2] text-[#59704f] ${isCompactLayout ? "px-2 py-0.5 tracking-[0.1em]" : "px-2.5 py-0.5 tracking-[0.14em]"}`}>Swipe card</span>
                     </div>
                   </button>
                 );
               })}
 
-              <button type="button" onClick={() => cycleRole("right")} className="group absolute -right-2 top-1/2 z-50 flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full border border-[#9aaf91] bg-[#24361f] text-[#f7f4ea] shadow-[0_16px_34px_rgba(25,39,24,0.28)] transition hover:-translate-y-1/2 hover:bg-[#314a29] hover:shadow-[0_20px_42px_rgba(25,39,24,0.34)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#24361f] focus-visible:ring-offset-2 focus-visible:ring-offset-[#f2f0e5] sm:-right-3" aria-label="Next role">
+              <button type="button" onClick={() => cycleRole("right")} className={`group absolute top-1/2 z-50 flex ${arrowSize} -translate-y-1/2 items-center justify-center rounded-full border border-[#9aaf91] bg-[#24361f] text-[#f7f4ea] shadow-[0_16px_34px_rgba(25,39,24,0.28)] transition hover:-translate-y-1/2 hover:bg-[#314a29] hover:shadow-[0_20px_42px_rgba(25,39,24,0.34)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#24361f] focus-visible:ring-offset-2 focus-visible:ring-offset-[#f2f0e5] ${rightArrowOffset}`} aria-label="Next role">
                 <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 fill-none stroke-current stroke-[2.5] transition group-hover:translate-x-0.5">
                   <path d="M9 5l7 7-7 7" />
                 </svg>
@@ -1665,10 +1753,10 @@ export function AuthLanding() {
           </div>
         </div>
 
-          <footer className="border-t border-[#dfe6d7] pt-3 sm:pt-4">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <footer className={`border-t border-[#dfe6d7] ${isCompactLayout ? "pt-2.5" : "pt-3 sm:pt-4"}`}>
+            <div className={`flex flex-col sm:flex-row sm:items-end sm:justify-between ${isCompactLayout ? "gap-2.5" : "gap-4"}`}>
               <p className="text-[14px] text-[#6a7463] sm:text-sm">Continue as <strong className="font-semibold text-[#243025]">{selectedRoleCard.title}</strong>.</p>
-              <button type="button" onClick={() => { setStage("login"); switchAuthMode("login"); }} className="ml-auto rounded-full bg-[#223326] px-5 py-3 text-sm font-semibold text-[#f5f8f1] shadow-[0_12px_28px_rgba(35,49,34,0.18)] transition hover:bg-[#1a291e] sm:mr-0">Next</button>
+              <button type="button" onClick={() => { setStage("login"); switchAuthMode("login"); }} className={`ml-auto rounded-full bg-[#223326] text-sm font-semibold text-[#f5f8f1] shadow-[0_12px_28px_rgba(35,49,34,0.18)] transition hover:bg-[#1a291e] sm:mr-0 ${isCompactLayout ? "px-4 py-2.5" : "px-5 py-3"}`}>Next</button>
             </div>
           </footer>
 
