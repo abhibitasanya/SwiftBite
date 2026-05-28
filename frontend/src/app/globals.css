@@ -3,7 +3,7 @@
 
 :root {
   /* Deeper moss-green page background only (cards and inside styles untouched) */
-  --background: #9fbf9a;
+  --background: #88ad83;
   --foreground: #182118;
 }
 
@@ -16,10 +16,10 @@
 
 html {
   background:
-    radial-gradient(circle at top left, rgba(63, 90, 61, 0.26), transparent 20%),
-    radial-gradient(circle at 80% 12%, rgba(111, 135, 100, 0.22), transparent 16%),
-    radial-gradient(circle at 18% 84%, rgba(101, 118, 92, 0.18), transparent 18%),
-    linear-gradient(180deg, #e9f5ea 0%, #9fbf9a 50%, #88b685 100%);
+    radial-gradient(circle at top left, rgba(63, 90, 61, 0.30), transparent 20%),
+    radial-gradient(circle at 80% 12%, rgba(111, 135, 100, 0.26), transparent 16%),
+    radial-gradient(circle at 18% 84%, rgba(101, 118, 92, 0.22), transparent 18%),
+    linear-gradient(180deg, #dcebd8 0%, #88ad83 50%, #709a6b 100%);
   color-scheme: light;
 }
 
