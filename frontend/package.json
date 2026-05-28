@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "generate:branding": "node ./scripts/generate-brand-assets.mjs",
+    "predev": "npm run generate:branding",
+    "prebuild": "npm run generate:branding",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
