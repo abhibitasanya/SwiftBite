@@ -2321,17 +2321,17 @@ export function AuthLanding() {
     const isTabletViewport = viewportWidth >= 640 && viewportWidth < 1024;
     const isCompactHeight = viewportHeight < 760;
     const isCompactLayout = isPhoneViewport || (isStandaloneMode && viewportWidth < 820);
-    const roleShellMaxWidth = isCompactLayout ? "max-w-[26.5rem]" : isTabletViewport ? "max-w-[44rem]" : "max-w-[58rem]";
-    const roleShellPadding = isCompactLayout ? "px-8" : isTabletViewport ? "px-10" : "px-10 sm:px-12";
-    const roleStackHeight = isCompactLayout ? "h-[12.8rem]" : isTabletViewport ? "h-[14.2rem]" : "h-[15.5rem] sm:h-[16.2rem] lg:h-[16.8rem]";
+    const roleShellMaxWidth = isCompactLayout ? "max-w-[26.5rem]" : isTabletViewport ? "max-w-[36rem]" : "max-w-[38rem]";
+    const roleShellPadding = isCompactLayout ? "px-8" : isTabletViewport ? "px-6" : "px-4 sm:px-6";
+    const roleStackHeight = isCompactLayout ? "h-[12.8rem]" : isTabletViewport ? "h-[13.2rem]" : "h-[13.4rem] sm:h-[13.8rem] lg:h-[14rem]";
     const roleHeadingSize = isCompactLayout ? "text-3xl sm:text-4xl" : "text-4xl sm:text-5xl lg:text-[4.1rem]";
     const roleTitleSize = isCompactLayout ? "text-[1rem] sm:text-[1.08rem]" : "text-[1.2rem] sm:text-[1.35rem]";
     const roleSubtitleSize = isCompactLayout ? "text-[11px] sm:text-[12px]" : "text-[12px] sm:text-[13px]";
     const roleCardPadding = isCompactLayout ? "p-2.5 sm:p-3" : "p-3.5 sm:p-4";
-    const arrowSize = isCompactLayout ? "h-11 w-11" : "h-14 w-14";
-    const arrowOffset = isCompactLayout ? "left-0" : "-left-2 sm:-left-3";
-    const rightArrowOffset = isCompactLayout ? "right-0" : "-right-2 sm:-right-3";
-    const stackNudgeX = isCompactLayout ? "0%" : "-4%";
+    const arrowSize = isCompactLayout ? "h-11 w-11" : "h-13 w-13";
+    const arrowOffset = isCompactLayout ? "left-0" : "-left-1.5 sm:-left-2.5";
+    const rightArrowOffset = isCompactLayout ? "right-0" : "-right-1.5 sm:-right-2.5";
+    const stackNudgeX = isCompactLayout ? "0%" : "0%";
 
     return (
       <main
@@ -2380,9 +2380,9 @@ export function AuthLanding() {
                       : absOffset === 1
                         ? `${offset * 12}%`
                         : "0%"
-                  : absOffset === 2
+                    : absOffset === 2
                       ? "0%"
-                      : `${offset * 32}%`;
+                      : `${offset * 18}%`;
                 const translateY = isCompactLayout
                   ? isSelected
                     ? "-2px"
@@ -2390,10 +2390,10 @@ export function AuthLanding() {
                       ? "3px"
                       : "-38px"
                   : isSelected
-                    ? "-4px"
+                    ? "-2px"
                     : absOffset === 2
-                      ? "-68px"
-                      : "4px";
+                      ? "-34px"
+                      : "2px";
                 const scale = isCompactLayout
                   ? isSelected
                     ? 1.03
@@ -2403,10 +2403,10 @@ export function AuthLanding() {
                   : isSelected
                     ? 1.02
                     : absOffset === 2
-                      ? 0.88
-                      : 0.94;
+                      ? 0.9
+                      : 0.95;
                 const zIndex = isSelected ? 40 : absOffset === 2 ? 10 : 22 - absOffset;
-                const opacity = isCompactLayout ? (absOffset >= 2 ? 0 : absOffset === 1 ? 0.65 : 1) : absOffset === 2 ? 0.72 : 1;
+                const opacity = isCompactLayout ? (absOffset >= 2 ? 0 : absOffset === 1 ? 0.65 : 1) : absOffset === 2 ? 0.78 : 1;
                 const cardBg = isSelected
                   ? "linear-gradient(180deg,rgba(252,255,248,0.96) 0%,rgba(223,236,210,0.88) 100%)"
                   : "linear-gradient(180deg,rgba(250,248,241,0.78) 0%,rgba(238,243,231,0.66) 100%)";
@@ -2419,10 +2419,10 @@ export function AuthLanding() {
                     ? "min(88vw, 22rem)"
                     : "min(72vw, 18.5rem)"
                   : isSelected
-                    ? "clamp(18.5rem, 46vw, 36rem)"
+                    ? "clamp(17.5rem, 38vw, 27.5rem)"
                     : absOffset === 2
-                      ? "clamp(13rem, 30vw, 24rem)"
-                      : "clamp(12.5rem, 28vw, 23rem)";
+                      ? "clamp(12.5rem, 23vw, 20rem)"
+                      : "clamp(12rem, 22vw, 19rem)";
 
                 return (
                   <button
