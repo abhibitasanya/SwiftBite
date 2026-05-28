@@ -3,6 +3,6 @@ services:
     name: swiftbite-backend
     env: node
     rootDir: backend
-    buildCommand: npm install && npm run build
+    buildCommand: NODE_OPTIONS=--max_old_space_size=4096 npm install && NODE_OPTIONS=--max_old_space_size=4096 npm run build
     startCommand: npm start
     plan: free
