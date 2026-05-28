@@ -1531,10 +1531,16 @@ export function AuthLanding() {
                 <div className="relative mx-2 h-[18rem] w-[min(86vw,58rem)] overflow-visible">
                   {roleWheelCards.map(({ card, offset }) => {
                     const absOffset = Math.abs(offset);
-                    const translateX = `${offset * 38}%`;
-                    const scale = offset === 0 ? 1 : 0.86 - Math.min(absOffset - 1, 1) * 0.06;
-                    const zIndex = 20 - absOffset;
-                    const opacity = absOffset > 1 ? 0.35 : 1 - absOffset * 0.15;
+                    const translateX = `${offset * 42}%`;
+                    const rotate = `${offset * -8}deg`;
+                    const scale = offset === 0 ? 1 : Math.max(0.74, 0.92 - absOffset * 0.12);
+                    const zIndex = 30 - absOffset;
+                    const opacity = absOffset > 2 ? 0.18 : absOffset > 1 ? 0.55 : 1;
+                    const isSelected = selectedRole === card.id;
+                    const cardBg = isSelected ? "#eaf3e6" : "#ffffff";
+                    const cardBorder = isSelected ? "#cfe6d1" : "#eef1ea";
+                    const boxShadow = isSelected ? "0 40px 90px rgba(34,51,34,0.12)" : "0 18px 44px rgba(37,46,34,0.08)";
+                    const width = isSelected ? "min(62%, 42rem)" : absOffset <= 1 ? "min(46%, 34rem)" : "min(36%, 28rem)";
 
                     return (
                       <button
@@ -1543,21 +1549,24 @@ export function AuthLanding() {
                         onClick={() => {
                           chooseRole(card.id);
                         }}
-                        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform-gpu rounded-[1.6rem] border p-6 shadow-[0_24px_60px_rgba(37,46,34,0.12)] bg-white text-left transition-all"
+                        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform-gpu rounded-[1.6rem] border p-6 text-left transition-all"
                         style={{
-                          transform: `translateX(${translateX}) translateY(-50%) scale(${scale})`,
+                          transform: `translateX(${translateX}) translateY(-50%) rotate(${rotate}) scale(${scale})`,
                           zIndex,
                           opacity,
-                          width: "min(78%, 48rem)",
+                          background: cardBg,
+                          borderColor: cardBorder,
+                          boxShadow,
+                          width,
                         }}
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div>
-                            <p className="text-lg font-black text-[#1f2b21]">{card.title}</p>
-                            <p className="mt-1 text-sm text-[#5e6b5a]">{card.subtitle}</p>
+                            <p className="text-xl font-black text-[#133016]">{card.title}</p>
+                            <p className="mt-1 text-sm text-[#476152]">{card.subtitle}</p>
                           </div>
-                          {selectedRole === card.id ? (
-                            <span className="rounded-full bg-[#4f6b52] px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-white">Selected</span>
+                          {isSelected ? (
+                            <span className="rounded-full bg-[#254b34] px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-white">SELECTED</span>
                           ) : null}
                         </div>
                         <div className="mt-4 text-sm text-[#6b7766]">Preview of the role experience and permissions.</div>
