@@ -2361,123 +2361,110 @@ export function AuthLanding() {
           </header>
 
           <div className={`flex min-h-0 flex-1 items-center justify-center ${isCompactLayout ? "py-0.5" : "py-1"}`}>
-            <div className={`relative flex w-full ${roleShellMaxWidth} items-center justify-center ${roleShellPadding}`}>
-              <div className={`pointer-events-none absolute top-1/2 -translate-y-1/2 rounded-[3rem] bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.46),rgba(243,239,227,0.1)_72%,transparent_100%)] blur-3xl ${isCompactLayout ? "inset-x-4 h-[10.4rem]" : "inset-x-10 h-[15rem]"}`} />
+              <div className={`relative flex w-full ${roleShellMaxWidth} items-center justify-center ${roleShellPadding}`}>
 
-              <button type="button" onClick={() => cycleRole("left")} className={`group absolute top-1/2 z-50 flex ${arrowSize} -translate-y-1/2 items-center justify-center rounded-full border border-[#9aaf91] bg-[#24361f] text-[#f7f4ea] shadow-[0_16px_34px_rgba(25,39,24,0.28)] transition hover:-translate-y-1/2 hover:bg-[#314a29] hover:shadow-[0_20px_42px_rgba(25,39,24,0.34)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#24361f] focus-visible:ring-offset-2 focus-visible:ring-offset-[#f2f0e5] ${arrowOffset}`} aria-label="Previous role">
-                <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 fill-none stroke-current stroke-[2.5] transition group-hover:-translate-x-0.5">
-                  <path d="M15 5l-7 7 7 7" />
-                </svg>
-              </button>
+                <div className="relative mx-auto mt-16 flex w-full max-w-[980px] items-center justify-center overflow-visible">
 
-              <div className={`relative w-full overflow-visible ${roleStackHeight}`}>
-              {roleWheelCards.map(({ card, offset }) => {
-                const absOffset = Math.abs(offset);
-                const isSelected = selectedRole === card.id;
-                const translateX = isCompactLayout
-                  ? absOffset === 0
-                      ? "0%"
-                      : absOffset === 1
-                        ? `${offset * 12}%`
-                        : "0%"
-                    : absOffset === 2
-                      ? "0%"
-                      : `${offset * 18}%`;
-                const translateY = isCompactLayout
-                  ? isSelected
-                    ? "-2px"
-                    : absOffset === 1
-                      ? "3px"
-                      : "-38px"
-                  : isSelected
-                    ? "-2px"
-                    : absOffset === 2
-                      ? "-34px"
-                      : "2px";
-                const scale = isCompactLayout
-                  ? isSelected
-                    ? 1.03
-                    : absOffset === 1
-                      ? 0.92
-                      : 0.82
-                  : isSelected
-                    ? 1.02
-                    : absOffset === 2
-                      ? 0.9
-                      : 0.95;
-                const zIndex = isSelected ? 40 : absOffset === 2 ? 10 : 22 - absOffset;
-                const opacity = isCompactLayout ? (absOffset >= 2 ? 0 : absOffset === 1 ? 0.65 : 1) : absOffset === 2 ? 0.78 : 1;
-                const cardBg = isSelected
-                  ? "linear-gradient(180deg,rgba(252,255,248,0.96) 0%,rgba(223,236,210,0.88) 100%)"
-                  : "linear-gradient(180deg,rgba(250,248,241,0.78) 0%,rgba(238,243,231,0.66) 100%)";
-                const cardBorder = isSelected ? "rgba(134,156,112,0.84)" : "rgba(170,183,157,0.62)";
-                const boxShadow = isSelected
-                  ? "0 28px 72px rgba(31,49,24,0.26), 0 0 0 1px rgba(120,144,100,0.12), inset 0 1px 0 rgba(255,255,255,0.58)"
-                  : "0 18px 40px rgba(31,49,24,0.13), 0 0 0 1px rgba(136,152,120,0.08), inset 0 1px 0 rgba(255,255,255,0.52)";
-                const width = isCompactLayout
-                  ? isSelected
-                    ? "min(88vw, 22rem)"
-                    : "min(72vw, 18.5rem)"
-                  : isSelected
-                    ? "clamp(17.5rem, 38vw, 27.5rem)"
-                    : absOffset === 2
-                      ? "clamp(12.5rem, 23vw, 20rem)"
-                      : "clamp(12rem, 22vw, 19rem)";
-
-                return (
+                  {/* LEFT BUTTON */}
                   <button
-                    key={card.id}
                     type="button"
-                    onClick={() => {
-                      chooseRole(card.id);
-                    }}
-                    className={`absolute left-1/2 top-1/2 transform-gpu rounded-[1.75rem] border text-left backdrop-blur-[12px] transition-all ${roleCardPadding}`}
-                    style={{
-                      transform: `translateX(calc(${translateX} + ${stackNudgeX})) translateY(calc(-50% + ${translateY})) scale(${scale})`,
-                      zIndex,
-                      opacity,
-                      background: cardBg,
-                      borderColor: cardBorder,
-                      boxShadow,
-                      width,
-                    }}
+                    onClick={() => cycleRole("left")}
+                    className="absolute left-0 z-30 flex h-16 w-16 items-center justify-center rounded-full bg-[#173321] text-white shadow-[0_18px_40px_rgba(0,0,0,0.18)] transition hover:scale-105"
                   >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className={`font-black tracking-[-0.05em] text-[#112514] ${roleTitleSize}`}>{card.title}</p>
-                        <p className={`mt-0.5 text-[#5c6a59] ${roleSubtitleSize}`}>{card.subtitle}</p>
-                      </div>
-                      {isSelected ? (
-                        <span className="rounded-full bg-[#254b34] px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.18em] text-white shadow-[0_8px_18px_rgba(37,46,34,0.18)]">Selected</span>
-                      ) : null}
-                    </div>
-
-                    <div className={`rounded-[1rem] border border-white/70 bg-[rgba(255,255,252,0.92)] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_8px_18px_rgba(42,59,29,0.06)] ${isCompactLayout ? "mt-2 p-2" : "mt-2.5 p-2.5"}`}>
-                      <div className="flex items-start justify-between gap-3">
-                        <div className={`space-y-${isCompactLayout ? "1.5" : "2"}`}>
-                          <div className={`${isCompactLayout ? "h-1.5 w-20" : "h-2 w-24"} rounded-full bg-[#d5ded0]`} />
-                          <div className={`${isCompactLayout ? "h-1.5 w-14" : "h-2 w-16"} rounded-full bg-[#e2e8dc]`} />
-                          <div className={`${isCompactLayout ? "h-1.5 w-16" : "h-2 w-20"} rounded-full bg-[#d5ded0]`} />
-                        </div>
-                        <div className={`${isCompactLayout ? "h-10 w-10 rounded-[0.75rem]" : "h-12 w-12 rounded-[0.9rem]"} bg-[radial-gradient(circle_at_35%_35%,rgba(181,194,159,0.96),rgba(125,145,99,0.92))] shadow-[inset_0_1px_1px_rgba(255,255,255,0.25),0_10px_24px_rgba(75,95,60,0.22)]`} />
-                      </div>
-                    </div>
-
-                    <div className={`flex items-center justify-between font-black uppercase text-[#72836b] ${isCompactLayout ? "mt-2 text-[8px] tracking-[0.2em]" : "mt-2.5 text-[9px] tracking-[0.24em]"}`}>
-                      <span>Preview</span>
-                      <span className={`rounded-full bg-[#dde7d2] text-[#59704f] ${isCompactLayout ? "px-2 py-0.5 tracking-[0.1em]" : "px-2.5 py-0.5 tracking-[0.14em]"}`}>Swipe card</span>
-                    </div>
+                    <span className="text-2xl">‹</span>
                   </button>
-                );
-              })}
 
-              <button type="button" onClick={() => cycleRole("right")} className={`group absolute top-1/2 z-50 flex ${arrowSize} -translate-y-1/2 items-center justify-center rounded-full border border-[#9aaf91] bg-[#24361f] text-[#f7f4ea] shadow-[0_16px_34px_rgba(25,39,24,0.28)] transition hover:-translate-y-1/2 hover:bg-[#314a29] hover:shadow-[0_20px_42px_rgba(25,39,24,0.34)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#24361f] focus-visible:ring-offset-2 focus-visible:ring-offset-[#f2f0e5] ${rightArrowOffset}`} aria-label="Next role">
-                <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 fill-none stroke-current stroke-[2.5] transition group-hover:translate-x-0.5">
-                  <path d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
-          </div>
+                  {/* CAROUSEL */}
+                  <div className="relative flex h-[340px] w-full items-center justify-center">
+
+                    {roleWheelCards.map(({ card, offset }) => {
+                      const isActive = offset === 0;
+
+                      return (
+                        <div
+                          key={card.id}
+                          className="absolute transition-all duration-500 ease-out"
+                          style={{
+                            transform: `
+                              translateX(${offset * 240}px)
+                              scale(${isActive ? 1 : 0.84})
+                            `,
+                            opacity: Math.abs(offset) > 1 ? 0 : isActive ? 1 : 0.55,
+                            zIndex: 20 - Math.abs(offset),
+                          }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => chooseRole(card.id)}
+                            className={`
+                              relative h-[240px] w-[420px]
+                              overflow-hidden rounded-[2rem]
+                              border transition-all duration-500
+                              ${isActive
+                                ? "border-[#88a07e] bg-[#eef5e7] shadow-[0_30px_80px_rgba(74,93,62,0.24)]"
+                                : "border-[#d9dfd2] bg-[#f8f8f3] shadow-[0_12px_32px_rgba(0,0,0,0.08)]"}
+                            `}
+                          >
+
+                            {/* TOP */}
+                            <div className="flex items-start justify-between px-7 pt-7">
+                              <div>
+                                <h3 className="text-[2rem] font-black tracking-[-0.04em] text-[#132819]">
+                                  {card.title}
+                                </h3>
+
+                                <p className="mt-2 text-[1rem] text-[#5d695d]">
+                                  {card.subtitle}
+                                </p>
+                              </div>
+
+                              {isActive && (
+                                <div className="rounded-full bg-[#234128] px-4 py-1 text-[0.7rem] font-bold uppercase tracking-[0.22em] text-white">
+                                  Selected
+                                </div>
+                              )}
+                            </div>
+
+                            {/* MOCK CONTENT */}
+                            <div className="mx-7 mt-7 rounded-[1.4rem] bg-white p-5 shadow-inner">
+
+                              <div className="flex items-center justify-between">
+                                <div className="space-y-3">
+                                  <div className="h-3 w-32 rounded-full bg-[#d6dfce]" />
+                                  <div className="h-3 w-24 rounded-full bg-[#dfe6d7]" />
+                                  <div className="h-3 w-28 rounded-full bg-[#d6dfce]" />
+                                </div>
+
+                                <div className="h-20 w-20 rounded-[1.2rem] bg-[linear-gradient(135deg,#dbe6cf,#93a780)]" />
+                              </div>
+                            </div>
+
+                            {/* BOTTOM */}
+                            <div className="absolute bottom-6 left-7 text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#65745f]">
+                              Preview
+                            </div>
+
+                            <div className="absolute bottom-6 right-7 text-[0.75rem] font-bold uppercase tracking-[0.22em] text-[#65745f]">
+                              Swipe card
+                            </div>
+
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* RIGHT BUTTON */}
+                  <button
+                    type="button"
+                    onClick={() => cycleRole("right")}
+                    className="absolute right-0 z-30 flex h-16 w-16 items-center justify-center rounded-full bg-[#173321] text-white shadow-[0_18px_40px_rgba(0,0,0,0.18)] transition hover:scale-105"
+                  >
+                    <span className="text-2xl">›</span>
+                  </button>
+                </div>
+
+              </div>
         </div>
 
           <footer className={`border-t border-[#dfe6d7] ${isCompactLayout ? "pt-2.5 pb-20" : "pt-3 pb-24 sm:pt-4"}`}>
