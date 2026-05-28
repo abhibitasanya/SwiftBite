@@ -1523,22 +1523,59 @@ export function AuthLanding() {
               <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">Choose your role</p>
               <p className="mt-2 text-sm text-[#5e6b5a]">Select the role that best matches how you'll use SwiftBite.</p>
 
-              <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                {roleCards.map((card) => (
-                  <button
-                    key={card.id}
-                    type="button"
-                    onClick={() => {
-                      chooseRole(card.id);
-                      setStage("login");
-                      switchAuthMode("login");
-                    }}
-                    className={`rounded-[1.2rem] border p-4 text-left transition text-[#243025] ${selectedRole === card.id ? "ring-2 ring-[#4f6b52]/30 bg-[#f7fbf6]" : "bg-white/98 hover:bg-[#fbfcf8]"}`}
-                  >
-                    <p className="text-lg font-black">{card.title}</p>
-                    <p className="mt-1 text-sm text-[#5e6b5a]">{card.subtitle}</p>
-                  </button>
-                ))}
+              <div className="mt-6 flex items-center justify-center">
+                <button type="button" onClick={() => cycleRole("left")} className="mr-4 flex h-12 w-12 items-center justify-center rounded-full border border-[#e6ebe0] bg-white shadow-sm">
+                  ◀
+                </button>
+
+                <div className="relative mx-2 h-[18rem] w-[min(86vw,58rem)] overflow-visible">
+                  {roleWheelCards.map(({ card, offset }) => {
+                    const absOffset = Math.abs(offset);
+                    const translateX = `${offset * 38}%`;
+                    const scale = offset === 0 ? 1 : 0.86 - Math.min(absOffset - 1, 1) * 0.06;
+                    const zIndex = 20 - absOffset;
+                    const opacity = absOffset > 1 ? 0.35 : 1 - absOffset * 0.15;
+
+                    return (
+                      <button
+                        key={card.id}
+                        type="button"
+                        onClick={() => {
+                          chooseRole(card.id);
+                        }}
+                        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform-gpu rounded-[1.6rem] border p-6 shadow-[0_24px_60px_rgba(37,46,34,0.12)] bg-white text-left transition-all"
+                        style={{
+                          transform: `translateX(${translateX}) translateY(-50%) scale(${scale})`,
+                          zIndex,
+                          opacity,
+                          width: "min(78%, 48rem)",
+                        }}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="text-lg font-black text-[#1f2b21]">{card.title}</p>
+                            <p className="mt-1 text-sm text-[#5e6b5a]">{card.subtitle}</p>
+                          </div>
+                          {selectedRole === card.id ? (
+                            <span className="rounded-full bg-[#4f6b52] px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-white">Selected</span>
+                          ) : null}
+                        </div>
+                        <div className="mt-4 text-sm text-[#6b7766]">Preview of the role experience and permissions.</div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <button type="button" onClick={() => cycleRole("right")} className="ml-4 flex h-12 w-12 items-center justify-center rounded-full border border-[#e6ebe0] bg-white shadow-sm">
+                  ▶
+                </button>
+              </div>
+
+              <div className="mt-6 flex items-center justify-between">
+                <p className="text-sm text-[#5e6b5a]">Continue as <strong className="font-semibold text-[#243025]">{selectedRoleCard.title}</strong>.</p>
+                <div className="flex items-center gap-3">
+                  <button type="button" onClick={() => { setStage("login"); switchAuthMode("login"); }} className="rounded-full bg-[#223326] px-4 py-2 text-sm font-semibold text-[#f5f8f1]">Next</button>
+                </div>
               </div>
             </div>
 
