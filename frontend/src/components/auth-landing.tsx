@@ -1519,28 +1519,28 @@ export function AuthLanding() {
               </div>
             </div>
 
-            <div className="rounded-[2rem] border border-[#dfe7d6] bg-[rgba(251,252,248,0.98)] p-5 shadow-[0_20px_48px_rgba(37,46,34,0.08)] sm:p-6">
-              <p className="text-[11px] font-extrabold uppercase tracking-[0.46em] text-[#334636]">Choose your role</p>
-              <p className="mt-3 max-w-2xl text-[15px] leading-7 text-[#5e6b5a]">Select the role that best matches how you'll use SwiftBite.</p>
+            <div className="rounded-[2.25rem] border border-[#dfe7d6] bg-[rgba(251,252,248,0.98)] p-6 shadow-[0_20px_48px_rgba(37,46,34,0.08)] sm:p-7">
+              <p className="text-[12px] font-black uppercase tracking-[0.38em] text-[#334636]">Choose your role</p>
+              <p className="mt-3 max-w-2xl text-[16px] leading-7 text-[#5e6b5a]">Select the role that best matches how you'll use SwiftBite.</p>
 
-              <div className="mt-7 flex items-center justify-center">
+              <div className="mt-8 flex items-center justify-center">
                 <button type="button" onClick={() => cycleRole("left")} className="mr-4 flex h-12 w-12 items-center justify-center rounded-full border border-[#e3ead7] bg-[#f9fbf5] text-[#314a32] shadow-[0_8px_20px_rgba(37,46,34,0.08)] transition hover:bg-white">
                   ◀
                 </button>
 
-                <div className="relative mx-2 h-[19rem] w-[min(86vw,58rem)] overflow-visible">
+                <div className="relative mx-2 h-[20rem] w-[min(86vw,58rem)] overflow-visible">
                   {roleWheelCards.map(({ card, offset }) => {
                     const absOffset = Math.abs(offset);
                     const isSelected = selectedRole === card.id;
-                    const translateX = absOffset === 2 ? "0%" : `${offset * 40}%`;
-                    const translateY = isSelected ? "0px" : absOffset === 2 ? "-56px" : "18px";
-                    const scale = isSelected ? 1 : absOffset === 2 ? 0.92 : 0.88;
-                    const zIndex = isSelected ? 30 : absOffset === 2 ? 18 : 22 - absOffset;
-                    const opacity = absOffset === 2 ? 0.42 : 1;
-                    const cardBg = isSelected ? "#eaf3e6" : "#fbfbf6";
-                    const cardBorder = isSelected ? "#cfe6d1" : "#e3e9dd";
-                    const boxShadow = isSelected ? "0 34px 80px rgba(34,51,34,0.14)" : "0 14px 34px rgba(37,46,34,0.07)";
-                    const width = isSelected ? "min(66%, 44rem)" : absOffset === 2 ? "min(54%, 38rem)" : "min(42%, 30rem)";
+                    const translateX = absOffset === 2 ? "0%" : `${offset * 34}%`;
+                    const translateY = isSelected ? "0px" : absOffset === 2 ? "-92px" : "10px";
+                    const scale = isSelected ? 1 : absOffset === 2 ? 0.84 : 0.9;
+                    const zIndex = isSelected ? 40 : absOffset === 2 ? 12 : 22 - absOffset;
+                    const opacity = absOffset === 2 ? 0.7 : 1;
+                    const cardBg = isSelected ? "#e7f0df" : "#f7f8f3";
+                    const cardBorder = isSelected ? "#cfe0c8" : "#e5eadf";
+                    const boxShadow = isSelected ? "0 36px 86px rgba(34,51,34,0.16)" : "0 12px 28px rgba(37,46,34,0.06)";
+                    const width = isSelected ? "min(64%, 43rem)" : absOffset === 2 ? "min(54%, 38rem)" : "min(44%, 31rem)";
 
                     return (
                       <button
@@ -1549,7 +1549,7 @@ export function AuthLanding() {
                         onClick={() => {
                           chooseRole(card.id);
                         }}
-                        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform-gpu rounded-[1.6rem] border p-6 text-left transition-all"
+                        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform-gpu rounded-[1.8rem] border p-6 text-left transition-all"
                         style={{
                           transform: `translateX(${translateX}) translateY(calc(-50% + ${translateY})) scale(${scale})`,
                           zIndex,
@@ -1562,14 +1562,29 @@ export function AuthLanding() {
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div>
-                            <p className="text-[1.35rem] font-black tracking-tight text-[#133016] sm:text-[1.5rem]">{card.title}</p>
-                            <p className="mt-1 text-[15px] text-[#476152]">{card.subtitle}</p>
+                            <p className="text-[1.45rem] font-black tracking-[-0.04em] text-[#133016] sm:text-[1.65rem]">{card.title}</p>
+                            <p className="mt-1 text-[16px] text-[#476152]">{card.subtitle}</p>
                           </div>
                           {isSelected ? (
                             <span className="rounded-full bg-[#254b34] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-white">SELECTED</span>
                           ) : null}
                         </div>
-                        <div className="mt-5 text-[15px] leading-7 text-[#6b7766]">Preview of the role experience and permissions.</div>
+
+                        <div className="mt-4 rounded-[1.2rem] border border-[#e5ebe0] bg-white/95 p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="space-y-2.5">
+                              <div className="h-2.5 w-28 rounded-full bg-[#d5ded0]" />
+                              <div className="h-2.5 w-20 rounded-full bg-[#e2e8dc]" />
+                              <div className="h-2.5 w-24 rounded-full bg-[#d5ded0]" />
+                            </div>
+                            <div className="h-14 w-14 rounded-[1rem] bg-[radial-gradient(circle_at_35%_35%,rgba(181,194,159,0.96),rgba(125,145,99,0.92))] shadow-[inset_0_1px_1px_rgba(255,255,255,0.25)]" />
+                          </div>
+                        </div>
+
+                        <div className="mt-4 flex items-center justify-between text-[11px] font-black uppercase tracking-[0.28em] text-[#72836b]">
+                          <span>Preview</span>
+                          <span className="rounded-full bg-[#dde7d2] px-3 py-1 tracking-[0.16em] text-[#59704f]">Swipe card</span>
+                        </div>
                       </button>
                     );
                   })}
