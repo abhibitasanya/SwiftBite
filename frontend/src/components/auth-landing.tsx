@@ -582,10 +582,61 @@ function SoftScreen({
   className?: string;
 }) {
   return (
-    <div className={`rounded-[2.35rem] border border-[#cfd9c7] bg-[linear-gradient(180deg,rgba(248,251,245,0.92)_0%,rgba(233,241,227,0.92)_100%)] p-3 shadow-[0_18px_44px_rgba(49,64,45,0.14)] ${className}`}>
-      <div className="rounded-[1.7rem] border border-[#e4eadb] bg-[rgba(255,255,252,0.88)] px-4 py-4 sm:px-5 sm:py-5">
-        <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-[#cfd7c5]" />
+    <div className={`rounded-[2rem] border border-white/65 bg-[linear-gradient(145deg,rgba(255,255,252,0.96)_0%,rgba(238,246,231,0.94)_52%,rgba(221,232,214,0.96)_100%)] p-2.5 shadow-[0_24px_70px_rgba(44,61,40,0.16),inset_0_1px_0_rgba(255,255,255,0.92)] backdrop-blur-2xl ${className}`}>
+      <div className="relative overflow-hidden rounded-[1.55rem] border border-[#e2ead8] bg-[linear-gradient(180deg,rgba(255,255,253,0.96)_0%,rgba(248,251,244,0.92)_100%)] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.95)] sm:px-5 sm:py-5">
+        <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(79,107,82,0.45),transparent)]" />
         {children}
+      </div>
+    </div>
+  );
+}
+
+function AppMenu({
+  isOpen,
+  onToggle,
+  onDashboard,
+  onBrowseRestaurants,
+  onChangeRole,
+  onSignOut,
+}: {
+  isOpen: boolean;
+  onToggle: () => void;
+  onDashboard: () => void;
+  onBrowseRestaurants: () => void;
+  onChangeRole: () => void;
+  onSignOut: () => void;
+}) {
+  return (
+    <div className="fixed right-[max(1rem,env(safe-area-inset-right))] top-[max(1rem,env(safe-area-inset-top))] z-50 sm:right-[max(1.5rem,env(safe-area-inset-right))] sm:top-[max(1.5rem,env(safe-area-inset-top))]">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex h-12 w-12 items-center justify-center rounded-full border border-white/70 bg-[linear-gradient(180deg,#ffffff_0%,#edf4e8_100%)] text-[#263f2a] shadow-[0_14px_34px_rgba(45,71,44,0.18)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-[#223326] hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4f6b52]"
+        aria-label="Open app menu"
+        aria-expanded={isOpen}
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 fill-none stroke-current stroke-[2.7]">
+          <path d="M4 7h16M4 12h16M4 17h16" strokeLinecap="round" />
+        </svg>
+      </button>
+
+      <div
+        className={`absolute right-0 mt-3 w-[min(82vw,18rem)] rounded-[1.35rem] border border-white/70 bg-[rgba(252,254,249,0.96)] p-2 shadow-[0_24px_70px_rgba(37,46,34,0.2)] backdrop-blur-2xl transition ${
+          isOpen ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-2 opacity-0"
+        }`}
+      >
+        <button type="button" onClick={onDashboard} className="w-full rounded-[1rem] px-4 py-3 text-left text-sm font-semibold text-[#243025] transition hover:bg-[#eef5e8]">
+          Home
+        </button>
+        <button type="button" onClick={onBrowseRestaurants} className="w-full rounded-[1rem] px-4 py-3 text-left text-sm font-semibold text-[#243025] transition hover:bg-[#eef5e8]">
+          Browse restaurants
+        </button>
+        <button type="button" onClick={onChangeRole} className="w-full rounded-[1rem] px-4 py-3 text-left text-sm font-semibold text-[#243025] transition hover:bg-[#eef5e8]">
+          Change role
+        </button>
+        <button type="button" onClick={onSignOut} className="w-full rounded-[1rem] px-4 py-3 text-left text-sm font-semibold text-[#8b2d25] transition hover:bg-[#fff1ec]">
+          Sign out
+        </button>
       </div>
     </div>
   );
@@ -755,7 +806,6 @@ export function AuthLanding() {
   const [selectedPlatformRestaurantId, setSelectedPlatformRestaurantId] = useState<number | null>(null);
   const [restaurantMenuCart, setRestaurantMenuCart] = useState<MenuCartItem[]>([]);
   const [isRestaurantCartOpen, setIsRestaurantCartOpen] = useState(false);
-  const [isRestaurantProfileOpen, setIsRestaurantProfileOpen] = useState(false);
   const [deliveryAddress, setDeliveryAddress] = useState("Sector 12, Block C");
   const [deliveryLandmark, setDeliveryLandmark] = useState("Near Lake Bridge");
   const [riderNotes, setRiderNotes] = useState("Call on arrival and keep the order at the gate.");
@@ -773,6 +823,7 @@ export function AuthLanding() {
   const [isBooting, setIsBooting] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isAppMenuOpen, setIsAppMenuOpen] = useState(false);
   const [viewportWidth, setViewportWidth] = useState(1280);
   const [viewportHeight, setViewportHeight] = useState(900);
   const [isStandaloneMode, setIsStandaloneMode] = useState(false);
@@ -976,6 +1027,10 @@ export function AuthLanding() {
     window.localStorage.setItem("swiftbite.loginMode", loginMode);
   }, [loginMode]);
 
+  useEffect(() => {
+    setIsAppMenuOpen(false);
+  }, [stage]);
+
   // Synchronize stage state with browser history (popstate) and save to localStorage
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -987,6 +1042,22 @@ export function AuthLanding() {
     const handlePopState = (event: PopStateEvent) => {
       const stateFromHistory = event.state;
       if (stateFromHistory && stateFromHistory.stage) {
+        const nextStage = stateFromHistory.stage as Stage;
+        const currentStage = window.localStorage.getItem("swiftbite.stage") as Stage | null;
+        const protectedStages: Stage[] = ["dashboard", "continue", "restaurants", "restaurant-menu", "checkout"];
+
+        if (currentStage === "dashboard" && (nextStage === "login" || nextStage === "role")) {
+          window.history.pushState({ stage: "dashboard" }, "");
+          setStage("dashboard");
+          return;
+        }
+
+        if (protectedStages.includes(currentStage as Stage) && (nextStage === "login" || nextStage === "role")) {
+          window.history.pushState({ stage: currentStage }, "");
+          setStage(currentStage as Stage);
+          return;
+        }
+
         setStage(stateFromHistory.stage);
       }
     };
@@ -1096,13 +1167,11 @@ export function AuthLanding() {
     setSelectedRestaurantId(restaurantId);
     setRestaurantMenuCart([]);
     setIsRestaurantCartOpen(false);
-    setIsRestaurantProfileOpen(false);
     setStage("restaurant-menu");
   }
 
   function openRestaurantCheckout() {
     setIsRestaurantCartOpen(false);
-    setIsRestaurantProfileOpen(false);
     setStage("checkout");
   }
 
@@ -1574,6 +1643,10 @@ export function AuthLanding() {
   }, [chatbotWidget]);
 
   function handleGoBack() {
+    if (stage === "dashboard") {
+      return;
+    }
+
     if (typeof window !== "undefined" && window.history.length > 1) {
       window.history.back();
     } else {
@@ -1593,7 +1666,41 @@ export function AuthLanding() {
     }
   }
 
-  const globalBackButton = stage !== "role" && (
+  function goToDashboardFromMenu() {
+    setStage("dashboard");
+  }
+
+  function browseRestaurantsFromMenu() {
+    setStage("restaurants");
+  }
+
+  function changeRoleFromMenu() {
+    setStage("role");
+    setStatusMessage("Select your role to continue.");
+  }
+
+  function signOutFromMenu() {
+    setIsAppMenuOpen(false);
+    setStage("login");
+    setStatusMessage("Signed out. Sign in to continue.");
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("swiftbite.stage", "login");
+      window.history.pushState({ stage: "login" }, "");
+    }
+  }
+
+  const appMenu = stage !== "role" && stage !== "login" ? (
+    <AppMenu
+      isOpen={isAppMenuOpen}
+      onToggle={() => setIsAppMenuOpen((current) => !current)}
+      onDashboard={goToDashboardFromMenu}
+      onBrowseRestaurants={browseRestaurantsFromMenu}
+      onChangeRole={changeRoleFromMenu}
+      onSignOut={signOutFromMenu}
+    />
+  ) : null;
+
+  const globalBackButton = stage !== "role" && stage !== "dashboard" && (
     <button
       type="button"
       onClick={handleGoBack}
@@ -1617,6 +1724,7 @@ export function AuthLanding() {
         <main className="min-h-screen px-4 py-4 text-[#243025] sm:px-6 sm:py-6 lg:px-8">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
           {globalBackButton}
+          {appMenu}
           <section className="relative mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl items-start gap-6 lg:grid-cols-[0.95fr_1.05fr]">
             <SoftScreen>
               <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite • Delivery</p>
@@ -1779,6 +1887,7 @@ export function AuthLanding() {
         <main className="min-h-screen px-4 py-4 text-[#243025] sm:px-6 sm:py-6 lg:px-8">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
           {globalBackButton}
+          {appMenu}
           <section className="relative mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl items-start gap-6 lg:grid-cols-[1fr_1fr]">
             <SoftScreen>
               <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite • Restaurant Owner</p>
@@ -2018,6 +2127,7 @@ export function AuthLanding() {
         <main className="min-h-screen px-4 py-4 text-[#243025] sm:px-6 sm:py-6 lg:px-8">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
           {globalBackButton}
+          {appMenu}
           <section className="relative mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl items-start gap-6 lg:grid-cols-[1fr_1fr]">
             <SoftScreen>
               <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite • Main Team</p>
@@ -2120,6 +2230,7 @@ export function AuthLanding() {
       <main className="min-h-screen px-4 py-4 text-[#243025] sm:px-6 sm:py-6 lg:px-8">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
         {globalBackButton}
+        {appMenu}
         <section className="relative mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl items-start gap-6 lg:grid-cols-[0.95fr_1.05fr]">
           <SoftScreen>
             <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite • Customer</p>
@@ -2130,10 +2241,6 @@ export function AuthLanding() {
               <p className="mt-2 text-2xl font-black text-[#1f2b21]">{customerDashboard.activeOrder.restaurant}</p>
               <p className="mt-1 text-sm text-[#5e6b5a]">{customerDashboard.activeOrder.status} • Rider {customerDashboard.activeOrder.rider}</p>
               <p className="mt-1 text-sm text-[#5e6b5a]">ETA {customerDashboard.activeOrder.etaMinutes} min • {customerDashboard.activeOrder.address}</p>
-            </div>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <button type="button" onClick={() => setStage("role")} className="rounded-full border border-[#cbd5c0] bg-[#fbfcf9] px-5 py-3 text-sm font-semibold text-[#2d472c] shadow-[0_8px_18px_rgba(63,78,56,0.06)] hover:bg-[#eef3e8]">Change role</button>
-              <button type="button" onClick={() => setStage("login")} className="rounded-full bg-[#2d472c] px-5 py-3 text-sm font-semibold text-white shadow-[0_8px_18px_rgba(45,71,44,0.12)] transition duration-300 hover:bg-[#1a2d1a]">Sign out</button>
             </div>
           </SoftScreen>
 
@@ -2178,10 +2285,7 @@ export function AuthLanding() {
       <main className="min-h-screen px-4 py-4 text-[#243025] sm:px-6 sm:py-6 lg:px-8">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
         {globalBackButton}
-        <button type="button" onClick={() => setIsRestaurantProfileOpen((current) => !current)} className="fixed right-4 top-4 z-30 rounded-full border border-[#cbd5c0] bg-white/90 p-3 text-[#2d472c] shadow-[0_10px_25px_rgba(63,78,56,0.12)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-[#2d472c] hover:text-white" aria-label="Open profile settings">
-          <span className="block text-lg font-bold">☰</span>
-        </button>
-
+        {appMenu}
         <button type="button" onClick={() => setIsRestaurantCartOpen((current) => !current)} className="fixed right-3 top-1/2 z-30 -translate-y-1/2 rounded-full border border-[#6f7f68]/45 bg-[#223326] p-3 shadow-[0_14px_30px_rgba(37,46,34,0.14)]" aria-label="Open cart">
           <span className="block text-lg font-black text-[#f5f8f1]">🛒</span>
           {restaurantMenuItemCount > 0 ? (
@@ -2288,16 +2392,6 @@ export function AuthLanding() {
                 <span className="text-lg font-black text-[#1f2b21]">₹{restaurantMenuSubtotal.toFixed(0)}</span>
               </div>
             </div>
-            <div className={`fixed right-16 top-24 z-30 w-[min(92vw,20rem)] rounded-[1.6rem] border border-[#c9d7bf] bg-[linear-gradient(180deg,#fbfdf8_0%,#eef4e6_100%)] p-4 shadow-[0_20px_60px_rgba(63,78,56,0.14)] transition ${isRestaurantProfileOpen ? "translate-x-0 opacity-100" : "pointer-events-none translate-x-6 opacity-0"}`}>
-              <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#4f6750]">Profile & settings</p>
-              <p className="mt-3 text-sm font-black text-[#1f2b21]">{selectedRoleCard.title}</p>
-              <p className="mt-1 text-sm text-[#5e6b5a]">Manage your profile, saved addresses, and menu preferences.</p>
-              <div className="mt-4 grid gap-2 text-sm text-[#5e6b5a]">
-                <button type="button" onClick={() => setStage("dashboard")} className="rounded-xl border border-[#dfe7d6] bg-white/92 px-3 py-2 text-left">Account details</button>
-                <button type="button" onClick={() => setStage("login")} className="rounded-xl border border-[#dfe7d6] bg-white/92 px-3 py-2 text-left">Switch account</button>
-                <button type="button" onClick={() => setStage("restaurants")} className="rounded-xl border border-[#dfe7d6] bg-white/92 px-3 py-2 text-left">Back to restaurants</button>
-              </div>
-            </div>
           </SoftScreen>
         </section>
       </main>
@@ -2316,6 +2410,7 @@ export function AuthLanding() {
       <main className="min-h-screen px-4 py-4 text-[#243025] sm:px-6 sm:py-6 lg:px-8">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
         {globalBackButton}
+        {appMenu}
 
         <section className="relative mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl items-start gap-6 lg:grid-cols-[1.05fr_0.95fr]">
           <SoftScreen>
@@ -2572,6 +2667,7 @@ export function AuthLanding() {
       <main className="min-h-screen px-4 py-4 text-[#243025] sm:px-6 sm:py-6 lg:px-8">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
         {globalBackButton}
+        {appMenu}
 
         <section className="relative mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl items-center gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="rounded-[2rem] border border-[#5f7756]/55 bg-[rgba(225,212,193,0.92)] p-6 shadow-[0_24px_70px_rgba(45,61,44,0.14)] backdrop-blur-xl sm:p-8 lg:p-10">
@@ -2586,13 +2682,6 @@ export function AuthLanding() {
             </div>
 
             <div className="mt-6 flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={() => setStage("role")}
-                className="rounded-full border border-[#6a8160]/45 bg-[#f4efe4] px-5 py-3 text-sm font-semibold text-[#354033]"
-              >
-                Change role
-              </button>
               <button
                 type="button"
                 onClick={() => {
@@ -2616,6 +2705,7 @@ export function AuthLanding() {
       <main className="min-h-screen px-4 py-4 text-[#243025] sm:px-6 sm:py-6 lg:px-8">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
         {globalBackButton}
+        {appMenu}
 
         <section className="relative mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl items-center gap-6 lg:grid-cols-[0.95fr_1.05fr]">
           <div className="rounded-[2rem] border border-[#6f7f68]/45 bg-[rgba(248,251,246,0.94)] p-6 shadow-[0_24px_70px_rgba(45,61,44,0.1)] backdrop-blur-xl sm:p-8 lg:p-10">
@@ -2635,16 +2725,6 @@ export function AuthLanding() {
                 className="rounded-full border border-[#6f7f68]/45 bg-white/88 px-5 py-3 text-sm font-semibold text-[#4f5b47]"
               >
                 Back
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setStage("login");
-                  switchAuthMode("login");
-                }}
-                className="rounded-full bg-[#223326] px-5 py-3 text-sm font-semibold text-[#f5f8f1]"
-              >
-                Sign in again
               </button>
             </div>
           </div>
