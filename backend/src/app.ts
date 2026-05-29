@@ -1031,6 +1031,36 @@ async function loadOrders() {
   }
 }
 
+function mapOrderToLiveOrder(order: OrderRecord, index = 0) {
+  return {
+    id: order.id,
+    restaurantId: order.restaurantId,
+    restaurantName: order.restaurantName || `Restaurant #${order.restaurantId}`,
+    customerIdentifier: order.customerIdentifier,
+    status: order.status,
+    rider: order.status === "completed" ? "Delivered" : "Delivery partner",
+    etaMinutes: Math.max(8, 18 + index * 4),
+    address: order.address,
+    total: order.total,
+    items: order.items,
+  };
+}
+
+function mapOrderToDeliveryTrip(order: OrderRecord, index = 0) {
+  return {
+    id: order.id,
+    customer: order.customerIdentifier,
+    pickup: order.restaurantName || `Restaurant #${order.restaurantId}`,
+    dropoff: order.address,
+    status: order.status === "completed" ? "Completed" : order.status === "placed" ? "Preparing" : order.status,
+    etaMinutes: Math.max(8, 18 + index * 4),
+    currentLocation: order.status === "completed" ? "Delivered" : index === 0 ? "On the way" : "Assigned",
+    restaurantName: order.restaurantName || `Restaurant #${order.restaurantId}`,
+    total: order.total,
+    items: order.items,
+  };
+}
+
 async function saveOrder(order: OrderRecord) {
   try {
     await db.query(
@@ -1525,6 +1555,31 @@ export function createApp() {
     }
   });
 
+  app.patch("/api/orders/:id/status", async (request: Request, response: Response) => {
+    const orderId = Number(request.params.id);
+    const parsed = z.object({ status: z.enum(["placed", "completed"]) }).safeParse(request.body);
+
+    if (!Number.isFinite(orderId) || !parsed.success) {
+      response.status(400).json({ message: "Invalid order status payload." });
+      return;
+    }
+
+    try {
+      await db.query("UPDATE orders SET status = ? WHERE id = ?", [parsed.data.status, orderId]);
+      response.json({ message: `Order marked ${parsed.data.status}.`, order: { id: orderId, status: parsed.data.status }, source: "mysql" });
+    } catch {
+      const fallbackOrder = fallbackOrders.find((order) => order.id === orderId);
+
+      if (!fallbackOrder) {
+        response.status(404).json({ message: "Order not found." });
+        return;
+      }
+
+      fallbackOrder.status = parsed.data.status;
+      response.json({ message: `Order marked ${parsed.data.status}.`, order: fallbackOrder, source: "fallback" });
+    }
+  });
+
   app.get("/api/dashboard/:role", async (request: Request, response: Response) => {
     const role = request.params.role as DashboardRole;
 
@@ -1551,8 +1606,9 @@ export function createApp() {
     }
     // include active orders count when available
     let ordersCount = 0;
+    let orderResult = { orders: fallbackOrders, source: "fallback" as const };
     try {
-      const orderResult = await loadOrders();
+      orderResult = await loadOrders();
       ordersCount = orderResult.orders.length;
     } catch {
       ordersCount = fallbackOrders.length;
@@ -1564,7 +1620,37 @@ export function createApp() {
 
     const dashboard = buildDashboard(role, restaurantResult.restaurants, users, riderResult.profiles, restaurantProfileResult.profiles, menuResult.items, fallbackRestaurantCategories);
     if ((dashboard as any).totals) {
-      (dashboard as any).totals.activeOrders = ordersCount;
+      (dashboard as any).totals.activeOrders = orderResult.orders.filter((order) => order.status !== "completed").length;
+    }
+
+    if (role === "customer" && orderResult.orders.length > 0) {
+      const liveOrders = orderResult.orders.map((order, index) => mapOrderToLiveOrder(order, index));
+      (dashboard as any).liveOrders = liveOrders;
+      const firstOrder = liveOrders[0];
+
+      if (firstOrder) {
+        (dashboard as any).activeOrder = {
+          id: String(firstOrder.id),
+          restaurant: firstOrder.restaurantName,
+          status: firstOrder.status,
+          rider: firstOrder.rider,
+          etaMinutes: firstOrder.etaMinutes,
+          address: firstOrder.address,
+          total: firstOrder.total,
+          items: firstOrder.items,
+        };
+      }
+    }
+
+    if (role === "delivery" && orderResult.orders.length > 0) {
+      const activeTrips = orderResult.orders.map((order, index) => mapOrderToDeliveryTrip(order, index));
+      (dashboard as any).activeTrips = activeTrips;
+      (dashboard as any).stats.activeTrips = activeTrips.filter((trip) => trip.status.toLowerCase() !== "completed").length;
+      if (activeTrips[0]) {
+        (dashboard as any).currentPosition = activeTrips[0].currentLocation;
+        (dashboard as any).nextDrop = activeTrips[0].dropoff;
+        (dashboard as any).timeToReach = `${activeTrips[0].etaMinutes} min`;
+      }
     }
 
     response.json(dashboard);

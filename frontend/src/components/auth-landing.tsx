@@ -83,6 +83,25 @@ type MenuCartItem = {
   price: number;
 };
 
+type OrderLineItem = {
+  name: string;
+  quantity: number;
+  price: number;
+};
+
+type LiveOrderSummary = {
+  id: number;
+  restaurantId: number;
+  restaurantName: string;
+  customerIdentifier: string;
+  status: string;
+  rider: string;
+  etaMinutes: number;
+  address: string;
+  total: number;
+  items: OrderLineItem[];
+};
+
 type RiderProfileDraft = {
   userIdentifier: string;
   fullName: string;
@@ -158,7 +177,6 @@ type ChatSuggestion = {
   label: string;
   value: string;
 };
-
 type PlatformSection = "overview" | "users" | "restaurants" | "notifications" | "activity";
 
 type PlatformNotification = {
@@ -173,11 +191,12 @@ const roleCards: Array<{
   title: string;
   subtitle: string;
   accent: string;
+  icon: string;
 }> = [
-  { id: "customer", title: "Order Maker", subtitle: "Browse and order", accent: "from-[#4f6b52] to-[#93a884]" },
-  { id: "delivery", title: "Delivery Partner", subtitle: "Pick up and deliver", accent: "from-[#46624b] to-[#89a07a]" },
-  { id: "restaurant", title: "Restaurant Owner", subtitle: "Manage menu and orders", accent: "from-[#58745b] to-[#a0b28f]" },
-  { id: "platform", title: "Main Team", subtitle: "Support and control", accent: "from-[#3f5a43] to-[#7f9772]" },
+  { id: "customer", title: "Order Maker", subtitle: "Browse and order", accent: "from-[#4f6b52] to-[#93a884]", icon: "📱" },
+  { id: "delivery", title: "Delivery Partner", subtitle: "Pick up and deliver", accent: "from-[#46624b] to-[#89a07a]", icon: "🛵" },
+  { id: "restaurant", title: "Restaurant Owner", subtitle: "Manage menu and orders", accent: "from-[#58745b] to-[#a0b28f]", icon: "🍴" },
+  { id: "platform", title: "Main Team", subtitle: "Support and control", accent: "from-[#3f5a43] to-[#7f9772]", icon: "🖥️" },
 ];
 
 function createCaptchaChallenge(): CaptchaChallenge {
@@ -361,6 +380,20 @@ function createEmptyMenuItemDraft(restaurantIdentifier = ""): MenuItemDraft {
     isBestseller: false,
     isRecommended: false,
   };
+}
+
+function formatOrderItems(items: OrderLineItem[]) {
+  return items.map((item) => `${item.name} x${item.quantity}`).join(" • ");
+}
+
+function createRestaurantIdentifier(name: string) {
+  const slug = name
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  return `${slug || "restaurant"}-${Date.now().toString(36)}`;
 }
 
 function createNotification(title: string, details: string): PlatformNotification {
@@ -784,10 +817,10 @@ function createFallbackDashboard(role: UserRole, restaurants: RestaurantCard[]):
       nextDrop: "Sector 12, Block C",
       timeToReach: "14 min",
       activeTrips: [
-        { id: 1, customer: "Customer Demo", pickup: "Green Fork", dropoff: "Sector 12, Block C", status: "Heading to customer", etaMinutes: 14, currentLocation: "Near Lake Bridge" },
-        { id: 2, customer: "Riya Sharma", pickup: "Spice Harbor", dropoff: "Market Heights", status: "Picked up", etaMinutes: 21, currentLocation: "Main Road checkpoint" },
+        { id: 1, customer: "Customer Demo", pickup: "Green Fork", dropoff: "Sector 12, Block C", status: "Heading to customer", etaMinutes: 14, currentLocation: "Near Lake Bridge", restaurantName: "Green Fork", total: 348, items: [{ name: "Quinoa Power Bowl", quantity: 1, price: 189 }, { name: "Avocado Wrap", quantity: 1, price: 159 }] },
+        { id: 2, customer: "Riya Sharma", pickup: "Spice Harbor", dropoff: "Market Heights", status: "Picked up", etaMinutes: 21, currentLocation: "Main Road checkpoint", restaurantName: "Spice Harbor", total: 429, items: [{ name: "Paneer Tikka Platter", quantity: 1, price: 249 }, { name: "Butter Naan Combo", quantity: 1, price: 180 }] },
       ],
-    };
+    } as unknown as DashboardData;
   }
 
   if (role === "restaurant") {
@@ -834,10 +867,47 @@ function createFallbackDashboard(role: UserRole, restaurants: RestaurantCard[]):
       rider: "Aman",
       etaMinutes: 18,
       address: "Sector 12, Block C",
+      total: 348,
+      items: [
+        { name: "Quinoa Power Bowl", quantity: 1, price: 189 },
+        { name: "Avocado Wrap", quantity: 1, price: 159 },
+      ],
     },
+    liveOrders: [
+      {
+        id: 2041,
+        restaurantId: restaurants[0]?.id ?? 1,
+        restaurantName: restaurants[0]?.name ?? "Green Fork",
+        customerIdentifier: "guest",
+        status: "On the way",
+        rider: "Aman",
+        etaMinutes: 18,
+        address: "Sector 12, Block C",
+        total: 348,
+        items: [
+          { name: "Quinoa Power Bowl", quantity: 1, price: 189 },
+          { name: "Avocado Wrap", quantity: 1, price: 159 },
+        ],
+      },
+      {
+        id: 2042,
+        restaurantId: restaurants[1]?.id ?? 2,
+        restaurantName: restaurants[1]?.name ?? "Spice Harbor",
+        customerIdentifier: "guest",
+        status: "Preparing",
+        rider: "Ravi",
+        etaMinutes: 24,
+        address: "Market Heights",
+        total: 429,
+        items: [
+          { name: "Paneer Tikka Platter", quantity: 1, price: 249 },
+          { name: "Butter Naan Combo", quantity: 1, price: 180 },
+        ],
+      },
+    ],
     timeline: ["Restaurant accepted", "Order packed", "Picked up by rider", "Arriving soon"],
     restaurants,
-  };
+  } as DashboardData;
 }
 
 export function AuthLanding() {
@@ -893,6 +963,7 @@ export function AuthLanding() {
   const [contactNumber, setContactNumber] = useState("9876543210");
   const [checkoutMethod, setCheckoutMethod] = useState<CheckoutMethod>("upi");
   const [restaurantFormStatus, setRestaurantFormStatus] = useState("");
+  const [restaurantCreateStep, setRestaurantCreateStep] = useState<1 | 2>(1);
   const [selectedMenuItemId, setSelectedMenuItemId] = useState<number | null>(null);
   const [newRestaurantName, setNewRestaurantName] = useState("");
   const [newRestaurantCuisine, setNewRestaurantCuisine] = useState("");
@@ -1301,6 +1372,65 @@ export function AuthLanding() {
     }
   }
 
+  async function markOrderAsComplete(orderId: number) {
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/orders/${orderId}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "completed" }),
+      });
+
+      const payload = (await response.json()) as { message?: string; order?: { id?: number; status?: string } };
+
+      if (!response.ok) {
+        setStatusMessage(payload.message ?? "Unable to update order status.");
+        return;
+      }
+
+      setDashboardData((current) => {
+        if (!current) {
+          return current;
+        }
+
+        if (current.role === "delivery") {
+          const nextTrips = current.activeTrips.map((trip) =>
+            trip.id === orderId
+              ? { ...trip, status: payload.order?.status ?? "completed" }
+              : trip
+          );
+
+          return {
+            ...current,
+            activeTrips: nextTrips,
+          };
+        }
+
+        if (current.role === "customer") {
+          const nextLiveOrders = (((current as any).liveOrders ?? []) as LiveOrderSummary[]).map((order) =>
+            order.id === orderId
+              ? { ...order, status: payload.order?.status ?? "completed" }
+              : order
+          );
+
+          return {
+            ...current,
+            liveOrders: nextLiveOrders,
+            activeOrder:
+              current.activeOrder && Number(current.activeOrder.id) === orderId
+                ? { ...current.activeOrder, status: payload.order?.status ?? "completed" }
+                : current.activeOrder,
+          };
+        }
+
+        return current;
+      });
+
+      setStatusMessage(`Order #${orderId} marked complete.`);
+    } catch {
+      setStatusMessage("Unable to reach the backend while updating order status.");
+    }
+  }
+
   function getMenuPrice(restaurantId: number, dishIndex: number) {
     return 79 + restaurantId * 7 + dishIndex * 18;
   }
@@ -1435,17 +1565,82 @@ export function AuthLanding() {
       return;
     }
 
+    const cleanName = newRestaurantName.trim();
+    const cleanCuisine = newRestaurantCuisine.trim();
+    const cleanLocation = newRestaurantLocation.trim();
+    const cleanEta = newRestaurantEta.trim();
+    const cleanRating = newRestaurantRating.trim();
+    const cleanDescription = newRestaurantDescription.trim();
+
+    const missingStepOneFields: string[] = [];
+
+    if (!cleanName) missingStepOneFields.push("restaurant name");
+    if (!cleanCuisine) missingStepOneFields.push("cuisine");
+    if (!cleanLocation) missingStepOneFields.push("location");
+    if (!cleanEta) missingStepOneFields.push("ETA minutes");
+    if (!cleanRating) missingStepOneFields.push("rating");
+    if (!cleanDescription) missingStepOneFields.push("description");
+
+    if (missingStepOneFields.length > 0) {
+      setRestaurantFormStatus(`Step 1/2 missing: ${missingStepOneFields.join(", ")}.`);
+      return;
+    }
+
+    if (restaurantCreateStep === 1) {
+      setRestaurantProfileDraft((current) => ({
+        ...current,
+        restaurantName: current.restaurantName || cleanName,
+        cuisineType: current.cuisineType || cleanCuisine,
+        cityState: current.cityState || cleanLocation,
+        description: current.description || cleanDescription,
+      }));
+      setRestaurantCreateStep(2);
+      setRestaurantFormStatus("Step 1/2 complete. Fill Step 2/2 restaurant profile, then add the restaurant.");
+      return;
+    }
+
+    const profileRestaurantName = restaurantProfileDraft.restaurantName.trim() || cleanName;
+    const profileOwnerName = restaurantProfileDraft.ownerName.trim();
+    const profileContactNumber = restaurantProfileDraft.contactNumber.trim();
+    const profileEmail = restaurantProfileDraft.email.trim();
+    const profileAddress = restaurantProfileDraft.restaurantAddress.trim();
+    const profileCityState = restaurantProfileDraft.cityState.trim();
+    const profileCuisineType = restaurantProfileDraft.cuisineType.trim() || cleanCuisine;
+    const profileGstLicenseNumber = restaurantProfileDraft.gstLicenseNumber.trim();
+    const profileOpeningHours = restaurantProfileDraft.openingHours.trim();
+    const profileDeliveryRadius = restaurantProfileDraft.deliveryRadius.trim();
+    const profileDescription = restaurantProfileDraft.description.trim() || cleanDescription;
+
+    const missingStepTwoFields: string[] = [];
+
+    if (!profileRestaurantName) missingStepTwoFields.push("restaurant name");
+    if (!profileOwnerName) missingStepTwoFields.push("owner name");
+    if (!profileContactNumber) missingStepTwoFields.push("contact number");
+    if (!profileEmail) missingStepTwoFields.push("email");
+    if (!profileAddress) missingStepTwoFields.push("restaurant address");
+    if (!profileCityState) missingStepTwoFields.push("city / state");
+    if (!profileCuisineType) missingStepTwoFields.push("cuisine type");
+    if (!profileGstLicenseNumber) missingStepTwoFields.push("GST / license number");
+    if (!profileOpeningHours) missingStepTwoFields.push("opening hours");
+    if (!profileDeliveryRadius) missingStepTwoFields.push("delivery radius");
+    if (!profileDescription) missingStepTwoFields.push("profile description");
+
+    if (missingStepTwoFields.length > 0) {
+      setRestaurantFormStatus(`Step 2/2 missing: ${missingStepTwoFields.join(", ")}.`);
+      return;
+    }
+
     try {
       const response = await fetch(`${apiBaseUrl}/api/restaurants`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: newRestaurantName.trim(),
-          cuisine: newRestaurantCuisine.trim(),
-          location: newRestaurantLocation.trim(),
-          etaMinutes: Number(newRestaurantEta),
-          rating: Number(newRestaurantRating),
-          description: newRestaurantDescription.trim(),
+          name: cleanName,
+          cuisine: cleanCuisine,
+          location: cleanLocation,
+          etaMinutes: Number(cleanEta),
+          rating: Number(cleanRating),
+          description: cleanDescription,
           featured: newRestaurantFeatured,
         }),
       });
@@ -1457,7 +1652,38 @@ export function AuthLanding() {
         return;
       }
 
-      setRestaurantFormStatus(`${payload.message ?? "Restaurant added."} Source: ${payload.source ?? "backend"}.`);
+      const restaurantIdentifier = restaurantProfileDraft.userIdentifier.trim() || createRestaurantIdentifier(cleanName);
+      const profileResponse = await fetch(`${apiBaseUrl}/api/restaurant-profiles/${encodeURIComponent(restaurantIdentifier)}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userIdentifier: restaurantIdentifier,
+          restaurantName: profileRestaurantName,
+          restaurantLogoUrl: restaurantProfileDraft.restaurantLogoUrl,
+          coverImageUrl: restaurantProfileDraft.coverImageUrl,
+          ownerName: profileOwnerName,
+          contactNumber: profileContactNumber,
+          email: profileEmail,
+          restaurantAddress: profileAddress,
+          cityState: profileCityState,
+          cuisineType: profileCuisineType,
+          gstLicenseNumber: profileGstLicenseNumber,
+          openingHours: profileOpeningHours,
+          deliveryRadius: profileDeliveryRadius,
+          description: profileDescription,
+          verificationStatus: restaurantProfileDraft.verificationStatus,
+        }),
+      });
+
+      const profilePayload = (await profileResponse.json()) as { message?: string; profile?: RestaurantProfileDraft };
+
+      if (!profileResponse.ok) {
+        setRestaurantFormStatus(`Restaurant added, but profile save failed: ${profilePayload.message ?? "Please retry Step 2/2."}`);
+        return;
+      }
+
+      setRestaurantFormStatus(`${payload.message ?? "Restaurant added."} Step 1/2 and Step 2/2 complete. Source: ${payload.source ?? "backend"}.`);
+      setRestaurantProfileStatus(profilePayload.message ?? "Restaurant profile saved.");
       if (!payload.restaurant) {
         setNewRestaurantName("");
         setNewRestaurantCuisine("");
@@ -1466,6 +1692,8 @@ export function AuthLanding() {
         setNewRestaurantRating("");
         setNewRestaurantDescription("");
         setNewRestaurantFeatured(false);
+        setRestaurantCreateStep(1);
+        setRestaurantProfileDraft(createEmptyRestaurantProfileDraft());
         return;
       }
 
@@ -1480,6 +1708,7 @@ export function AuthLanding() {
           restaurantOptions: [addedRestaurant, ...current.restaurantOptions],
         };
       });
+      setSelectedRestaurantOptionId(addedRestaurant.id);
       pushPlatformNotification("Restaurant added", `${addedRestaurant.name} is now live in the restaurant list.`);
       setNewRestaurantName("");
       setNewRestaurantCuisine("");
@@ -1488,6 +1717,8 @@ export function AuthLanding() {
       setNewRestaurantRating("");
       setNewRestaurantDescription("");
       setNewRestaurantFeatured(false);
+      setRestaurantCreateStep(1);
+      setRestaurantProfileDraft(createEmptyRestaurantProfileDraft());
     } catch {
       setRestaurantFormStatus("Unable to reach the backend while adding the restaurant.");
     }
@@ -1616,7 +1847,7 @@ export function AuthLanding() {
         return;
       }
 
-      if (payload.item?.id) {
+      if (payload.item?.id && editingItemId) {
         setSelectedMenuItemId(payload.item.id);
       }
 
@@ -1642,10 +1873,6 @@ export function AuthLanding() {
           editingItemId ? "Menu item updated" : "Menu item added",
           `${savedMenuItem.dishName ?? "A menu item"} is now reflected in the restaurant menu.`
         );
-      }
-
-      if (!editingItemId) {
-        setSelectedMenuItemId(null);
       }
 
       setMenuItemStatus(payload.message ?? "Menu item saved.");
@@ -1901,11 +2128,11 @@ export function AuthLanding() {
   if (stage === "dashboard") {
     if (selectedRole === "delivery") {
       const deliveryDashboard = (dashboard.role === "delivery" ? dashboard : createFallbackDashboard("delivery", fallbackRestaurantsForUi)) as Extract<DashboardData, { role: "delivery" }>;
-      const selectedTrip = deliveryDashboard.activeTrips.find((trip) => trip.id === selectedDeliveryTripId) ?? deliveryDashboard.activeTrips[0] ?? null;
+      const selectedTrip = (deliveryDashboard.activeTrips.find((trip) => trip.id === selectedDeliveryTripId) ?? deliveryDashboard.activeTrips[0] ?? null) as any;
 
       return (
         <main className="min-h-screen px-4 py-4 text-[#243025] sm:px-6 sm:py-6 lg:px-8">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.20),_transparent_20%),radial-gradient(circle_at_22%_78%,_rgba(255,252,245,0.22),_transparent_36%),linear-gradient(180deg,_#f0f4e9_0%,_#d9e3d3_42%,_#bdd0bb_100%)]" />
           {globalBackButton}
           {appMenu}
           <section className="relative mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl items-start gap-6 lg:grid-cols-[0.95fr_1.05fr]">
@@ -1956,14 +2183,39 @@ export function AuthLanding() {
                 <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#4f6750]">Selected trip</p>
                 {selectedTrip ? (
                   <>
-                    <p className="mt-2 text-2xl font-black text-[#1f2b21]">{selectedTrip.customer}</p>
+                    <p className="mt-2 text-2xl font-black text-[#1f2b21]">{selectedTrip.restaurantName ?? selectedTrip.pickup}</p>
+                    <p className="mt-1 text-sm text-[#5e6b5a]">Order for {selectedTrip.customer}</p>
                     <p className="mt-1 text-sm text-[#5e6b5a]">{selectedTrip.pickup} → {selectedTrip.dropoff}</p>
-                    <p className="mt-3 text-sm text-[#5e6b5a]">{selectedTrip.status}</p>
+                    <p className="mt-3 text-sm text-[#5e6b5a]">Status: {selectedTrip.status}</p>
                     <p className="mt-1 text-sm text-[#5e6b5a]">Current location: {selectedTrip.currentLocation}</p>
+                    {selectedTrip.items?.length ? (
+                      <div className="mt-4 rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-3">
+                        <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#4f6750]">Ordered dishes</p>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {selectedTrip.items.map((item: any) => (
+                            <span key={`${selectedTrip.id}-${item.name}`} className="rounded-full bg-[#eef3e8] px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#4f5b47]">
+                              {item.name} x{item.quantity}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
                     <div className="mt-4 flex flex-wrap gap-2">
                       <span className="rounded-full bg-white/90 px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#4f6750]">ETA {selectedTrip.etaMinutes} min</span>
                       <span className="rounded-full bg-white/90 px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#4f6750]">Trip {selectedTrip.id}</span>
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => markOrderAsComplete(selectedTrip.id)}
+                      disabled={selectedTrip.status.toLowerCase() === "completed"}
+                      className={`mt-4 rounded-full px-5 py-3 text-sm font-semibold shadow-[0_10px_24px_rgba(63,90,61,0.18)] ${
+                        selectedTrip.status.toLowerCase() === "completed"
+                          ? "cursor-not-allowed bg-[#d8e4ce] text-[#60705d]"
+                          : "bg-[#223326] text-[#f5f8f1]"
+                      }`}
+                    >
+                      {selectedTrip.status.toLowerCase() === "completed" ? "Marked complete" : "Mark as complete"}
+                    </button>
                   </>
                 ) : null}
               </div>
@@ -2068,7 +2320,7 @@ export function AuthLanding() {
 
       return (
         <main className="min-h-screen px-4 py-4 text-[#243025] sm:px-6 sm:py-6 lg:px-8">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.20),_transparent_20%),radial-gradient(circle_at_22%_78%,_rgba(255,252,245,0.22),_transparent_36%),linear-gradient(180deg,_#f0f4e9_0%,_#d9e3d3_42%,_#bdd0bb_100%)]" />
           {globalBackButton}
           {appMenu}
           <section className="relative mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl items-start gap-6 lg:grid-cols-[1fr_1fr]">
@@ -2078,6 +2330,21 @@ export function AuthLanding() {
               <p className="mt-3 text-sm leading-7 text-[#5e6b5a]">Add a restaurant, edit your profile, and keep the kitchen queue moving.</p>
 
               <form className="mt-6 grid gap-3" onSubmit={handleRestaurantCreate}>
+                <div className="flex items-center justify-between rounded-[1.15rem] border border-[#c9d7bf] bg-[linear-gradient(180deg,#f6faf2_0%,#e8f1df_100%)] px-4 py-3">
+                  <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#4f6750]">Step {restaurantCreateStep}/2</p>
+                  {restaurantCreateStep === 2 ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRestaurantCreateStep(1);
+                        setRestaurantFormStatus("Back to Step 1/2.");
+                      }}
+                      className="rounded-full border border-[#c9d7bf] bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-[#4f5b47]"
+                    >
+                      Back to Step 1
+                    </button>
+                  ) : null}
+                </div>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <input value={newRestaurantName} onChange={(event) => setNewRestaurantName(event.target.value)} placeholder="Restaurant name" className="rounded-[1.15rem] border border-[#6f7f68]/45 bg-[#f8faf4] px-4 py-3 outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10" />
                   <input value={newRestaurantCuisine} onChange={(event) => setNewRestaurantCuisine(event.target.value)} placeholder="Cuisine" className="rounded-[1.15rem] border border-[#6f7f68]/45 bg-[#f8faf4] px-4 py-3 outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10" />
@@ -2087,12 +2354,12 @@ export function AuthLanding() {
                   <label className="flex items-center gap-2 rounded-[1.15rem] border border-[#6f7f68]/45 bg-[#f8faf4] px-4 py-3 text-sm text-[#4f5b47]"><input type="checkbox" checked={newRestaurantFeatured} onChange={(event) => setNewRestaurantFeatured(event.target.checked)} /> Featured</label>
                 </div>
                 <textarea value={newRestaurantDescription} onChange={(event) => setNewRestaurantDescription(event.target.value)} placeholder="Short description" className="min-h-24 rounded-[1.15rem] border border-[#6f7f68]/45 bg-[#f8faf4] px-4 py-3 outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10" />
-                <button type="submit" className="rounded-full bg-[#223326] px-5 py-3 text-sm font-semibold text-[#f5f8f1] shadow-[0_10px_24px_rgba(63,90,61,0.18)]">Add restaurant</button>
+                <button type="submit" className="rounded-full bg-[#223326] px-5 py-3 text-sm font-semibold text-[#f5f8f1] shadow-[0_10px_24px_rgba(63,90,61,0.18)]">{restaurantCreateStep === 1 ? "Continue to Step 2" : "Add restaurant"}</button>
               </form>
 
               <div className="mt-6 rounded-[1.35rem] border border-[#c9d7bf] bg-[linear-gradient(180deg,#f6faf2_0%,#e8f1df_100%)] p-4 shadow-[0_12px_28px_rgba(63,78,56,0.08)]">
-                <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#4f6750]">Restaurant profile</p>
-                <p className="mt-1 text-sm text-[#5e6b5a]">Edit owner, contact, and brand details.</p>
+                <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#4f6750]">Restaurant profile {restaurantCreateStep === 2 ? "• Step 2/2 required" : ""}</p>
+                <p className="mt-1 text-sm text-[#5e6b5a]">{restaurantCreateStep === 2 ? "Complete these fields before adding the restaurant." : "Edit owner, contact, and brand details."}</p>
 
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   <input value={restaurantProfileDraft.restaurantName} onChange={(event) => setRestaurantProfileDraft((current) => ({ ...current, restaurantName: event.target.value }))} placeholder="Restaurant name" className="rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#4f6b52]/70 focus:ring-2 focus:ring-[#4f6b52]/10" />
@@ -2112,22 +2379,10 @@ export function AuthLanding() {
                   </select>
                 </div>
 
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  <label className="rounded-[1rem] border border-dashed border-[#c9d7bf] bg-white px-3 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#4f6750]">
-                    Menu item image
-                    <input type="file" accept="image/*" className="mt-2 block w-full text-[11px] normal-case tracking-normal" onChange={(event) => {
-                      const file = event.target.files?.[0];
-                      if (file) {
-                        uploadImageFile(file, "menu-item", menuItemDraft.restaurantIdentifier || restaurantProfileDraft.userIdentifier || ((dashboardData as any)?.restaurantProfile?.userIdentifier ?? ""), "menu-item", (url) => setMenuItemDraft((current) => ({ ...current, dishImageUrl: url })));
-                      }
-                    }} />
-                  </label>
-                </div>
-
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
                   <div className="text-sm text-[#5e6b5a]">{restaurantProfileStatus || uploadStatus}</div>
                   <button type="button" onClick={handleRestaurantProfileSave} className="rounded-full bg-[#223326] px-5 py-3 text-sm font-semibold text-[#f5f8f1] shadow-[0_10px_24px_rgba(63,90,61,0.18)]">
-                    Save restaurant profile
+                    {restaurantCreateStep === 2 ? "Save profile draft" : "Save restaurant profile"}
                   </button>
                 </div>
               </div>
@@ -2182,7 +2437,7 @@ export function AuthLanding() {
                     onClick={() => setSelectedRestaurantOptionId(restaurant.id)}
                     className={`rounded-[1.35rem] border p-4 text-left shadow-[0_10px_24px_rgba(63,78,56,0.08)] transition ${
                       selectedRestaurantOption?.id === restaurant.id
-                        ? "border-[#bdd0b2] bg-[linear-gradient(180deg,#f3f7ef_0%,#e7f0df_100%)]"
+                        ? "border-[#557051] bg-[linear-gradient(180deg,#dce9d4_0%,#bfd2b5_100%)] shadow-[0_14px_30px_rgba(46,68,44,0.2)]"
                         : "border-[#d3dfca] bg-[linear-gradient(180deg,#fbfdf8_0%,#eef4e6_100%)] hover:bg-[#f7faf4]"
                     }`}
                   >
@@ -2306,7 +2561,7 @@ export function AuthLanding() {
 
       return (
         <main className="min-h-screen px-4 py-4 text-[#243025] sm:px-6 sm:py-6 lg:px-8">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.20),_transparent_20%),radial-gradient(circle_at_22%_78%,_rgba(255,252,245,0.22),_transparent_36%),linear-gradient(180deg,_#f0f4e9_0%,_#d9e3d3_42%,_#bdd0bb_100%)]" />
           {globalBackButton}
           {appMenu}
           <section className="relative mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl items-start gap-6 lg:grid-cols-[0.92fr_1.08fr]">
@@ -2536,11 +2791,27 @@ export function AuthLanding() {
       );
     }
 
-    const customerDashboard = (dashboard.role === "customer" ? dashboard : createFallbackDashboard("customer", fallbackRestaurantsForUi)) as Extract<DashboardData, { role: "customer" }>;
+    const customerDashboard = (dashboard.role === "customer" ? dashboard : createFallbackDashboard("customer", fallbackRestaurantsForUi)) as any;
+    const liveOrders = customerDashboard.liveOrders && customerDashboard.liveOrders.length > 0
+      ? customerDashboard.liveOrders
+      : [
+          {
+            id: Number(String(customerDashboard.activeOrder.id).replace(/\D/g, "")) || Date.now(),
+            restaurantId: customerDashboard.restaurants[0]?.id ?? 1,
+            restaurantName: customerDashboard.activeOrder.restaurant,
+            customerIdentifier: identifier || "guest",
+            status: customerDashboard.activeOrder.status,
+            rider: customerDashboard.activeOrder.rider,
+            etaMinutes: customerDashboard.activeOrder.etaMinutes,
+            address: customerDashboard.activeOrder.address,
+            total: customerDashboard.activeOrder.total ?? 0,
+            items: customerDashboard.activeOrder.items ?? [],
+          },
+        ];
 
     return (
       <main className="min-h-screen px-4 py-4 text-[#243025] sm:px-6 sm:py-6 lg:px-8">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.20),_transparent_20%),radial-gradient(circle_at_22%_78%,_rgba(255,252,245,0.22),_transparent_36%),linear-gradient(180deg,_#f0f4e9_0%,_#d9e3d3_42%,_#bdd0bb_100%)]" />
         {globalBackButton}
         {appMenu}
         <section className="relative mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl items-start gap-6 lg:grid-cols-[0.95fr_1.05fr]">
@@ -2548,18 +2819,42 @@ export function AuthLanding() {
             <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite • Customer</p>
             <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">Track your order</h1>
             <p className="mt-3 text-sm leading-7 text-[#5e6b5a]">See your active order, rider ETA, and the restaurants available right now.</p>
-            <div className="mt-6 rounded-[1.5rem] border border-[#dfe7d6] bg-[#eef3e8] p-5 shadow-[0_10px_24px_rgba(37,46,34,0.05)]">
-              <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#4f6750]">Active order</p>
-              <p className="mt-2 text-2xl font-black text-[#1f2b21]">{customerDashboard.activeOrder.restaurant}</p>
-              <p className="mt-1 text-sm text-[#5e6b5a]">{customerDashboard.activeOrder.status} • Rider {customerDashboard.activeOrder.rider}</p>
-              <p className="mt-1 text-sm text-[#5e6b5a]">ETA {customerDashboard.activeOrder.etaMinutes} min • {customerDashboard.activeOrder.address}</p>
+            <div className="mt-6 grid gap-3">
+              {liveOrders.map((order: any) => (
+                <div key={order.id} className="rounded-[1.5rem] border border-[#dfe7d6] bg-[#eef3e8] p-5 shadow-[0_10px_24px_rgba(37,46,34,0.05)]">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#4f6750]">Live order status</p>
+                      <p className="mt-2 text-2xl font-black text-[#1f2b21]">{order.restaurantName}</p>
+                    </div>
+                    <span className={`rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.2em] ${order.status.toLowerCase() === "completed" ? "bg-[#223326] text-[#f5f8f1]" : "bg-[#4f6b52] text-[#f5f8f1]"}`}>
+                      {order.status}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-sm text-[#5e6b5a]">Rider {order.rider}</p>
+                  <p className="mt-1 text-sm text-[#5e6b5a]">ETA {order.etaMinutes} min • {order.address}</p>
+                  {order.items.length > 0 ? (
+                    <div className="mt-4 rounded-[1rem] border border-[#dfe7d6] bg-white px-3 py-3">
+                      <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#4f6750]">Ordered dishes</p>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {order.items.map((item: any) => (
+                          <span key={`${order.id}-${item.name}`} className="rounded-full bg-[#eef3e8] px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#4f5b47]">
+                            {item.name} x{item.quantity}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+                  <p className="mt-3 text-sm text-[#5e6b5a]">Total ₹{order.total.toFixed(0)} • {formatOrderItems(order.items)}</p>
+                </div>
+              ))}
             </div>
           </SoftScreen>
 
           <SoftScreen>
             <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">Live options</p>
             <div className="mt-4 grid gap-3">
-              {customerDashboard.restaurants.map((restaurant) => (
+              {customerDashboard.restaurants.map((restaurant: any) => (
                 <button
                   key={restaurant.id}
                   type="button"
@@ -2595,7 +2890,7 @@ export function AuthLanding() {
 
     return (
       <main className="min-h-screen px-4 py-4 text-[#243025] sm:px-6 sm:py-6 lg:px-8">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.20),_transparent_20%),radial-gradient(circle_at_22%_78%,_rgba(255,252,245,0.22),_transparent_36%),linear-gradient(180deg,_#f0f4e9_0%,_#d9e3d3_42%,_#bdd0bb_100%)]" />
         {globalBackButton}
         {appMenu}
         <button type="button" onClick={() => setIsRestaurantCartOpen((current) => !current)} className="fixed right-3 top-1/2 z-30 -translate-y-1/2 rounded-full border border-[#6f7f68]/45 bg-[#223326] p-3 shadow-[0_14px_30px_rgba(37,46,34,0.14)]" aria-label="Open cart">
@@ -2720,7 +3015,7 @@ export function AuthLanding() {
 
     return (
       <main className="min-h-screen px-4 py-4 text-[#243025] sm:px-6 sm:py-6 lg:px-8">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.20),_transparent_20%),radial-gradient(circle_at_22%_78%,_rgba(255,252,245,0.22),_transparent_36%),linear-gradient(180deg,_#f0f4e9_0%,_#d9e3d3_42%,_#bdd0bb_100%)]" />
         {globalBackButton}
         {appMenu}
 
@@ -2820,14 +3115,14 @@ export function AuthLanding() {
 
     return (
       <main
-        className="relative h-[100dvh] overflow-x-hidden px-3 text-[#243025] sm:px-6 lg:px-8"
+        className="relative min-h-[100dvh] overflow-x-hidden px-3 text-[#243025] sm:px-6 lg:px-8"
         style={{
           paddingTop: "max(0.7rem, env(safe-area-inset-top))",
           paddingBottom: "max(0.7rem, env(safe-area-inset-bottom))",
         }}
       >
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,#efe6d0_0%,#e7dcc0_100%)]" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.12),transparent_58%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_72%,rgba(98,129,96,0.22),transparent_30%),radial-gradient(circle_at_78%_18%,rgba(255,252,245,0.55),transparent_36%),linear-gradient(180deg,#efe6d0_0%,#d8d8c3_36%,#bdd0b8_68%,#a7c197_100%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.10),transparent_62%)]" />
 
         <section className={`relative mx-auto flex h-full w-full max-w-7xl flex-col ${isCompactLayout ? "gap-2.5" : "gap-3 lg:gap-4"}`}>
           <header className={`flex gap-3 ${isCompactLayout ? "flex-col items-start" : "items-start justify-between gap-4"}`}>
@@ -2898,9 +3193,14 @@ export function AuthLanding() {
                             {/* TOP */}
                             <div className="flex items-start justify-between px-7 pt-7">
                               <div>
-                                <h3 className="text-[2rem] font-black tracking-[-0.04em] text-[#132819]">
-                                  {card.title}
-                                </h3>
+                                <div className="flex items-center gap-3">
+                                  <div className="flex h-12 w-12 items-center justify-center rounded-[1rem] border border-[#cfd9c7] bg-white text-2xl shadow-[0_8px_18px_rgba(37,46,34,0.08)]">
+                                    {card.icon}
+                                  </div>
+                                  <h3 className="text-[2rem] font-black tracking-[-0.04em] text-[#132819]">
+                                    {card.title}
+                                  </h3>
+                                </div>
 
                                 <p className="mt-2 text-[1rem] text-[#5d695d]">
                                   {card.subtitle}
@@ -2908,8 +3208,8 @@ export function AuthLanding() {
                               </div>
 
                               {isActive && (
-                                <div className="rounded-full bg-[#2d472c] px-4 py-1 text-[0.7rem] font-bold uppercase tracking-[0.22em] text-white">
-                                  Selected
+                                <div className="flex h-12 w-12 items-center justify-center rounded-full border border-[#2d472c] bg-[#eef5e7] text-2xl shadow-[0_10px_22px_rgba(45,71,44,0.14)]">
+                                  {card.icon}
                                 </div>
                               )}
                             </div>
@@ -3010,7 +3310,7 @@ export function AuthLanding() {
   if (stage === "continue") {
     return (
       <main className="min-h-screen px-4 py-4 text-[#243025] sm:px-6 sm:py-6 lg:px-8">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.20),_transparent_20%),radial-gradient(circle_at_22%_78%,_rgba(255,252,245,0.22),_transparent_36%),linear-gradient(180deg,_#f0f4e9_0%,_#d9e3d3_42%,_#bdd0bb_100%)]" />
         {globalBackButton}
         {appMenu}
 
@@ -3048,7 +3348,7 @@ export function AuthLanding() {
   if (stage === "restaurants") {
     return (
       <main className="min-h-screen px-4 py-4 text-[#243025] sm:px-6 sm:py-6 lg:px-8">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.20),_transparent_20%),radial-gradient(circle_at_22%_78%,_rgba(255,252,245,0.22),_transparent_36%),linear-gradient(180deg,_#f0f4e9_0%,_#d9e3d3_42%,_#bdd0bb_100%)]" />
         {globalBackButton}
         {appMenu}
 
@@ -3304,3 +3604,4 @@ export function AuthLanding() {
     </main>
   );
 }
+

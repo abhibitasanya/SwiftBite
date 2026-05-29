@@ -19,8 +19,8 @@ html {
     radial-gradient(circle at top left, rgba(63, 90, 61, 0.28), transparent 18%),
     radial-gradient(circle at 80% 12%, rgba(111, 135, 100, 0.22), transparent 16%),
     radial-gradient(circle at 18% 84%, rgba(101, 118, 92, 0.16), transparent 20%),
-    radial-gradient(circle at 52% 48%, rgba(246, 242, 229, 0.65), transparent 42%),
-    linear-gradient(180deg, #dfead8 0%, #c8d9b8 34%, #a7c090 64%, #86ab7e 100%);
+    radial-gradient(circle at 52% 48%, rgba(246, 242, 229, 0.52), transparent 48%),
+    linear-gradient(180deg, #e7eee0 0%, #d9e5d1 28%, #c8d8bf 56%, #b4caad 78%, #9dbb95 100%);
   color-scheme: light;
 }
 
