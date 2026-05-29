@@ -1606,7 +1606,7 @@ export function createApp() {
     }
     // include active orders count when available
     let ordersCount = 0;
-    let orderResult = { orders: fallbackOrders, source: "fallback" as const };
+    let orderResult: Awaited<ReturnType<typeof loadOrders>> = { orders: fallbackOrders, source: "fallback" as const };
     try {
       orderResult = await loadOrders();
       ordersCount = orderResult.orders.length;

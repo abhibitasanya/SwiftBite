@@ -182,6 +182,7 @@ const fallbackDeliveryTasks = [
         currentLocation: "Main Road checkpoint",
     },
 ];
+let fallbackOrders = [];
 const fallbackPlatformUsers = [
     { fullName: "Customer Demo", identifier: "customer@example.com", role: "customer" },
     { fullName: "Delivery Demo", identifier: "9876543210", role: "delivery" },
@@ -785,6 +786,77 @@ async function loadRestaurants() {
         return { restaurants: fallbackRestaurants, source: "fallback" };
     }
 }
+async function loadOrders() {
+    try {
+        const [rows] = await db.query("SELECT o.id, o.restaurant_id, r.name as restaurant_name, o.customer_identifier, o.items_json, o.total_amount, o.status, o.address, o.contact_number, o.notes, o.created_at FROM orders o LEFT JOIN restaurants r ON r.id = o.restaurant_id ORDER BY o.created_at DESC");
+        return {
+            orders: rows.map((row) => ({
+                id: Number(row.id),
+                restaurantId: Number(row.restaurant_id),
+                restaurantName: String(row.restaurant_name || ""),
+                customerIdentifier: String(row.customer_identifier),
+                items: JSON.parse(String(row.items_json || "[]")),
+                total: Number(row.total_amount),
+                status: String(row.status),
+                address: String(row.address),
+                contactNumber: String(row.contact_number),
+                notes: normalizeEmpty(row.notes ? String(row.notes) : ""),
+                createdAt: new Date(row.created_at).toISOString(),
+            })),
+            source: "mysql",
+        };
+    }
+    catch {
+        return { orders: fallbackOrders, source: "fallback" };
+    }
+}
+function mapOrderToLiveOrder(order, index = 0) {
+    return {
+        id: order.id,
+        restaurantId: order.restaurantId,
+        restaurantName: order.restaurantName || `Restaurant #${order.restaurantId}`,
+        customerIdentifier: order.customerIdentifier,
+        status: order.status,
+        rider: order.status === "completed" ? "Delivered" : "Delivery partner",
+        etaMinutes: Math.max(8, 18 + index * 4),
+        address: order.address,
+        total: order.total,
+        items: order.items,
+    };
+}
+function mapOrderToDeliveryTrip(order, index = 0) {
+    return {
+        id: order.id,
+        customer: order.customerIdentifier,
+        pickup: order.restaurantName || `Restaurant #${order.restaurantId}`,
+        dropoff: order.address,
+        status: order.status === "completed" ? "Completed" : order.status === "placed" ? "Preparing" : order.status,
+        etaMinutes: Math.max(8, 18 + index * 4),
+        currentLocation: order.status === "completed" ? "Delivered" : index === 0 ? "On the way" : "Assigned",
+        restaurantName: order.restaurantName || `Restaurant #${order.restaurantId}`,
+        total: order.total,
+        items: order.items,
+    };
+}
+async function saveOrder(order) {
+    try {
+        await db.query("INSERT INTO orders (restaurant_id, customer_identifier, items_json, total_amount, status, address, contact_number, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [
+            order.restaurantId,
+            order.customerIdentifier,
+            JSON.stringify(order.items),
+            order.total,
+            order.status,
+            order.address,
+            order.contactNumber,
+            order.notes || null,
+        ]);
+        return { source: "mysql" };
+    }
+    catch {
+        fallbackOrders.unshift(order);
+        return { source: "fallback" };
+    }
+}
 function buildDashboard(role, restaurants, users, riderProfiles = fallbackRiderProfiles, restaurantProfiles = fallbackRestaurantProfiles, menuItems = fallbackMenuItems, categories = fallbackRestaurantCategories) {
     if (role === "delivery") {
         const riderProfile = riderProfiles[0] ?? fallbackRiderProfiles[0];
@@ -1147,6 +1219,55 @@ export function createApp() {
             response.status(201).json({ message: "Restaurant added.", restaurant: nextRestaurant, source: "fallback" });
         }
     });
+    app.post("/api/orders", async (request, response) => {
+        try {
+            const body = request.body;
+            if (!body || !Array.isArray(body.items) || body.items.length === 0) {
+                response.status(400).json({ message: "Invalid order payload." });
+                return;
+            }
+            const total = body.items.reduce((s, i) => s + (i.price || 0) * (i.quantity || 1), 0);
+            const nextOrder = {
+                id: Date.now(),
+                restaurantId: Number(body.restaurantId || 0),
+                restaurantName: body.restaurantName || "",
+                customerIdentifier: normalizeEmpty(body.customerIdentifier) || "guest",
+                items: body.items.map((it) => ({ name: it.name, quantity: Number(it.quantity || 1), price: Number(it.price || 0) })),
+                total,
+                status: "placed",
+                address: normalizeEmpty(body.address),
+                contactNumber: normalizeEmpty(body.contactNumber),
+                notes: normalizeEmpty(body.notes),
+                createdAt: new Date().toISOString(),
+            };
+            const result = await saveOrder(nextOrder);
+            response.status(201).json({ message: "Order placed.", order: nextOrder, source: result.source });
+        }
+        catch (err) {
+            response.status(500).json({ message: "Unable to place order right now." });
+        }
+    });
+    app.patch("/api/orders/:id/status", async (request, response) => {
+        const orderId = Number(request.params.id);
+        const parsed = z.object({ status: z.enum(["placed", "completed"]) }).safeParse(request.body);
+        if (!Number.isFinite(orderId) || !parsed.success) {
+            response.status(400).json({ message: "Invalid order status payload." });
+            return;
+        }
+        try {
+            await db.query("UPDATE orders SET status = ? WHERE id = ?", [parsed.data.status, orderId]);
+            response.json({ message: `Order marked ${parsed.data.status}.`, order: { id: orderId, status: parsed.data.status }, source: "mysql" });
+        }
+        catch {
+            const fallbackOrder = fallbackOrders.find((order) => order.id === orderId);
+            if (!fallbackOrder) {
+                response.status(404).json({ message: "Order not found." });
+                return;
+            }
+            fallbackOrder.status = parsed.data.status;
+            response.json({ message: `Order marked ${parsed.data.status}.`, order: fallbackOrder, source: "fallback" });
+        }
+    });
     app.get("/api/dashboard/:role", async (request, response) => {
         const role = request.params.role;
         if (!["customer", "delivery", "restaurant", "platform"].includes(role)) {
@@ -1168,10 +1289,51 @@ export function createApp() {
                 users = fallbackPlatformUsers;
             }
         }
+        // include active orders count when available
+        let ordersCount = 0;
+        let orderResult = { orders: fallbackOrders, source: "fallback" };
+        try {
+            orderResult = await loadOrders();
+            ordersCount = orderResult.orders.length;
+        }
+        catch {
+            ordersCount = fallbackOrders.length;
+        }
         const riderResult = role === "delivery" || role === "platform" ? await loadRiderProfiles() : { profiles: fallbackRiderProfiles, source: "fallback" };
         const restaurantProfileResult = role === "restaurant" || role === "platform" ? await loadRestaurantProfiles() : { profiles: fallbackRestaurantProfiles, source: "fallback" };
         const menuResult = role === "restaurant" || role === "platform" ? await loadMenuItems() : { items: fallbackMenuItems, source: "fallback" };
-        response.json(buildDashboard(role, restaurantResult.restaurants, users, riderResult.profiles, restaurantProfileResult.profiles, menuResult.items, fallbackRestaurantCategories));
+        const dashboard = buildDashboard(role, restaurantResult.restaurants, users, riderResult.profiles, restaurantProfileResult.profiles, menuResult.items, fallbackRestaurantCategories);
+        if (dashboard.totals) {
+            dashboard.totals.activeOrders = orderResult.orders.filter((order) => order.status !== "completed").length;
+        }
+        if (role === "customer" && orderResult.orders.length > 0) {
+            const liveOrders = orderResult.orders.map((order, index) => mapOrderToLiveOrder(order, index));
+            dashboard.liveOrders = liveOrders;
+            const firstOrder = liveOrders[0];
+            if (firstOrder) {
+                dashboard.activeOrder = {
+                    id: String(firstOrder.id),
+                    restaurant: firstOrder.restaurantName,
+                    status: firstOrder.status,
+                    rider: firstOrder.rider,
+                    etaMinutes: firstOrder.etaMinutes,
+                    address: firstOrder.address,
+                    total: firstOrder.total,
+                    items: firstOrder.items,
+                };
+            }
+        }
+        if (role === "delivery" && orderResult.orders.length > 0) {
+            const activeTrips = orderResult.orders.map((order, index) => mapOrderToDeliveryTrip(order, index));
+            dashboard.activeTrips = activeTrips;
+            dashboard.stats.activeTrips = activeTrips.filter((trip) => trip.status.toLowerCase() !== "completed").length;
+            if (activeTrips[0]) {
+                dashboard.currentPosition = activeTrips[0].currentLocation;
+                dashboard.nextDrop = activeTrips[0].dropoff;
+                dashboard.timeToReach = `${activeTrips[0].etaMinutes} min`;
+            }
+        }
+        response.json(dashboard);
     });
     app.post("/api/auth/login", async (request, response) => {
         const parsed = loginSchema.safeParse(request.body);
