@@ -14,17 +14,16 @@ type RestaurantCard = {
   name: string;
   cuisine: string;
   location: string;
-        avatar: string; // top-left small avatar
-        picture: string; // mock image inside the card
+  etaMinutes: number;
   rating: number;
   description: string;
   featured: boolean;
   menu: string[];
 };
 
-                                <div className="flex items-center justify-center h-20 w-20 rounded-[1.2rem] bg-white shadow-inner text-3xl">
-                                  {card.picture}
-                                </div>
+type DashboardData =
+  | {
+      role: "customer";
       source: string;
       activeOrder: {
         id: string;
@@ -33,7 +32,10 @@ type RestaurantCard = {
         rider: string;
         etaMinutes: number;
         address: string;
+        total: number;
+        items: OrderLineItem[];
       };
+      liveOrders: LiveOrderSummary[];
       timeline: string[];
       restaurants: RestaurantCard[];
     }
@@ -52,6 +54,9 @@ type RestaurantCard = {
         status: string;
         etaMinutes: number;
         currentLocation: string;
+        restaurantName?: string;
+        total?: number;
+        items?: OrderLineItem[];
       }>;
     }
   | {
@@ -3204,7 +3209,7 @@ export function AuthLanding() {
                               <div>
                                 <div className="flex items-center gap-3">
                                   <div className="flex h-12 w-12 items-center justify-center rounded-[1rem] border border-[#cfd9c7] bg-white text-2xl shadow-[0_8px_18px_rgba(37,46,34,0.08)]">
-                                    {card.icon}
+                                    {card.avatar}
                                   </div>
                                   <h3 className="text-[2rem] font-black tracking-[-0.04em] text-[#132819]">
                                     {card.title}
@@ -3230,7 +3235,7 @@ export function AuthLanding() {
                                 </div>
 
                                 <div className="flex items-center justify-center h-20 w-20 rounded-[1.2rem] bg-white shadow-inner text-3xl">
-                                  {card.icon}
+                                  {card.picture}
                                 </div>
                               </div>
                             </div>
