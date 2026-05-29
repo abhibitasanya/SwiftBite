@@ -53,7 +53,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col relative">
+        {/* Global soft gradient overlay for all pages */}
+        <div className="pointer-events-none -z-10 absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(63,90,61,0.24),transparent_24%),radial-gradient(circle_at_80%_10%,rgba(111,135,92,0.20),transparent_20%),radial-gradient(circle_at_22%_78%,rgba(255,252,245,0.22),transparent_36%),linear-gradient(180deg,#f0f4e9_0%,#d9e3d3_42%,#bdd0bb_100%)]" />
+        {children}
+      </body>
     </html>
   );
 }

@@ -193,10 +193,10 @@ const roleCards: Array<{
   accent: string;
   icon: string;
 }> = [
-  { id: "customer", title: "Order Maker", subtitle: "Browse and order", accent: "from-[#4f6b52] to-[#93a884]", icon: "📱" },
-  { id: "delivery", title: "Delivery Partner", subtitle: "Pick up and deliver", accent: "from-[#46624b] to-[#89a07a]", icon: "🛵" },
-  { id: "restaurant", title: "Restaurant Owner", subtitle: "Manage menu and orders", accent: "from-[#58745b] to-[#a0b28f]", icon: "🍴" },
-  { id: "platform", title: "Main Team", subtitle: "Support and control", accent: "from-[#3f5a43] to-[#7f9772]", icon: "🖥️" },
+  { id: "customer", title: "Order Maker", subtitle: "Browse and order", accent: "from-[#4f6b52] to-[#93a884]", icon: "👨" },
+  { id: "delivery", title: "Delivery Partner", subtitle: "Pick up and deliver", accent: "from-[#46624b] to-[#89a07a]", icon: "👨" },
+  { id: "restaurant", title: "Restaurant Owner", subtitle: "Manage menu and orders", accent: "from-[#58745b] to-[#a0b28f]", icon: "👨" },
+  { id: "platform", title: "Main Team", subtitle: "Support and control", accent: "from-[#3f5a43] to-[#7f9772]", icon: "👨" },
 ];
 
 function createCaptchaChallenge(): CaptchaChallenge {
@@ -2875,6 +2875,8 @@ export function AuthLanding() {
               ))}
             </div>
           </SoftScreen>
+
+          
         </section>
       </main>
     );
@@ -3044,17 +3046,7 @@ export function AuthLanding() {
               </div>
             </div>
 
-            <div className="mt-6 rounded-[1.35rem] border border-[#c9d7bf] bg-[linear-gradient(180deg,#fbfdf8_0%,#eef4e6_100%)] p-4 shadow-[0_12px_28px_rgba(63,78,56,0.08)]">
-              <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#4f6750]">Final confirmation</p>
-              <p className="mt-2 text-sm leading-7 text-[#5e6b5a]">Review the details above, then confirm the order once.</p>
-              <button
-                type="button"
-                onClick={placeOrder}
-                className="mt-4 w-full rounded-full bg-[#223326] px-5 py-3 text-sm font-semibold text-[#f5f1e7]"
-              >
-                Confirm order
-              </button>
-            </div>
+            {/* Final confirmation moved to a full-width card below */}
           </SoftScreen>
 
           <SoftScreen>
@@ -3091,6 +3083,21 @@ export function AuthLanding() {
               <p className="mt-3 text-sm leading-7 text-[#5e6b5a]">The button on the left confirms and sends the order in one step.</p>
             </div>
           </SoftScreen>
+
+          {/* Full-width confirmation card spanning both columns */}
+          <div className="mx-auto w-full max-w-6xl px-4">
+            <div className="mt-6 rounded-[1.35rem] border border-[#c9d7bf] bg-[linear-gradient(180deg,#fbfdf8_0%,#eef4e6_100%)] p-4 shadow-[0_12px_28px_rgba(63,78,56,0.08)]">
+              <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#4f6750]">Final confirmation</p>
+              <p className="mt-2 text-sm leading-7 text-[#5e6b5a]">Review the details above, then confirm the order once.</p>
+              <button
+                type="button"
+                onClick={placeOrder}
+                className="mt-4 w-full rounded-full bg-[#223326] px-5 py-3 text-sm font-semibold text-[#f5f1e7]"
+              >
+                Confirm order
+              </button>
+            </div>
+          </div>
         </section>
       </main>
     );
@@ -3207,11 +3214,7 @@ export function AuthLanding() {
                                 </p>
                               </div>
 
-                              {isActive && (
-                                <div className="flex h-12 w-12 items-center justify-center rounded-full border border-[#2d472c] bg-[#eef5e7] text-2xl shadow-[0_10px_22px_rgba(45,71,44,0.14)]">
-                                  {card.icon}
-                                </div>
-                              )}
+                              {/* removed duplicate top-right icon - single avatar shown on the left */}
                             </div>
 
                             {/* MOCK CONTENT */}
@@ -3224,37 +3227,8 @@ export function AuthLanding() {
                                   <div className="h-3 w-5/6 rounded-full bg-[#e9f0e6]" />
                                 </div>
 
-                                <div className="flex items-center justify-center h-20 w-20 rounded-[1.2rem] bg-white shadow-inner">
-                                  {card.id === "customer" && (
-                                    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-[#4f6b52]">
-                                      <path d="M6 2h11l-1.2 6H7.2L6 2z" fill="#e9f4e9" stroke="#4f6b52" strokeWidth="0.8"/>
-                                      <path d="M3 8h17v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8z" fill="#dfe9db" stroke="#4f6b52" strokeWidth="0.8"/>
-                                    </svg>
-                                  )}
-
-                                  {card.id === "delivery" && (
-                                    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                      <path d="M3 13h11v4H3z" fill="#dfeee0" stroke="#46624b" strokeWidth="0.8"/>
-                                      <path d="M16 11h4l1 3h-5z" fill="#e9f4e9" stroke="#46624b" strokeWidth="0.8"/>
-                                      <circle cx="7" cy="18" r="1.8" fill="#46624b"/>
-                                      <circle cx="19" cy="18" r="1.8" fill="#46624b"/>
-                                    </svg>
-                                  )}
-
-                                  {card.id === "restaurant" && (
-                                    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                      <path d="M6 3c0 2.5-1 3.5-1 5 0 2 1 4 4 4s4-2 4-4c0-1.5-1-2.5-1-5H6z" fill="#f6f7ef" stroke="#58745b" strokeWidth="0.8"/>
-                                      <path d="M4 15c0 1.7 2 3 4 3s4-1.3 4-3" stroke="#58745b" strokeWidth="0.8"/>
-                                    </svg>
-                                  )}
-
-                                  {card.id === "platform" && (
-                                    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                      <path d="M12 8v2" stroke="#3f5a43" strokeWidth="1.2" strokeLinecap="round"/>
-                                      <path d="M12 14v2" stroke="#3f5a43" strokeWidth="1.2" strokeLinecap="round"/>
-                                      <circle cx="12" cy="11" r="5" fill="#eef4ea" stroke="#3f5a43" strokeWidth="0.8"/>
-                                    </svg>
-                                  )}
+                                <div className="flex items-center justify-center h-20 w-20 rounded-[1.2rem] bg-white shadow-inner text-3xl">
+                                  {card.icon}
                                 </div>
                               </div>
                             </div>
