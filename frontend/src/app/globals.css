@@ -5,7 +5,7 @@
   /* Soft blended page background for all app screens */
   --background: #e5eddc;
   --foreground: #182118;
-  --accent: #223326; /* primary selected color (dark green) */
+  --accent: #539755; /* primary selected color (dark green) */
   --accent-contrast: #f5f8f1; /* text on accent */
   --accent-border: #4f6b52; /* slightly lighter border tone */
 }
