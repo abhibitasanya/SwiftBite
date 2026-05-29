@@ -159,6 +159,15 @@ type ChatSuggestion = {
   value: string;
 };
 
+type PlatformSection = "overview" | "users" | "restaurants" | "notifications" | "activity";
+
+type PlatformNotification = {
+  id: number;
+  title: string;
+  details: string;
+  timestamp: string;
+};
+
 const roleCards: Array<{
   id: UserRole;
   title: string;
@@ -314,6 +323,60 @@ function getChatSuggestions(intent: string | null, isStarter: boolean): ChatSugg
   }
 
   return [];
+}
+
+function createEmptyRestaurantProfileDraft(userIdentifier = ""): RestaurantProfileDraft {
+  return {
+    userIdentifier,
+    restaurantName: "",
+    restaurantLogoUrl: "",
+    coverImageUrl: "",
+    ownerName: "",
+    contactNumber: "",
+    email: "",
+    restaurantAddress: "",
+    cityState: "",
+    cuisineType: "",
+    gstLicenseNumber: "",
+    openingHours: "",
+    deliveryRadius: "",
+    description: "",
+    verificationStatus: "pending",
+  };
+}
+
+function createEmptyMenuItemDraft(restaurantIdentifier = ""): MenuItemDraft {
+  return {
+    restaurantIdentifier,
+    dishName: "",
+    dishImageUrl: "",
+    price: "",
+    category: "",
+    description: "",
+    spiceLevel: "medium",
+    vegType: "veg",
+    isAvailable: true,
+    preparationTimeMinutes: "",
+    isFeatured: false,
+    isBestseller: false,
+    isRecommended: false,
+  };
+}
+
+function createNotification(title: string, details: string): PlatformNotification {
+  return {
+    id: Date.now() + Math.floor(Math.random() * 1000),
+    title,
+    details,
+    timestamp: new Date().toISOString(),
+  };
+}
+
+function formatNotificationTime(timestamp: string) {
+  return new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(timestamp));
 }
 
 function ChatWidget({
@@ -819,6 +882,9 @@ export function AuthLanding() {
   const [selectedRestaurantOptionId, setSelectedRestaurantOptionId] = useState<number | null>(null);
   const [selectedPlatformUserIdentifier, setSelectedPlatformUserIdentifier] = useState<string | null>(null);
   const [selectedPlatformRestaurantId, setSelectedPlatformRestaurantId] = useState<number | null>(null);
+  const [selectedPlatformSection, setSelectedPlatformSection] = useState<PlatformSection>("overview");
+  const [platformNotifications, setPlatformNotifications] = useState<PlatformNotification[]>([]);
+  const [selectedPlatformNotificationId, setSelectedPlatformNotificationId] = useState<number | null>(null);
   const [restaurantMenuCart, setRestaurantMenuCart] = useState<MenuCartItem[]>([]);
   const [isRestaurantCartOpen, setIsRestaurantCartOpen] = useState(false);
   const [deliveryAddress, setDeliveryAddress] = useState("Sector 12, Block C");
@@ -831,10 +897,10 @@ export function AuthLanding() {
   const [newRestaurantName, setNewRestaurantName] = useState("");
   const [newRestaurantCuisine, setNewRestaurantCuisine] = useState("");
   const [newRestaurantLocation, setNewRestaurantLocation] = useState("");
-  const [newRestaurantEta, setNewRestaurantEta] = useState("20");
-  const [newRestaurantRating, setNewRestaurantRating] = useState("4.5");
+  const [newRestaurantEta, setNewRestaurantEta] = useState("");
+  const [newRestaurantRating, setNewRestaurantRating] = useState("");
   const [newRestaurantDescription, setNewRestaurantDescription] = useState("");
-  const [newRestaurantFeatured, setNewRestaurantFeatured] = useState(true);
+  const [newRestaurantFeatured, setNewRestaurantFeatured] = useState(false);
   const [isBooting, setIsBooting] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -869,38 +935,8 @@ export function AuthLanding() {
     drivingLicenseUrl: "",
     profilePhotoUrl: "",
   });
-  const [restaurantProfileDraft, setRestaurantProfileDraft] = useState<RestaurantProfileDraft>({
-    userIdentifier: "restaurant@example.com",
-    restaurantName: "Restaurant Demo Kitchen",
-    restaurantLogoUrl: "/message-icon.svg",
-    coverImageUrl: "",
-    ownerName: "Restaurant Demo",
-    contactNumber: "9876543211",
-    email: "restaurant@example.com",
-    restaurantAddress: "Market Road, Kolkata",
-    cityState: "Kolkata, West Bengal",
-    cuisineType: "North Indian",
-    gstLicenseNumber: "GST-DEMO-001",
-    openingHours: "10:00 AM - 11:30 PM",
-    deliveryRadius: "8",
-    description: "Comfort meals, curries, and tandoor plates for dinner.",
-    verificationStatus: "verified",
-  });
-  const [menuItemDraft, setMenuItemDraft] = useState<MenuItemDraft>({
-    restaurantIdentifier: "restaurant@example.com",
-    dishName: "",
-    dishImageUrl: "",
-    price: "0",
-    category: "Featured",
-    description: "",
-    spiceLevel: "medium",
-    vegType: "veg",
-    isAvailable: true,
-    preparationTimeMinutes: "15",
-    isFeatured: false,
-    isBestseller: false,
-    isRecommended: false,
-  });
+  const [restaurantProfileDraft, setRestaurantProfileDraft] = useState<RestaurantProfileDraft>(() => createEmptyRestaurantProfileDraft());
+  const [menuItemDraft, setMenuItemDraft] = useState<MenuItemDraft>(() => createEmptyMenuItemDraft());
   const [riderProfileStatus, setRiderProfileStatus] = useState("");
   const [restaurantProfileStatus, setRestaurantProfileStatus] = useState("");
   const [menuItemStatus, setMenuItemStatus] = useState("");
@@ -986,46 +1022,14 @@ export function AuthLanding() {
     }
 
     if (selectedRole === "restaurant" && activeDashboard?.restaurantProfile) {
-      const restaurantProfile = activeDashboard.restaurantProfile;
-      setRestaurantProfileDraft({
-        userIdentifier: restaurantProfile.userIdentifier ?? "restaurant@example.com",
-        restaurantName: restaurantProfile.restaurantName ?? "Restaurant Demo Kitchen",
-        restaurantLogoUrl: restaurantProfile.restaurantLogoUrl ?? "",
-        coverImageUrl: restaurantProfile.coverImageUrl ?? "",
-        ownerName: restaurantProfile.ownerName ?? "Restaurant Demo",
-        contactNumber: restaurantProfile.contactNumber ?? "",
-        email: restaurantProfile.email ?? "",
-        restaurantAddress: restaurantProfile.restaurantAddress ?? "",
-        cityState: restaurantProfile.cityState ?? "",
-        cuisineType: restaurantProfile.cuisineType ?? "",
-        gstLicenseNumber: restaurantProfile.gstLicenseNumber ?? "",
-        openingHours: restaurantProfile.openingHours ?? "",
-        deliveryRadius: String(restaurantProfile.deliveryRadius ?? 8),
-        description: restaurantProfile.description ?? "",
-        verificationStatus: restaurantProfile.verificationStatus ?? "pending",
-      });
+      const restaurantIdentifier = activeDashboard.restaurantProfile.userIdentifier ?? "";
+      setRestaurantProfileDraft(createEmptyRestaurantProfileDraft(restaurantIdentifier));
 
-      const nextMenuItem = activeDashboard.menuItems?.[0];
-      if (nextMenuItem) {
-        setSelectedMenuItemId(nextMenuItem.id ?? null);
-        setMenuItemDraft({
-          restaurantIdentifier: nextMenuItem.restaurantIdentifier ?? restaurantProfile.userIdentifier ?? "restaurant@example.com",
-          dishName: nextMenuItem.dishName ?? "",
-          dishImageUrl: nextMenuItem.dishImageUrl ?? "",
-          price: String(nextMenuItem.price ?? 0),
-          category: nextMenuItem.category ?? "Featured",
-          description: nextMenuItem.description ?? "",
-          spiceLevel: nextMenuItem.spiceLevel ?? "medium",
-          vegType: nextMenuItem.vegType ?? "veg",
-          isAvailable: Boolean(nextMenuItem.isAvailable),
-          preparationTimeMinutes: String(nextMenuItem.preparationTimeMinutes ?? 15),
-          isFeatured: Boolean(nextMenuItem.isFeatured),
-          isBestseller: Boolean(nextMenuItem.isBestseller),
-          isRecommended: Boolean(nextMenuItem.isRecommended),
-        });
+      if (selectedMenuItemId === null) {
+        setMenuItemDraft(createEmptyMenuItemDraft(restaurantIdentifier));
       }
     }
-  }, [dashboardData, selectedRole]);
+  }, [dashboardData, selectedMenuItemId, selectedRole]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -1192,6 +1196,32 @@ export function AuthLanding() {
   }, [apiBaseUrl, selectedRole, stage]);
 
   useEffect(() => {
+    if (selectedRole !== "platform") {
+      return;
+    }
+
+    const platformDashboard = dashboardData && dashboardData.role === "platform" ? dashboardData : null;
+    const activityEntries = (platformDashboard?.activity ?? []) as string[];
+
+    if (activityEntries.length === 0) {
+      return;
+    }
+
+    setPlatformNotifications((current) => {
+      const seenDetails = new Set(current.map((notification) => notification.details));
+      const nextNotifications = activityEntries
+        .filter((item) => !seenDetails.has(item))
+        .map((item) => createNotification("App activity", item));
+
+      if (nextNotifications.length === 0) {
+        return current;
+      }
+
+      return [...nextNotifications, ...current].slice(0, 12);
+    });
+  }, [dashboardData, selectedRole]);
+
+  useEffect(() => {
     const rootId = "swiftbite-chatbot-root";
     let mountPoint = document.getElementById(rootId) as HTMLDivElement | null;
 
@@ -1211,6 +1241,10 @@ export function AuthLanding() {
 
   function chooseRole(role: UserRole) {
     setSelectedRole(role);
+  }
+
+  function pushPlatformNotification(title: string, details: string) {
+    setPlatformNotifications((current) => [createNotification(title, details), ...current].slice(0, 12));
   }
 
   function openRestaurantMenu(restaurantId: number) {
@@ -1428,6 +1462,18 @@ export function AuthLanding() {
       }
 
       setRestaurantFormStatus(`${payload.message ?? "Restaurant added."} Source: ${payload.source ?? "backend"}.`);
+      if (!payload.restaurant) {
+        setNewRestaurantName("");
+        setNewRestaurantCuisine("");
+        setNewRestaurantLocation("");
+        setNewRestaurantEta("");
+        setNewRestaurantRating("");
+        setNewRestaurantDescription("");
+        setNewRestaurantFeatured(false);
+        return;
+      }
+
+      const addedRestaurant: RestaurantCard = payload.restaurant;
       setDashboardData((current) => {
         if (!current || current.role !== "restaurant") {
           return current;
@@ -1435,26 +1481,17 @@ export function AuthLanding() {
 
         return {
           ...current,
-          restaurantOptions: [payload.restaurant ?? {
-            id: Date.now(),
-            name: newRestaurantName.trim(),
-            cuisine: newRestaurantCuisine.trim(),
-            location: newRestaurantLocation.trim(),
-            etaMinutes: Number(newRestaurantEta),
-            rating: Number(newRestaurantRating),
-            description: newRestaurantDescription.trim(),
-            featured: newRestaurantFeatured,
-            menu: ["Chef Special Bowl", "Daily Wrap", "Seasonal Plate", "House Drink"],
-          }, ...current.restaurantOptions],
+          restaurantOptions: [addedRestaurant, ...current.restaurantOptions],
         };
       });
+      pushPlatformNotification("Restaurant added", `${addedRestaurant.name} is now live in the restaurant list.`);
       setNewRestaurantName("");
       setNewRestaurantCuisine("");
       setNewRestaurantLocation("");
-      setNewRestaurantEta("20");
-      setNewRestaurantRating("4.5");
+      setNewRestaurantEta("");
+      setNewRestaurantRating("");
       setNewRestaurantDescription("");
-      setNewRestaurantFeatured(true);
+      setNewRestaurantFeatured(false);
     } catch {
       setRestaurantFormStatus("Unable to reach the backend while adding the restaurant.");
     }
@@ -1523,17 +1560,35 @@ export function AuthLanding() {
 
   async function handleRestaurantProfileSave() {
     try {
-      const response = await fetch(`${apiBaseUrl}/api/restaurant-profiles/${encodeURIComponent(restaurantProfileDraft.userIdentifier)}`, {
+      const restaurantIdentifier = restaurantProfileDraft.userIdentifier || ((dashboardData as any)?.restaurantProfile?.userIdentifier ?? "");
+      const response = await fetch(`${apiBaseUrl}/api/restaurant-profiles/${encodeURIComponent(restaurantIdentifier)}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(restaurantProfileDraft),
+        body: JSON.stringify({
+          ...restaurantProfileDraft,
+          userIdentifier: restaurantIdentifier,
+        }),
       });
 
-      const payload = (await response.json()) as { message?: string };
+      const payload = (await response.json()) as { message?: string; profile?: RestaurantProfileDraft };
 
       if (!response.ok) {
         setRestaurantProfileStatus(payload.message ?? "Unable to save restaurant profile.");
         return;
+      }
+
+      if (payload.profile) {
+        setDashboardData((current) => {
+          if (!current || current.role !== "restaurant") {
+            return current;
+          }
+
+          return {
+            ...current,
+            restaurantProfile: payload.profile,
+          };
+        });
+        pushPlatformNotification("Restaurant profile updated", `${payload.profile.restaurantName} profile was saved successfully.`);
       }
 
       setRestaurantProfileStatus(payload.message ?? "Restaurant profile saved.");
@@ -1543,17 +1598,22 @@ export function AuthLanding() {
   }
 
   async function handleMenuItemSave() {
-    const endpoint = selectedMenuItemId ? `${apiBaseUrl}/api/menu-items/${selectedMenuItemId}` : `${apiBaseUrl}/api/restaurant-profiles/${encodeURIComponent(menuItemDraft.restaurantIdentifier)}/menu-items`;
+    const editingItemId = selectedMenuItemId;
+    const restaurantIdentifier = menuItemDraft.restaurantIdentifier || restaurantProfileDraft.userIdentifier || ((dashboardData as any)?.restaurantProfile?.userIdentifier ?? "");
+    const endpoint = editingItemId ? `${apiBaseUrl}/api/menu-items/${editingItemId}` : `${apiBaseUrl}/api/restaurant-profiles/${encodeURIComponent(restaurantIdentifier)}/menu-items`;
     const method = selectedMenuItemId ? "PUT" : "POST";
 
     try {
       const response = await fetch(endpoint, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(menuItemDraft),
+        body: JSON.stringify({
+          ...menuItemDraft,
+          restaurantIdentifier,
+        }),
       });
 
-      const payload = (await response.json()) as { message?: string; item?: { id?: number } };
+      const payload = (await response.json()) as { message?: string; item?: { id?: number; dishName?: string } };
 
       if (!response.ok) {
         setMenuItemStatus(payload.message ?? "Unable to save menu item.");
@@ -1562,6 +1622,35 @@ export function AuthLanding() {
 
       if (payload.item?.id) {
         setSelectedMenuItemId(payload.item.id);
+      }
+
+      if (payload.item) {
+        const savedMenuItem = payload.item as { id?: number; dishName?: string; restaurantIdentifier?: string; price?: number; category?: string; description?: string; spiceLevel?: MenuItemDraft["spiceLevel"]; vegType?: MenuItemDraft["vegType"]; isAvailable?: boolean; preparationTimeMinutes?: number; isFeatured?: boolean; isBestseller?: boolean; isRecommended?: boolean };
+        setDashboardData((current) => {
+          if (!current || current.role !== "restaurant") {
+            return current;
+          }
+
+          const currentMenuItems = Array.isArray((current as any).menuItems) ? ((current as any).menuItems as any[]) : [];
+          const nextMenuItems = editingItemId
+            ? currentMenuItems.map((item) => (item.id === editingItemId ? savedMenuItem : item))
+            : [savedMenuItem, ...currentMenuItems];
+
+          return {
+            ...current,
+            menuItems: nextMenuItems,
+            menu: nextMenuItems.map((item: any) => item.dishName ?? item.name ?? ""),
+          };
+        });
+        pushPlatformNotification(
+          editingItemId ? "Menu item updated" : "Menu item added",
+          `${savedMenuItem.dishName ?? "A menu item"} is now reflected in the restaurant menu.`
+        );
+      }
+
+      if (!editingItemId) {
+        setSelectedMenuItemId(null);
+        setMenuItemDraft(createEmptyMenuItemDraft(restaurantIdentifier));
       }
 
       setMenuItemStatus(payload.message ?? "Menu item saved.");
@@ -1581,6 +1670,7 @@ export function AuthLanding() {
       }
 
       setMenuItemStatus(payload.message ?? "Menu item deleted.");
+      pushPlatformNotification("Menu item deleted", `Menu item #${itemId} was removed from the restaurant menu.`);
       if (selectedMenuItemId === itemId) {
         setSelectedMenuItemId(null);
       }
@@ -2045,7 +2135,7 @@ export function AuthLanding() {
                     <input type="file" accept="image/*" className="mt-2 block w-full text-[11px] normal-case tracking-normal" onChange={(event) => {
                       const file = event.target.files?.[0];
                       if (file) {
-                        uploadImageFile(file, "restaurant", restaurantProfileDraft.userIdentifier, "restaurant-logo", (url) => setRestaurantProfileDraft((current) => ({ ...current, restaurantLogoUrl: url })));
+                        uploadImageFile(file, "restaurant", restaurantProfileDraft.userIdentifier || ((dashboardData as any)?.restaurantProfile?.userIdentifier ?? ""), "restaurant-logo", (url) => setRestaurantProfileDraft((current) => ({ ...current, restaurantLogoUrl: url })));
                       }
                     }} />
                   </label>
@@ -2054,7 +2144,7 @@ export function AuthLanding() {
                     <input type="file" accept="image/*" className="mt-2 block w-full text-[11px] normal-case tracking-normal" onChange={(event) => {
                       const file = event.target.files?.[0];
                       if (file) {
-                        uploadImageFile(file, "restaurant", restaurantProfileDraft.userIdentifier, "restaurant-banner", (url) => setRestaurantProfileDraft((current) => ({ ...current, coverImageUrl: url })));
+                        uploadImageFile(file, "restaurant", restaurantProfileDraft.userIdentifier || ((dashboardData as any)?.restaurantProfile?.userIdentifier ?? ""), "restaurant-banner", (url) => setRestaurantProfileDraft((current) => ({ ...current, coverImageUrl: url })));
                       }
                     }} />
                   </label>
@@ -2063,7 +2153,7 @@ export function AuthLanding() {
                     <input type="file" accept="image/*" className="mt-2 block w-full text-[11px] normal-case tracking-normal" onChange={(event) => {
                       const file = event.target.files?.[0];
                       if (file) {
-                        uploadImageFile(file, "menu-item", menuItemDraft.restaurantIdentifier, "menu-item", (url) => setMenuItemDraft((current) => ({ ...current, dishImageUrl: url })));
+                        uploadImageFile(file, "menu-item", menuItemDraft.restaurantIdentifier || restaurantProfileDraft.userIdentifier || ((dashboardData as any)?.restaurantProfile?.userIdentifier ?? ""), "menu-item", (url) => setMenuItemDraft((current) => ({ ...current, dishImageUrl: url })));
                       }
                     }} />
                   </label>
@@ -2218,19 +2308,79 @@ export function AuthLanding() {
       const riderProfiles = (platformDashboard.riderProfiles ?? []) as Array<{ userIdentifier: string; fullName: string; vehicleType: string; deliveryZone: string; availabilityStatus: string; isOnline: boolean; completedOrdersCount: string }>;
       const restaurantProfiles = (platformDashboard.restaurantProfiles ?? []) as Array<{ userIdentifier: string; restaurantName: string; cuisineType: string; cityState: string; ownerName: string; deliveryRadius: string }>;
       const activity = (platformDashboard.activity ?? []) as string[];
+      const notificationsFeed = platformNotifications.length > 0
+        ? platformNotifications
+        : activity.map((item) => createNotification("App activity", item));
       const selectedPlatformUser = recentUsers.find((user) => user.identifier === selectedPlatformUserIdentifier) ?? recentUsers[0] ?? null;
       const selectedPlatformRestaurant = recentRestaurants.find((restaurant) => restaurant.id === selectedPlatformRestaurantId) ?? recentRestaurants[0] ?? null;
+      const selectedPlatformNotification = notificationsFeed.find((notification) => notification.id === selectedPlatformNotificationId) ?? notificationsFeed[0] ?? null;
+
+      const platformSectionCards: Array<{ id: PlatformSection; title: string; description: string; accent: string }> = [
+        { id: "overview", title: "Overview", description: "Totals and live health", accent: "from-[#35533a] to-[#6d8660]" },
+        { id: "users", title: "Users", description: "Recent logins and roles", accent: "from-[#405c45] to-[#829a76]" },
+        { id: "restaurants", title: "Restaurants", description: "Live restaurant records", accent: "from-[#58745b] to-[#a0b28f]" },
+        { id: "notifications", title: "Notifications", description: "New in-app events", accent: "from-[#2f4c35] to-[#728a63]" },
+        { id: "activity", title: "Activity", description: "What happened lately", accent: "from-[#4a654d] to-[#92a784]" },
+      ];
+
+      const sectionTitle = {
+        overview: "Home overview",
+        users: "User details",
+        restaurants: "Restaurant details",
+        notifications: "Notification center",
+        activity: "Activity timeline",
+      }[selectedPlatformSection];
+
+      const sectionSubtitle = {
+        overview: "Keep the home page clean and let each section open into a focused panel.",
+        users: "Select a user to inspect their role, identifier, and quick status.",
+        restaurants: "Select a restaurant to view the live menu and branch summary.",
+        notifications: "New app events land here first, then stay in the feed for later review.",
+        activity: "A chronological view of what has happened across the app.",
+      }[selectedPlatformSection];
 
       return (
         <main className="min-h-screen px-4 py-4 text-[#243025] sm:px-6 sm:py-6 lg:px-8">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,90,61,0.24),_transparent_24%),radial-gradient(circle_at_80%_10%,_rgba(111,135,92,0.22),_transparent_18%),linear-gradient(180deg,_#f4f8ef_0%,_#e5ede0_100%)]" />
           {globalBackButton}
           {appMenu}
-          <section className="relative mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl items-start gap-6 lg:grid-cols-[1fr_1fr]">
+          <section className="relative mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-6xl items-start gap-6 lg:grid-cols-[0.92fr_1.08fr]">
             <SoftScreen>
               <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">SwiftBite • Main Team</p>
-              <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">Everything in one view</h1>
-              <p className="mt-3 text-sm leading-7 text-[#5e6b5a]">See who is using the app, how many restaurants are live, and what is happening right now.</p>
+              <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">Main Team home</h1>
+              <p className="mt-3 text-sm leading-7 text-[#5e6b5a]">Each section opens separately so users, restaurants, notifications, and activity stay organized.</p>
+
+              <div className="mt-6 grid gap-3">
+                {platformSectionCards.map((section) => (
+                  <button
+                    key={section.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedPlatformSection(section.id);
+                      if (section.id === "users" && recentUsers[0]) {
+                        setSelectedPlatformUserIdentifier(recentUsers[0].identifier);
+                      }
+                      if (section.id === "restaurants" && recentRestaurants[0]) {
+                        setSelectedPlatformRestaurantId(recentRestaurants[0].id);
+                      }
+                      if (section.id === "notifications" && notificationsFeed[0]) {
+                        setSelectedPlatformNotificationId(notificationsFeed[0].id);
+                      }
+                    }}
+                    className={`rounded-[1.35rem] border p-4 text-left shadow-[0_10px_24px_rgba(63,78,56,0.08)] transition ${
+                      selectedPlatformSection === section.id
+                        ? "border-[#b9cdb0] bg-[linear-gradient(180deg,#f3f7ef_0%,#e7f0df_100%)]"
+                        : "border-[#d3dfca] bg-[linear-gradient(180deg,#fbfdf8_0%,#eef4e6_100%)] hover:bg-[#f7faf4]"
+                    }`}
+                  >
+                    <div className={`inline-flex rounded-full bg-gradient-to-r ${section.accent} px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-white`}>
+                      {section.title}
+                    </div>
+                    <p className="mt-3 text-sm text-[#5e6b5a]">{section.description}</p>
+                  </button>
+                ))}
+              </div>
+
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
                 <div className="rounded-[1.1rem] border border-[#d3dfca] bg-[linear-gradient(180deg,#fbfdf8_0%,#eef4e6_100%)] px-4 py-3 shadow-[0_10px_24px_rgba(63,78,56,0.08)]"><span className="block text-2xl font-black text-[#1f2b21]">{platformDashboard.totals.users}</span><span className="text-xs uppercase tracking-[0.18em] text-[#4f6750]">Users</span></div>
                 <div className="rounded-[1.1rem] border border-[#d3dfca] bg-[linear-gradient(180deg,#fbfdf8_0%,#eef4e6_100%)] px-4 py-3 shadow-[0_10px_24px_rgba(63,78,56,0.08)]"><span className="block text-2xl font-black text-[#1f2b21]">{platformDashboard.totals.restaurants}</span><span className="text-xs uppercase tracking-[0.18em] text-[#4f6750]">Restaurants</span></div>
@@ -2240,79 +2390,178 @@ export function AuthLanding() {
             </SoftScreen>
 
             <SoftScreen>
-              <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">Activity stream</p>
-              <div className="mt-4 grid gap-3">
-                {activity.map((item) => (
-                  <div key={item} className="rounded-[1.1rem] border border-[#d3dfca] bg-[linear-gradient(180deg,#fbfdf8_0%,#eef4e6_100%)] px-4 py-3 text-sm text-[#5e6b5a] shadow-[0_10px_24px_rgba(63,78,56,0.08)]">{item}</div>
-                ))}
+              <p className="text-xs font-bold uppercase tracking-[0.32em] text-[#4f6750]">{sectionTitle}</p>
+              <h2 className="mt-4 text-3xl font-black tracking-tight text-[#1f2b21]">{selectedPlatformSection === "overview" ? "Work in separate sections" : sectionTitle}</h2>
+              <p className="mt-2 text-sm leading-7 text-[#5e6b5a]">{sectionSubtitle}</p>
+
+              <div className="mt-6 rounded-[1.35rem] border border-[#c9d7bf] bg-[linear-gradient(180deg,#f6faf2_0%,#e8f1df_100%)] p-4 shadow-[0_12px_28px_rgba(63,78,56,0.08)]">
+                {selectedPlatformSection === "overview" && (
+                  <>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="rounded-[1rem] border border-[#dfe7d6] bg-white/92 px-4 py-3">
+                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#4f6750]">Current status</p>
+                        <p className="mt-2 text-lg font-black text-[#1f2b21]">Live dashboard ready</p>
+                        <p className="mt-1 text-sm text-[#5e6b5a]">Open users, restaurants, notifications, or activity to drill into details.</p>
+                      </div>
+                      <div className="rounded-[1rem] border border-[#dfe7d6] bg-white/92 px-4 py-3">
+                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#4f6750]">Notifications</p>
+                        <p className="mt-2 text-lg font-black text-[#1f2b21]">{notificationsFeed.length} items</p>
+                        <p className="mt-1 text-sm text-[#5e6b5a]">New events from the app collect here automatically.</p>
+                      </div>
+                    </div>
+                    <div className="mt-4 grid gap-2">
+                      {activity.slice(0, 4).map((item) => (
+                        <div key={item} className="rounded-xl border border-[#dfe7d6] bg-white/92 px-3 py-2 text-sm text-[#5e6b5a]">{item}</div>
+                      ))}
+                    </div>
+                  </>
+                )}
+
+                {selectedPlatformSection === "users" && (
+                  <>
+                    <div className="grid gap-2">
+                      {recentUsers.map((user) => (
+                        <button
+                          key={`${user.identifier}-${user.role}`}
+                          type="button"
+                          onClick={() => setSelectedPlatformUserIdentifier(user.identifier)}
+                          className={`rounded-xl border px-3 py-2 text-left text-sm transition ${
+                            selectedPlatformUser?.identifier === user.identifier
+                              ? "border-[#bdd0b2] bg-[linear-gradient(180deg,#f3f7ef_0%,#e7f0df_100%)] text-[#1f2b21]"
+                              : "border-[#d3dfca] bg-[linear-gradient(180deg,#fbfdf8_0%,#eef4e6_100%)] text-[#5e6b5a] hover:bg-[#f7faf4]"
+                          }`}
+                        >
+                          {user.fullName} • {user.role} • {user.identifier}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="mt-4 rounded-[1rem] border border-[#dfe7d6] bg-white/92 px-4 py-3">
+                      <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#4f6750]">User detail</p>
+                      {selectedPlatformUser ? (
+                        <>
+                          <p className="mt-2 text-xl font-black text-[#1f2b21]">{selectedPlatformUser.fullName}</p>
+                          <p className="mt-1 text-sm text-[#5e6b5a]">{selectedPlatformUser.role} • {selectedPlatformUser.identifier}</p>
+                        </>
+                      ) : (
+                        <p className="mt-2 text-sm text-[#5e6b5a]">Select a user to inspect the account details.</p>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                {selectedPlatformSection === "restaurants" && (
+                  <>
+                    <div className="grid gap-2">
+                      {recentRestaurants.map((restaurant) => (
+                        <button
+                          key={restaurant.id}
+                          type="button"
+                          onClick={() => setSelectedPlatformRestaurantId(restaurant.id)}
+                          className={`rounded-xl border px-3 py-2 text-left text-sm transition ${
+                            selectedPlatformRestaurant?.id === restaurant.id
+                              ? "border-[#bdd0b2] bg-[linear-gradient(180deg,#f3f7ef_0%,#e7f0df_100%)] text-[#1f2b21]"
+                              : "border-[#d3dfca] bg-[linear-gradient(180deg,#fbfdf8_0%,#eef4e6_100%)] text-[#5e6b5a] hover:bg-[#f7faf4]"
+                          }`}
+                        >
+                          {restaurant.name} • {restaurant.cuisine} • {restaurant.location}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="mt-4 rounded-[1rem] border border-[#dfe7d6] bg-white/92 px-4 py-3">
+                      <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#4f6750]">Restaurant detail</p>
+                      {selectedPlatformRestaurant ? (
+                        <>
+                          <p className="mt-2 text-xl font-black text-[#1f2b21]">{selectedPlatformRestaurant.name}</p>
+                          <p className="mt-1 text-sm text-[#5e6b5a]">{selectedPlatformRestaurant.cuisine} • {selectedPlatformRestaurant.location}</p>
+                          <p className="mt-2 text-sm text-[#5e6b5a]">{selectedPlatformRestaurant.description}</p>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {selectedPlatformRestaurant.menu.map((dish) => (
+                              <span key={dish} className="rounded-full bg-[#f8faf4] px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#4f6750]">{dish}</span>
+                            ))}
+                          </div>
+                        </>
+                      ) : (
+                        <p className="mt-2 text-sm text-[#5e6b5a]">Select a restaurant to inspect its menu and summary.</p>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                {selectedPlatformSection === "notifications" && (
+                  <>
+                    <div className="grid gap-2">
+                      {notificationsFeed.map((notification) => (
+                        <button
+                          key={notification.id}
+                          type="button"
+                          onClick={() => setSelectedPlatformNotificationId(notification.id)}
+                          className={`rounded-xl border px-3 py-2 text-left text-sm transition ${
+                            selectedPlatformNotification?.id === notification.id
+                              ? "border-[#bdd0b2] bg-[linear-gradient(180deg,#f3f7ef_0%,#e7f0df_100%)] text-[#1f2b21]"
+                              : "border-[#d3dfca] bg-[linear-gradient(180deg,#fbfdf8_0%,#eef4e6_100%)] text-[#5e6b5a] hover:bg-[#f7faf4]"
+                          }`}
+                        >
+                          <span className="block font-semibold text-[#1f2b21]">{notification.title}</span>
+                          <span className="mt-1 block text-xs uppercase tracking-[0.16em] text-[#4f6750]">{formatNotificationTime(notification.timestamp)}</span>
+                          <span className="mt-1 block text-sm text-[#5e6b5a]">{notification.details}</span>
+                        </button>
+                      ))}
+                    </div>
+                    <div className="mt-4 rounded-[1rem] border border-[#dfe7d6] bg-white/92 px-4 py-3">
+                      <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#4f6750]">Notification detail</p>
+                      {selectedPlatformNotification ? (
+                        <>
+                          <p className="mt-2 text-xl font-black text-[#1f2b21]">{selectedPlatformNotification.title}</p>
+                          <p className="mt-1 text-sm text-[#5e6b5a]">{selectedPlatformNotification.details}</p>
+                          <p className="mt-2 text-xs uppercase tracking-[0.16em] text-[#4f6750]">{formatNotificationTime(selectedPlatformNotification.timestamp)}</p>
+                        </>
+                      ) : (
+                        <p className="mt-2 text-sm text-[#5e6b5a]">Notifications will appear here as the app generates them.</p>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                {selectedPlatformSection === "activity" && (
+                  <>
+                    <div className="grid gap-2">
+                      {activity.map((item, index) => (
+                        <div key={`${item}-${index}`} className="rounded-xl border border-[#dfe7d6] bg-white/92 px-3 py-2 text-sm text-[#5e6b5a]">
+                          {item}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-4 rounded-[1rem] border border-[#dfe7d6] bg-white/92 px-4 py-3">
+                      <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#4f6750]">Latest update</p>
+                      <p className="mt-2 text-sm text-[#5e6b5a]">{activity[0] ?? "No activity recorded yet."}</p>
+                    </div>
+                  </>
+                )}
               </div>
+
               <div className="mt-5 rounded-[1.35rem] border border-[#c9d7bf] bg-[linear-gradient(180deg,#f6faf2_0%,#e8f1df_100%)] p-4 shadow-[0_12px_28px_rgba(63,78,56,0.08)]">
-                <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#4f6750]">Recent users</p>
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#4f6750]">Live notifications</p>
+                  <span className="rounded-full bg-white/90 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-[#4f6750]">{notificationsFeed.length}</span>
+                </div>
                 <div className="mt-3 grid gap-2">
-                  {recentUsers.map((user) => (
+                  {notificationsFeed.slice(0, 4).map((notification) => (
                     <button
-                      key={`${user.identifier}-${user.role}`}
+                      key={notification.id}
                       type="button"
-                      onClick={() => setSelectedPlatformUserIdentifier(user.identifier)}
+                      onClick={() => {
+                        setSelectedPlatformSection("notifications");
+                        setSelectedPlatformNotificationId(notification.id);
+                      }}
                       className={`rounded-xl border px-3 py-2 text-left text-sm transition ${
-                        selectedPlatformUser?.identifier === user.identifier
+                        selectedPlatformNotification?.id === notification.id
                           ? "border-[#bdd0b2] bg-[linear-gradient(180deg,#f3f7ef_0%,#e7f0df_100%)] text-[#1f2b21]"
                           : "border-[#d3dfca] bg-[linear-gradient(180deg,#fbfdf8_0%,#eef4e6_100%)] text-[#5e6b5a] hover:bg-[#f7faf4]"
                       }`}
                     >
-                      {user.fullName} • {user.role} • {user.identifier}
+                      <span className="block font-semibold text-[#1f2b21]">{notification.title}</span>
+                      <span className="mt-1 block text-sm text-[#5e6b5a]">{notification.details}</span>
                     </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mt-5 rounded-[1.35rem] border border-[#c9d7bf] bg-[linear-gradient(180deg,#f6faf2_0%,#e8f1df_100%)] p-4 shadow-[0_12px_28px_rgba(63,78,56,0.08)]">
-                <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#4f6750]">Selected user</p>
-                {selectedPlatformUser ? (
-                  <>
-                    <p className="mt-2 text-2xl font-black text-[#1f2b21]">{selectedPlatformUser.fullName}</p>
-                    <p className="mt-1 text-sm text-[#5e6b5a]">{selectedPlatformUser.role} • {selectedPlatformUser.identifier}</p>
-                  </>
-                ) : null}
-              </div>
-
-              <div className="mt-5 rounded-[1.35rem] border border-[#c9d7bf] bg-[linear-gradient(180deg,#f6faf2_0%,#e8f1df_100%)] p-4 shadow-[0_12px_28px_rgba(63,78,56,0.08)]">
-                <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#4f6750]">Selected restaurant</p>
-                {selectedPlatformRestaurant ? (
-                  <>
-                    <p className="mt-2 text-2xl font-black text-[#1f2b21]">{selectedPlatformRestaurant.name}</p>
-                    <p className="mt-1 text-sm text-[#5e6b5a]">{selectedPlatformRestaurant.cuisine} • {selectedPlatformRestaurant.location}</p>
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {selectedPlatformRestaurant.menu.map((dish) => (
-                        <span key={dish} className="rounded-full bg-white/90 px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#4f6750]">{dish}</span>
-                      ))}
-                    </div>
-                  </>
-                ) : null}
-              </div>
-
-              <div className="mt-5 rounded-[1.35rem] border border-[#c9d7bf] bg-[linear-gradient(180deg,#f6faf2_0%,#e8f1df_100%)] p-4 shadow-[0_12px_28px_rgba(63,78,56,0.08)]">
-                <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#4f6750]">Rider profiles</p>
-                <div className="mt-3 grid gap-2">
-                  {riderProfiles.map((rider: any) => (
-                    <div key={rider.userIdentifier} className="rounded-xl border border-[#d3dfca] bg-white/92 px-3 py-2 text-sm text-[#5e6b5a] shadow-[0_10px_24px_rgba(63,78,56,0.06)]">
-                      <p className="font-semibold text-[#1f2b21]">{rider.fullName}</p>
-                      <p className="text-xs uppercase tracking-[0.18em] text-[#4f6750]">{rider.vehicleType} • {rider.deliveryZone}</p>
-                      <p className="mt-1">{rider.availabilityStatus} • {rider.isOnline ? "Online" : "Offline"} • {rider.completedOrdersCount} completed</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mt-5 rounded-[1.35rem] border border-[#c9d7bf] bg-[linear-gradient(180deg,#f6faf2_0%,#e8f1df_100%)] p-4 shadow-[0_12px_28px_rgba(63,78,56,0.08)]">
-                <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#4f6750]">Restaurant profiles</p>
-                <div className="mt-3 grid gap-2">
-                  {restaurantProfiles.map((restaurant: any) => (
-                    <div key={restaurant.userIdentifier} className="rounded-xl border border-[#d3dfca] bg-white/92 px-3 py-2 text-sm text-[#5e6b5a] shadow-[0_10px_24px_rgba(63,78,56,0.06)]">
-                      <p className="font-semibold text-[#1f2b21]">{restaurant.restaurantName}</p>
-                      <p className="text-xs uppercase tracking-[0.18em] text-[#4f6750]">{restaurant.cuisineType} • {restaurant.cityState}</p>
-                      <p className="mt-1">{restaurant.ownerName} • radius {restaurant.deliveryRadius} km</p>
-                    </div>
                   ))}
                 </div>
               </div>
