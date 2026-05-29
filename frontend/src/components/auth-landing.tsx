@@ -1024,10 +1024,6 @@ export function AuthLanding() {
     if (selectedRole === "restaurant" && activeDashboard?.restaurantProfile) {
       const restaurantIdentifier = activeDashboard.restaurantProfile.userIdentifier ?? "";
       setRestaurantProfileDraft(createEmptyRestaurantProfileDraft(restaurantIdentifier));
-
-      if (selectedMenuItemId === null) {
-        setMenuItemDraft(createEmptyMenuItemDraft(restaurantIdentifier));
-      }
     }
   }, [dashboardData, selectedMenuItemId, selectedRole]);
 
@@ -1650,7 +1646,6 @@ export function AuthLanding() {
 
       if (!editingItemId) {
         setSelectedMenuItemId(null);
-        setMenuItemDraft(createEmptyMenuItemDraft(restaurantIdentifier));
       }
 
       setMenuItemStatus(payload.message ?? "Menu item saved.");
@@ -2117,37 +2112,7 @@ export function AuthLanding() {
                   </select>
                 </div>
 
-                <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                  <div className="rounded-[1rem] border border-dashed border-[#c9d7bf] bg-white px-3 py-3">
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#4f6750]">Logo preview</p>
-                    <div className="mt-2 overflow-hidden rounded-[0.9rem] border border-[#dfe7d6] bg-[#eef3e8]">
-                      <img src={restaurantProfileDraft.restaurantLogoUrl || "/message-icon.svg"} alt="Restaurant logo preview" className="h-24 w-full object-cover" />
-                    </div>
-                  </div>
-                  <div className="rounded-[1rem] border border-dashed border-[#c9d7bf] bg-white px-3 py-3">
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#4f6750]">Banner preview</p>
-                    <div className="mt-2 overflow-hidden rounded-[0.9rem] border border-[#dfe7d6] bg-[#eef3e8]">
-                      <img src={restaurantProfileDraft.coverImageUrl || "/message-icon.svg"} alt="Restaurant banner preview" className="h-24 w-full object-cover" />
-                    </div>
-                  </div>
-                  <label className="rounded-[1rem] border border-dashed border-[#c9d7bf] bg-white px-3 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#4f6750]">
-                    Logo upload
-                    <input type="file" accept="image/*" className="mt-2 block w-full text-[11px] normal-case tracking-normal" onChange={(event) => {
-                      const file = event.target.files?.[0];
-                      if (file) {
-                        uploadImageFile(file, "restaurant", restaurantProfileDraft.userIdentifier || ((dashboardData as any)?.restaurantProfile?.userIdentifier ?? ""), "restaurant-logo", (url) => setRestaurantProfileDraft((current) => ({ ...current, restaurantLogoUrl: url })));
-                      }
-                    }} />
-                  </label>
-                  <label className="rounded-[1rem] border border-dashed border-[#c9d7bf] bg-white px-3 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#4f6750]">
-                    Banner upload
-                    <input type="file" accept="image/*" className="mt-2 block w-full text-[11px] normal-case tracking-normal" onChange={(event) => {
-                      const file = event.target.files?.[0];
-                      if (file) {
-                        uploadImageFile(file, "restaurant", restaurantProfileDraft.userIdentifier || ((dashboardData as any)?.restaurantProfile?.userIdentifier ?? ""), "restaurant-banner", (url) => setRestaurantProfileDraft((current) => ({ ...current, coverImageUrl: url })));
-                      }
-                    }} />
-                  </label>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   <label className="rounded-[1rem] border border-dashed border-[#c9d7bf] bg-white px-3 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#4f6750]">
                     Menu item image
                     <input type="file" accept="image/*" className="mt-2 block w-full text-[11px] normal-case tracking-normal" onChange={(event) => {
@@ -2784,12 +2749,15 @@ export function AuthLanding() {
               </div>
             </div>
 
-            <div className="mt-6 flex flex-wrap gap-3">
-              <button type="button" onClick={() => setStage("restaurant-menu")} className="rounded-full border border-[#6a8160]/45 bg-[#f4efe4] px-5 py-3 text-sm font-semibold text-[#354033]">
-                Edit cart
-              </button>
-              <button type="button" onClick={placeOrder} className="rounded-full bg-[#223326] px-5 py-3 text-sm font-semibold text-[#f5f1e7]">
-                Place order
+            <div className="mt-6 rounded-[1.35rem] border border-[#c9d7bf] bg-[linear-gradient(180deg,#fbfdf8_0%,#eef4e6_100%)] p-4 shadow-[0_12px_28px_rgba(63,78,56,0.08)]">
+              <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#4f6750]">Final confirmation</p>
+              <p className="mt-2 text-sm leading-7 text-[#5e6b5a]">Review the details above, then confirm the order once.</p>
+              <button
+                type="button"
+                onClick={placeOrder}
+                className="mt-4 w-full rounded-full bg-[#223326] px-5 py-3 text-sm font-semibold text-[#f5f1e7]"
+              >
+                Confirm order
               </button>
             </div>
           </SoftScreen>
@@ -2825,16 +2793,7 @@ export function AuthLanding() {
                 <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#4f6750]">Total</p>
                 <span className="text-lg font-black text-[#1f2b21]">₹{restaurantMenuSubtotal.toFixed(0)}</span>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setStage("dashboard");
-                  setStatusMessage("Order confirmed.");
-                }}
-                className="mt-4 w-full rounded-full bg-[#223326] px-5 py-3 text-sm font-semibold text-[#f5f8f1]"
-              >
-                Confirm order
-              </button>
+              <p className="mt-3 text-sm leading-7 text-[#5e6b5a]">The button on the left confirms and sends the order in one step.</p>
             </div>
           </SoftScreen>
         </section>

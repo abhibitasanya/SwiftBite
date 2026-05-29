@@ -2,8 +2,8 @@
 @import "tailwindcss";
 
 :root {
-  /* Deeper moss-green page background only (cards and inside styles untouched) */
-  --background: #88ad83;
+  /* Soft blended page background for all app screens */
+  --background: #e5eddc;
   --foreground: #182118;
 }
 
@@ -16,10 +16,11 @@
 
 html {
   background:
-    radial-gradient(circle at top left, rgba(63, 90, 61, 0.30), transparent 20%),
-    radial-gradient(circle at 80% 12%, rgba(111, 135, 100, 0.26), transparent 16%),
-    radial-gradient(circle at 18% 84%, rgba(101, 118, 92, 0.22), transparent 18%),
-    linear-gradient(180deg, #dcebd8 0%, #88ad83 50%, #709a6b 100%);
+    radial-gradient(circle at top left, rgba(63, 90, 61, 0.28), transparent 18%),
+    radial-gradient(circle at 80% 12%, rgba(111, 135, 100, 0.22), transparent 16%),
+    radial-gradient(circle at 18% 84%, rgba(101, 118, 92, 0.16), transparent 20%),
+    radial-gradient(circle at 52% 48%, rgba(246, 242, 229, 0.65), transparent 42%),
+    linear-gradient(180deg, #dfead8 0%, #c8d9b8 34%, #a7c090 64%, #86ab7e 100%);
   color-scheme: light;
 }
 
