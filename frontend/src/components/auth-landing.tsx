@@ -14,16 +14,17 @@ type RestaurantCard = {
   name: string;
   cuisine: string;
   location: string;
-  etaMinutes: number;
+        avatar: string; // top-left small avatar
+        picture: string; // mock image inside the card
   rating: number;
   description: string;
   featured: boolean;
   menu: string[];
 };
 
-type DashboardData =
-  | {
-      role: "customer";
+                                <div className="flex items-center justify-center h-20 w-20 rounded-[1.2rem] bg-white shadow-inner text-3xl">
+                                  {card.picture}
+                                </div>
       source: string;
       activeOrder: {
         id: string;
@@ -191,12 +192,13 @@ const roleCards: Array<{
   title: string;
   subtitle: string;
   accent: string;
-  icon: string;
+  avatar: string; // top-left small avatar
+  picture: string; // mock image inside the card
 }> = [
-  { id: "customer", title: "Order Maker", subtitle: "Browse and order", accent: "from-[#4f6b52] to-[#93a884]", icon: "👨" },
-  { id: "delivery", title: "Delivery Partner", subtitle: "Pick up and deliver", accent: "from-[#46624b] to-[#89a07a]", icon: "👨" },
-  { id: "restaurant", title: "Restaurant Owner", subtitle: "Manage menu and orders", accent: "from-[#58745b] to-[#a0b28f]", icon: "👨" },
-  { id: "platform", title: "Main Team", subtitle: "Support and control", accent: "from-[#3f5a43] to-[#7f9772]", icon: "👨" },
+  { id: "customer", title: "Order Maker", subtitle: "Browse and order", accent: "from-[#4f6b52] to-[#93a884]", avatar: "📱", picture: "👤" },
+  { id: "delivery", title: "Delivery Partner", subtitle: "Pick up and deliver", accent: "from-[#46624b] to-[#89a07a]", avatar: "🛵", picture: "👤" },
+  { id: "restaurant", title: "Restaurant Owner", subtitle: "Manage menu and orders", accent: "from-[#58745b] to-[#a0b28f]", avatar: "🍴", picture: "👤" },
+  { id: "platform", title: "Main Team", subtitle: "Support and control", accent: "from-[#3f5a43] to-[#7f9772]", avatar: "🖥️", picture: "👤" },
 ];
 
 function createCaptchaChallenge(): CaptchaChallenge {
@@ -3039,7 +3041,7 @@ export function AuthLanding() {
               <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#4f6750]">Payment method</p>
               <div className="mt-3 grid gap-2 sm:grid-cols-3">
                 {(["upi", "card", "cash"] as CheckoutMethod[]).map((method) => (
-                  <button key={method} type="button" onClick={() => setCheckoutMethod(method)} className={`rounded-xl border px-3 py-3 text-sm font-semibold capitalize transition ${checkoutMethod === method ? "border-[#4f6b52]/70 bg-[#223326] text-[#f5f8f1]" : "border-[#dfe7d6] bg-white/92 text-[#4f5b47] hover:bg-[#f7faf4]"}`}>
+                  <button key={method} type="button" onClick={() => setCheckoutMethod(method)} className={`rounded-xl border px-3 py-3 text-sm font-semibold capitalize transition ${checkoutMethod === method ? "selected" : "border-[#dfe7d6] bg-white/92 text-[#4f5b47] hover:bg-[#f7faf4]"}`}>
                     {method === "upi" ? "UPI" : method}
                   </button>
                 ))}
@@ -3192,7 +3194,7 @@ export function AuthLanding() {
                               border transition-all duration-500
                               transform-gpu will-change-transform
                               ${isActive
-                                ? "border-[#88a07e] bg-[#eef5e7] shadow-[0_36px_96px_rgba(74,93,62,0.28)]"
+                                ? "selected shadow-[0_36px_96px_rgba(74,93,62,0.28)]"
                                 : "border-[#d9dfd2] bg-[#f8f8f3] shadow-[0_16px_40px_rgba(0,0,0,0.10)]"}
                             `}
                           >

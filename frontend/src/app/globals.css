@@ -5,6 +5,9 @@
   /* Soft blended page background for all app screens */
   --background: #e5eddc;
   --foreground: #182118;
+  --accent: #223326; /* primary selected color (dark green) */
+  --accent-contrast: #f5f8f1; /* text on accent */
+  --accent-border: #4f6b52; /* slightly lighter border tone */
 }
 
 @theme inline {
@@ -12,6 +15,18 @@
   --color-foreground: var(--foreground);
   --font-sans: "Plus Jakarta Sans", "Outfit", "Segoe UI Variable", "Segoe UI", "Aptos", system-ui, sans-serif;
   --font-mono: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+}
+
+/* Global selected state utility */
+[data-selected="true"],
+.selected {
+  background-color: var(--accent) !important;
+  color: var(--accent-contrast) !important;
+  border-color: var(--accent-border) !important;
+}
+
+.selected:hover {
+  filter: brightness(0.98);
 }
 
 html {
