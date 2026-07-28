@@ -195,7 +195,7 @@ function sanitizeImagePreviewUrl(value: string | undefined, fallback: string) {
   if (candidate.startsWith("/")) {
     return candidate;
   }
-  if (/^(https?:\/\/|blob:|data:image\/)/i.test(candidate)) {
+  if (/^https?:\/\//i.test(candidate)) {
     return candidate;
   }
   return fallback;
