@@ -187,6 +187,20 @@ function isValidPhone(value: string) {
   return /^[6-9]\d{9}$/.test(value);
 }
 
+function sanitizeImagePreviewUrl(value: string | undefined, fallback: string) {
+  const candidate = value?.trim();
+  if (!candidate) {
+    return fallback;
+  }
+  if (candidate.startsWith("/")) {
+    return candidate;
+  }
+  if (/^(https?:\/\/|blob:|data:image\/)/i.test(candidate)) {
+    return candidate;
+  }
+  return fallback;
+}
+
 function formatChatTimestamp(timestamp?: string) {
   if (!timestamp) {
     return "";
@@ -1824,13 +1838,13 @@ export function AuthLanding() {
                   <div className="rounded-[1rem] border border-dashed border-[#c9d7bf] bg-white px-3 py-3">
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#4f6750]">Logo preview</p>
                     <div className="mt-2 overflow-hidden rounded-[0.9rem] border border-[#dfe7d6] bg-[#eef3e8]">
-                      <img src={restaurantProfileDraft.restaurantLogoUrl || "/message-icon.svg"} alt="Restaurant logo preview" className="h-24 w-full object-cover" />
+                      <img src={sanitizeImagePreviewUrl(restaurantProfileDraft.restaurantLogoUrl, "/message-icon.svg")} alt="Restaurant logo preview" className="h-24 w-full object-cover" />
                     </div>
                   </div>
                   <div className="rounded-[1rem] border border-dashed border-[#c9d7bf] bg-white px-3 py-3">
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#4f6750]">Banner preview</p>
                     <div className="mt-2 overflow-hidden rounded-[0.9rem] border border-[#dfe7d6] bg-[#eef3e8]">
-                      <img src={restaurantProfileDraft.coverImageUrl || "/message-icon.svg"} alt="Restaurant banner preview" className="h-24 w-full object-cover" />
+                      <img src={sanitizeImagePreviewUrl(restaurantProfileDraft.coverImageUrl, "/message-icon.svg")} alt="Restaurant banner preview" className="h-24 w-full object-cover" />
                     </div>
                   </div>
                   <label className="rounded-[1rem] border border-dashed border-[#c9d7bf] bg-white px-3 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#4f6750]">
