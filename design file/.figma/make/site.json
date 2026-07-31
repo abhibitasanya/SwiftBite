@@ -1,0 +1,10 @@
+{
+  "description": "This web application connects professionals with tailored resources and tools to enhance productivity, streamline workflows, and foster collaboration.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

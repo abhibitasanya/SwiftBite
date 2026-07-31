@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "SwiftBite | Premium Food Delivery",
-  description: "Experience the best food delivery app with our olive green theme.",
+  title: "SwiftBite | Premium Food Delivery Platform",
+  description: "A polished, responsive food delivery experience for customers, restaurants, delivery partners, and admins.",
 };
 
 export default function RootLayout({
@@ -13,11 +13,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
-        <div className="container">
-          {children}
-        </div>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
