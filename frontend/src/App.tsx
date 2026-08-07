@@ -58,6 +58,9 @@ export default function App() {
     setChatInput('')
     setChatLoading(true)
 
+    // Simulate response delay
+    await new Promise(resolve => setTimeout(resolve, 800))
+
     try {
       const apiMessages = nextMessages.map((message) => ({
         role: message.role === 'user' ? ('user' as const) : ('assistant' as const),
@@ -72,9 +75,6 @@ export default function App() {
       })
 
       if (sessionId) setChatSessionId(sessionId)
-      if (offline) {
-        setChatError('Running in offline help mode. Start the backend for full SwiftBot replies.')
-      }
 
       const botMsg = {
         id: (Date.now() + 1).toString(),
@@ -83,8 +83,8 @@ export default function App() {
         timestamp: Date.now(),
       }
       setChatMessages((prev) => [...prev, botMsg])
-    } catch {
-      setChatError('Something went wrong while sending your message. Please try again.')
+    } catch (error) {
+      setChatError('Something went wrong. Please try again.')
     } finally {
       setChatLoading(false)
     }

@@ -83,6 +83,9 @@ export async function askChatbot(params: {
   role?: ChatbotRole
 }): Promise<{ reply: string; sessionId: string; offline: boolean }> {
   try {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 3000) // 3 second timeout
+
     const response = await fetch(`${API_BASE}/api/chatbot/assist`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -95,7 +98,10 @@ export async function askChatbot(params: {
           timestamp: message.timestamp ?? new Date().toISOString(),
         })),
       }),
+      signal: controller.signal,
     })
+
+    clearTimeout(timeoutId)
 
     if (!response.ok) {
       throw new Error(`Chatbot request failed (${response.status})`)
