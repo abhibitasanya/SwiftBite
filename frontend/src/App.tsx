@@ -20,6 +20,9 @@ export default function App() {
   const [onboStep, setOnboStep] = useState(0)
   const [cartAnim, setCartAnim] = useState(false)
   const [chatOpen, setChatOpen] = useState(false)
+  const [chatMessages, setChatMessages] = useState<Array<{ id: string; role: 'user' | 'bot'; text: string; timestamp: number }>>([])
+  const [chatInput, setChatInput] = useState('')
+  const [chatLoading, setChatLoading] = useState(false)
 
   useEffect(() => {
     if (screen === 'splash') {
@@ -27,6 +30,31 @@ export default function App() {
       return () => clearTimeout(t)
     }
   }, [screen])
+
+  const sendChatMessage = async (msg: string) => {
+    if (!msg.trim()) return
+    
+    // Add user message
+    const userMsg = { id: Date.now().toString(), role: 'user' as const, text: msg, timestamp: Date.now() }
+    setChatMessages(prev => [...prev, userMsg])
+    setChatInput('')
+    setChatLoading(true)
+
+    // Simulate bot response (replace with real API call)
+    setTimeout(() => {
+      const botResponses = [
+        'Great! Looking for something specific?',
+        'I can help you find restaurants, track orders, or answer questions.',
+        'Would you like to see popular restaurants near you?',
+        'Try searching for a cuisine like "pizza", "sushi", or "burgers"!',
+        'Need help with your order? I can check the status for you.',
+      ]
+      const randomResponse = botResponses[Math.floor(Math.random() * botResponses.length)]
+      const botMsg = { id: (Date.now() + 1).toString(), role: 'bot' as const, text: randomResponse, timestamp: Date.now() }
+      setChatMessages(prev => [...prev, botMsg])
+      setChatLoading(false)
+    }, 600)
+  }
 
   const goto = (s: Screen) => { setHistory(h => [...h, screen]); setScreen(s) }
   const goBack = () => { const prev = history[history.length - 1] || 'home'; setHistory(h => h.slice(0, -1)); setScreen(prev) }
@@ -122,25 +150,103 @@ export default function App() {
             position: 'fixed',
             right: 18,
             bottom: showNav ? 168 : 92,
-            width: 280,
-            padding: 14,
+            width: 320,
+            maxHeight: 450,
             borderRadius: 18,
-            background: 'rgba(255,253,248,0.96)',
+            background: 'rgba(255,253,248,0.98)',
             border: `1px solid ${C.border}`,
             boxShadow: '0 18px 40px rgba(47,58,45,0.16)',
             zIndex: 130,
             backdropFilter: 'blur(10px)',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-              <div style={{ fontSize: 13, fontWeight: 800, color: C.text }}>SwiftBot</div>
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', borderBottom: `1px solid ${C.border}` }}>
+              <div style={{ fontSize: 13, fontWeight: 800, color: C.text }}>🤖 SwiftBot</div>
               <button onClick={() => setChatOpen(false)} style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 16, color: C.muted }}>×</button>
             </div>
-            <div style={{ fontSize: 13, color: C.muted, lineHeight: 1.55 }}>
-              Hi! I can help you find food, track orders, or answer questions about SwiftBite.
+
+            {/* Messages */}
+            <div style={{ flex: 1, overflowY: 'auto', padding: '12px 12px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {chatMessages.length === 0 && (
+                <div style={{ color: C.muted, fontSize: 12, textAlign: 'center', paddingTop: 20 }}>
+                  <div style={{ fontSize: 28, marginBottom: 8 }}>👋</div>
+                  <div>Hi! Ask me anything about food orders, restaurants, or SwiftBite!</div>
+                </div>
+              )}
+              {chatMessages.map(msg => (
+                <div key={msg.id} style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
+                  <div style={{
+                    maxWidth: '75%',
+                    padding: '8px 12px',
+                    borderRadius: 12,
+                    backgroundColor: msg.role === 'user' ? C.red : C.bgGray,
+                    color: msg.role === 'user' ? 'white' : C.text,
+                    fontSize: 12,
+                    lineHeight: 1.4,
+                  }}>
+                    {msg.text}
+                  </div>
+                </div>
+              ))}
+              {chatLoading && (
+                <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                  <div style={{ padding: '8px 12px', borderRadius: 12, backgroundColor: C.bgGray, color: C.text, fontSize: 12 }}>
+                    <div style={{ display: 'flex', gap: 4, alignItems: 'center', height: 16 }}>
+                      <span style={{ animation: 'swiftPulse 1s infinite', animationDelay: '0s' }}>●</span>
+                      <span style={{ animation: 'swiftPulse 1s infinite', animationDelay: '0.2s' }}>●</span>
+                      <span style={{ animation: 'swiftPulse 1s infinite', animationDelay: '0.4s' }}>●</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-            <button onClick={() => setChatOpen(false)} style={{ marginTop: 10, width: '100%', border: 'none', borderRadius: 12, padding: '10px 12px', background: C.red, color: 'white', fontWeight: 700, cursor: 'pointer' }}>
-              Start chatting
-            </button>
+
+            {/* Input */}
+            <div style={{ padding: '10px 12px', borderTop: `1px solid ${C.border}`, display: 'flex', gap: 6 }}>
+              <input
+                type="text"
+                value={chatInput}
+                onChange={e => setChatInput(e.target.value)}
+                onKeyPress={e => e.key === 'Enter' && sendChatMessage(chatInput)}
+                placeholder="Type a message..."
+                disabled={chatLoading}
+                style={{
+                  flex: 1,
+                  border: `1px solid ${C.border}`,
+                  borderRadius: 10,
+                  padding: '8px 10px',
+                  fontSize: 12,
+                  fontFamily: 'inherit',
+                  outline: 'none',
+                  backgroundColor: C.bgGray,
+                  color: C.text,
+                  opacity: chatLoading ? 0.6 : 1,
+                }}
+              />
+              <button
+                onClick={() => sendChatMessage(chatInput)}
+                disabled={chatLoading || !chatInput.trim()}
+                style={{
+                  width: 36,
+                  height: 36,
+                  border: 'none',
+                  borderRadius: 10,
+                  backgroundColor: C.red,
+                  color: 'white',
+                  cursor: chatLoading || !chatInput.trim() ? 'not-allowed' : 'pointer',
+                  fontSize: 16,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  opacity: chatLoading || !chatInput.trim() ? 0.6 : 1,
+                }}
+              >
+                ↑
+              </button>
+            </div>
           </div>
         )}
 
