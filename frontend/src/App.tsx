@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import RoleSelector, { type Role } from './portals/RoleSelector'
 import AdminPortal from './portals/AdminPortal'
 import DeliveryPortal from './portals/DeliveryPortal'
 import RestaurantPortal from './portals/RestaurantPortal'
+import { askChatbot, type ChatbotRole } from './services/chatbot'
 
 import { SplashScreen, OnboardingScreen, HomeScreen, RestaurantListScreen, RestaurantDetailScreen, FoodDetailScreen, CartScreen, CheckoutScreen, OrderTrackingScreen, OrderSuccessScreen, OrderHistoryScreen, FavoritesScreen, NotificationsScreen, ProfileScreen, LoginScreen, SignUpScreen, ForgotScreen, OTPScreen, ResetScreen, SettingsScreen, TABS, TAB_SCREEN, SCREEN_TAB, SwitchRoleButton, LandingPageScreen } from './screens';
 import { Restaurant, MenuItem, CartItem, Screen, type NavTab } from './types';
@@ -23,6 +24,71 @@ export default function App() {
   const [chatMessages, setChatMessages] = useState<Array<{ id: string; role: 'user' | 'bot'; text: string; timestamp: number }>>([])
   const [chatInput, setChatInput] = useState('')
   const [chatLoading, setChatLoading] = useState(false)
+  const [chatSessionId, setChatSessionId] = useState<string>()
+  const [chatError, setChatError] = useState<string | null>(null)
+  const chatEndRef = useRef<HTMLDivElement>(null)
+
+  const chatQuickReplies = [
+    'How do I order food?',
+    'Where is my order?',
+    'Show me popular restaurants',
+    'What can you help with?',
+  ]
+
+  useEffect(() => {
+    if (chatOpen) {
+      chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [chatMessages, chatLoading, chatOpen])
+
+  const toChatbotRole = (currentRole: Role): ChatbotRole => {
+    if (currentRole === 'admin') return 'platform'
+    return currentRole
+  }
+
+  const sendChatMessage = async (msg: string) => {
+    const text = msg.trim()
+    if (!text || chatLoading) return
+
+    setChatError(null)
+
+    const userMsg = { id: Date.now().toString(), role: 'user' as const, text, timestamp: Date.now() }
+    const nextMessages = [...chatMessages, userMsg]
+    setChatMessages(nextMessages)
+    setChatInput('')
+    setChatLoading(true)
+
+    try {
+      const apiMessages = nextMessages.map((message) => ({
+        role: message.role === 'user' ? ('user' as const) : ('assistant' as const),
+        text: message.text,
+        timestamp: new Date(message.timestamp).toISOString(),
+      }))
+
+      const { reply, sessionId, offline } = await askChatbot({
+        messages: apiMessages,
+        sessionId: chatSessionId,
+        role: toChatbotRole(role),
+      })
+
+      if (sessionId) setChatSessionId(sessionId)
+      if (offline) {
+        setChatError('Running in offline help mode. Start the backend for full SwiftBot replies.')
+      }
+
+      const botMsg = {
+        id: (Date.now() + 1).toString(),
+        role: 'bot' as const,
+        text: reply,
+        timestamp: Date.now(),
+      }
+      setChatMessages((prev) => [...prev, botMsg])
+    } catch {
+      setChatError('Something went wrong while sending your message. Please try again.')
+    } finally {
+      setChatLoading(false)
+    }
+  }
 
   useEffect(() => {
     if (screen === 'splash') {
@@ -30,31 +96,6 @@ export default function App() {
       return () => clearTimeout(t)
     }
   }, [screen])
-
-  const sendChatMessage = async (msg: string) => {
-    if (!msg.trim()) return
-    
-    // Add user message
-    const userMsg = { id: Date.now().toString(), role: 'user' as const, text: msg, timestamp: Date.now() }
-    setChatMessages(prev => [...prev, userMsg])
-    setChatInput('')
-    setChatLoading(true)
-
-    // Simulate bot response (replace with real API call)
-    setTimeout(() => {
-      const botResponses = [
-        'Great! Looking for something specific?',
-        'I can help you find restaurants, track orders, or answer questions.',
-        'Would you like to see popular restaurants near you?',
-        'Try searching for a cuisine like "pizza", "sushi", or "burgers"!',
-        'Need help with your order? I can check the status for you.',
-      ]
-      const randomResponse = botResponses[Math.floor(Math.random() * botResponses.length)]
-      const botMsg = { id: (Date.now() + 1).toString(), role: 'bot' as const, text: randomResponse, timestamp: Date.now() }
-      setChatMessages(prev => [...prev, botMsg])
-      setChatLoading(false)
-    }, 600)
-  }
 
   const goto = (s: Screen) => { setHistory(h => [...h, screen]); setScreen(s) }
   const goBack = () => { const prev = history[history.length - 1] || 'home'; setHistory(h => h.slice(0, -1)); setScreen(prev) }
@@ -169,11 +210,51 @@ export default function App() {
             </div>
 
             {/* Messages */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '12px 12px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ flex: 1, overflowY: 'auto', padding: '12px 12px', display: 'flex', flexDirection: 'column', gap: 10, minHeight: 280 }}>
               {chatMessages.length === 0 && (
-                <div style={{ color: C.muted, fontSize: 12, textAlign: 'center', paddingTop: 20 }}>
+                <div style={{ color: C.muted, fontSize: 12, textAlign: 'center', paddingTop: 12 }}>
                   <div style={{ fontSize: 28, marginBottom: 8 }}>👋</div>
-                  <div>Hi! Ask me anything about food orders, restaurants, or SwiftBite!</div>
+                  <div style={{ marginBottom: 14, lineHeight: 1.5 }}>Hi! I can help with ordering, tracking, restaurants, and app questions.</div>
+                  <button
+                    type="button"
+                    onClick={() => sendChatMessage('Hi')}
+                    disabled={chatLoading}
+                    style={{
+                      border: 'none',
+                      borderRadius: 999,
+                      padding: '10px 16px',
+                      background: 'linear-gradient(135deg, #6F7F4D 0%, #8E9F63 100%)',
+                      color: 'white',
+                      fontSize: 12,
+                      fontWeight: 700,
+                      cursor: chatLoading ? 'not-allowed' : 'pointer',
+                      opacity: chatLoading ? 0.7 : 1,
+                      marginBottom: 12,
+                    }}
+                  >
+                    Start chatting
+                  </button>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, justifyContent: 'center' }}>
+                    {chatQuickReplies.map((prompt) => (
+                      <button
+                        key={prompt}
+                        type="button"
+                        onClick={() => sendChatMessage(prompt)}
+                        disabled={chatLoading}
+                        style={{
+                          border: `1px solid ${C.border}`,
+                          borderRadius: 999,
+                          padding: '6px 10px',
+                          backgroundColor: 'white',
+                          color: C.text,
+                          fontSize: 11,
+                          cursor: chatLoading ? 'not-allowed' : 'pointer',
+                        }}
+                      >
+                        {prompt}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
               {chatMessages.map(msg => (
@@ -186,6 +267,7 @@ export default function App() {
                     color: msg.role === 'user' ? 'white' : C.text,
                     fontSize: 12,
                     lineHeight: 1.4,
+                    whiteSpace: 'pre-wrap',
                   }}>
                     {msg.text}
                   </div>
@@ -202,6 +284,12 @@ export default function App() {
                   </div>
                 </div>
               )}
+              {chatError && (
+                <div style={{ fontSize: 11, color: '#B45309', backgroundColor: '#FFFBEB', borderRadius: 10, padding: '8px 10px', lineHeight: 1.4 }}>
+                  {chatError}
+                </div>
+              )}
+              <div ref={chatEndRef} />
             </div>
 
             {/* Input */}
@@ -210,8 +298,13 @@ export default function App() {
                 type="text"
                 value={chatInput}
                 onChange={e => setChatInput(e.target.value)}
-                onKeyPress={e => e.key === 'Enter' && sendChatMessage(chatInput)}
-                placeholder="Type a message..."
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault()
+                    sendChatMessage(chatInput)
+                  }
+                }}
+                placeholder="Ask about orders, food, or the app..."
                 disabled={chatLoading}
                 style={{
                   flex: 1,
