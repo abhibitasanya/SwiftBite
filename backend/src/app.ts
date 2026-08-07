@@ -9,6 +9,7 @@ import path from "path";
 import type { RowDataPacket } from "mysql2/promise";
 import { db } from "./db.js";
 import { z } from "zod";
+import { getAIResponse, isAIInitialized } from "./aiService.js";
 
 dotenv.config();
 
@@ -1798,7 +1799,7 @@ export function createApp() {
     }
   });
 
-  app.post("/api/chatbot/assist", (request: Request, response: Response) => {
+  app.post("/api/chatbot/assist", async (request: Request, response: Response) => {
     const parsed = chatbotSchema.safeParse(request.body);
 
     if (!parsed.success) {
@@ -1827,10 +1828,31 @@ export function createApp() {
 
     const storedConversation = chatbotSessionStore.get(sessionId)?.messages ?? [];
     const conversation = trimChatbotMessages([...storedConversation, ...incomingMessages]);
-    const assistantReply = chatbotProvider.respond({
-      messages: conversation,
-      ...(parsed.data.role ? { role: parsed.data.role } : {}),
-    });
+    
+    let assistantReply: string;
+    
+    // Try to use AI if available, otherwise fall back to local provider
+    if (isAIInitialized()) {
+      try {
+        const aiConversation = conversation.map(msg => ({
+          role: msg.role as "user" | "assistant",
+          text: msg.text,
+          ...(msg.timestamp && { timestamp: msg.timestamp })
+        }));
+        assistantReply = await getAIResponse(aiConversation, parsed.data.role ?? "customer");
+      } catch (error) {
+        console.error("AI response failed, falling back to local provider:", error);
+        assistantReply = chatbotProvider.respond({
+          messages: conversation,
+          ...(parsed.data.role ? { role: parsed.data.role } : {}),
+        });
+      }
+    } else {
+      assistantReply = chatbotProvider.respond({
+        messages: conversation,
+        ...(parsed.data.role ? { role: parsed.data.role } : {}),
+      });
+    }
 
     chatbotSessionStore.set(sessionId, {
       messages: trimChatbotMessages([

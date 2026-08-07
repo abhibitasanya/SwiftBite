@@ -8,6 +8,7 @@ import morgan from "morgan";
 import path from "path";
 import { db } from "./db.js";
 import { z } from "zod";
+import { getAIResponse, isAIInitialized } from "./aiService.js";
 dotenv.config();
 const loginSchema = z.object({
     identifier: z.string().min(1),
@@ -1448,7 +1449,7 @@ export function createApp() {
             });
         }
     });
-    app.post("/api/chatbot/assist", (request, response) => {
+    app.post("/api/chatbot/assist", async (request, response) => {
         const parsed = chatbotSchema.safeParse(request.body);
         if (!parsed.success) {
             response.status(400).json({
@@ -1469,10 +1470,31 @@ export function createApp() {
         }
         const storedConversation = chatbotSessionStore.get(sessionId)?.messages ?? [];
         const conversation = trimChatbotMessages([...storedConversation, ...incomingMessages]);
-        const assistantReply = chatbotProvider.respond({
-            messages: conversation,
-            ...(parsed.data.role ? { role: parsed.data.role } : {}),
-        });
+        let assistantReply;
+        // Try to use AI if available, otherwise fall back to local provider
+        if (isAIInitialized()) {
+            try {
+                const aiConversation = conversation.map(msg => ({
+                    role: msg.role,
+                    text: msg.text,
+                    ...(msg.timestamp && { timestamp: msg.timestamp })
+                }));
+                assistantReply = await getAIResponse(aiConversation, parsed.data.role ?? "customer");
+            }
+            catch (error) {
+                console.error("AI response failed, falling back to local provider:", error);
+                assistantReply = chatbotProvider.respond({
+                    messages: conversation,
+                    ...(parsed.data.role ? { role: parsed.data.role } : {}),
+                });
+            }
+        }
+        else {
+            assistantReply = chatbotProvider.respond({
+                messages: conversation,
+                ...(parsed.data.role ? { role: parsed.data.role } : {}),
+            });
+        }
         chatbotSessionStore.set(sessionId, {
             messages: trimChatbotMessages([
                 ...conversation,
