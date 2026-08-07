@@ -19,6 +19,7 @@ export default function App() {
   const [favorites, setFavorites] = useState<Set<number>>(new Set([1, 3]))
   const [onboStep, setOnboStep] = useState(0)
   const [cartAnim, setCartAnim] = useState(false)
+  const [chatOpen, setChatOpen] = useState(false)
 
   useEffect(() => {
     if (screen === 'splash') {
@@ -90,6 +91,58 @@ export default function App() {
           {screen === 'profile' && <ProfileScreen onSwitchRole={() => setShowRoleSelector(true)} onSettings={() => goto('settings')} />}
           {screen === 'settings' && <SettingsScreen onBack={goBack} />}
         </div>
+
+        <button
+          onClick={() => setChatOpen(v => !v)}
+          aria-label="Open AI assistant"
+          style={{
+            position: 'fixed',
+            right: 18,
+            bottom: showNav ? 100 : 24,
+            width: 56,
+            height: 56,
+            borderRadius: '50%',
+            border: 'none',
+            background: 'linear-gradient(135deg, #6F7F4D 0%, #8E9F63 100%)',
+            color: 'white',
+            boxShadow: '0 14px 34px rgba(111,127,77,0.30)',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 120,
+            fontSize: 24,
+          }}
+        >
+          🤖
+        </button>
+
+        {chatOpen && (
+          <div style={{
+            position: 'fixed',
+            right: 18,
+            bottom: showNav ? 168 : 92,
+            width: 280,
+            padding: 14,
+            borderRadius: 18,
+            background: 'rgba(255,253,248,0.96)',
+            border: `1px solid ${C.border}`,
+            boxShadow: '0 18px 40px rgba(47,58,45,0.16)',
+            zIndex: 130,
+            backdropFilter: 'blur(10px)',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <div style={{ fontSize: 13, fontWeight: 800, color: C.text }}>SwiftBot</div>
+              <button onClick={() => setChatOpen(false)} style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 16, color: C.muted }}>×</button>
+            </div>
+            <div style={{ fontSize: 13, color: C.muted, lineHeight: 1.55 }}>
+              Hi! I can help you find food, track orders, or answer questions about SwiftBite.
+            </div>
+            <button onClick={() => setChatOpen(false)} style={{ marginTop: 10, width: '100%', border: 'none', borderRadius: 12, padding: '10px 12px', background: C.red, color: 'white', fontWeight: 700, cursor: 'pointer' }}>
+              Start chatting
+            </button>
+          </div>
+        )}
 
         {/* Bottom nav */}
         {showNav && (

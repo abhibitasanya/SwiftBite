@@ -4,10 +4,10 @@ import Icon from '../components/icons';
 
 export function LandingPageScreen({ onGetStarted }: { onGetStarted: () => void }) {
   return (
-    <div className="min-h-screen w-full bg-white relative overflow-x-hidden font-sans">
+    <div className="min-h-screen w-full bg-[#f8f2e7] relative overflow-x-hidden font-sans">
       {/* Background gradients */}
-      <div className="absolute top-0 right-0 -mr-20 -mt-20 w-[600px] h-[600px] bg-red-50 rounded-full blur-3xl opacity-50 -z-10"></div>
-      <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-[500px] h-[500px] bg-orange-50 rounded-full blur-3xl opacity-50 -z-10"></div>
+      <div className="absolute top-0 right-0 -mr-20 -mt-20 w-[600px] h-[600px] bg-[#eef3e5] rounded-full blur-3xl opacity-70 -z-10"></div>
+      <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-[500px] h-[500px] bg-[#f1e7d3] rounded-full blur-3xl opacity-70 -z-10"></div>
 
       {/* Navbar */}
       <nav className="absolute top-0 w-full flex items-center justify-between px-6 py-6 md:px-12 z-20">
@@ -18,14 +18,14 @@ export function LandingPageScreen({ onGetStarted }: { onGetStarted: () => void }
           <img src="/swiftbite-logo.png" alt="SwiftBite logo" className="swift-brand-logo" />
           <span className="text-2xl font-extrabold text-gray-900 tracking-tight">SwiftBite</span>
         </div>
-        <div className="hidden md:flex items-center gap-10 text-sm font-bold text-gray-600">
-          <button onClick={onGetStarted} className="hover:text-red-600 transition bg-transparent border-none cursor-pointer">Features</button>
-          <button onClick={onGetStarted} className="hover:text-red-600 transition bg-transparent border-none cursor-pointer">Restaurants</button>
-          <button onClick={onGetStarted} className="hover:text-red-600 transition bg-transparent border-none cursor-pointer">About Us</button>
+        <div className="hidden md:flex items-center gap-10 text-sm font-bold text-[#6f725c]">
+          <button onClick={onGetStarted} className="hover:text-[#6f7f4d] transition bg-transparent border-none cursor-pointer">Features</button>
+          <button onClick={onGetStarted} className="hover:text-[#6f7f4d] transition bg-transparent border-none cursor-pointer">Restaurants</button>
+          <button onClick={onGetStarted} className="hover:text-[#6f7f4d] transition bg-transparent border-none cursor-pointer">About Us</button>
         </div>
         <button 
           onClick={onGetStarted}
-          className="hidden md:block bg-gray-900 hover:bg-gray-800 text-white px-7 py-3 rounded-xl font-bold transition shadow-xl border-none cursor-pointer"
+          className="hidden md:block bg-[#425132] hover:bg-[#39472b] text-white px-7 py-3 rounded-xl font-bold transition shadow-xl border-none cursor-pointer"
         >
           Sign In
         </button>
@@ -34,13 +34,13 @@ export function LandingPageScreen({ onGetStarted }: { onGetStarted: () => void }
       {/* Hero Section */}
       <div className="relative pt-36 pb-20 lg:pt-48 lg:pb-32 px-6 md:px-12 max-w-[1400px] mx-auto flex flex-col-reverse lg:flex-row items-center justify-between gap-16">
         <div className="flex-1 text-center lg:text-left z-10 max-w-2xl">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-50 border border-red-100 text-red-600 font-bold text-xs uppercase tracking-widest mb-8 shadow-sm">
-            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#eef3e5] border border-[#dfe8cf] text-[#5f7446] font-bold text-xs uppercase tracking-widest mb-8 shadow-sm">
+            <span className="w-2 h-2 rounded-full bg-[#6f7f4d] animate-pulse"></span>
             Now delivering in your city
           </div>
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-gray-900 leading-[1.1] tracking-tight mb-6">
             The food you love, <br/>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-500">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#6f7f4d] to-[#c7a96d]">
               delivered fast.
             </span>
           </h1>
@@ -50,7 +50,7 @@ export function LandingPageScreen({ onGetStarted }: { onGetStarted: () => void }
           <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
             <button 
               onClick={onGetStarted}
-              className="w-full sm:w-auto px-8 py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-bold text-lg shadow-2xl shadow-red-500/40 transition-all hover:-translate-y-1 active:translate-y-0 flex items-center justify-center gap-3 border-none cursor-pointer"
+              className="w-full sm:w-auto px-8 py-4 bg-[#6f7f4d] hover:bg-[#55663f] text-white rounded-2xl font-bold text-lg shadow-2xl shadow-[#6f7f4d]/30 transition-all hover:-translate-y-1 active:translate-y-0 flex items-center justify-center gap-3 border-none cursor-pointer"
             >
               Let's Get Started <div className="bg-white/20 rounded-full p-1 flex items-center justify-center"><Icon.Chevron dir="right" color="white" /></div>
             </button>
@@ -78,7 +78,7 @@ export function LandingPageScreen({ onGetStarted }: { onGetStarted: () => void }
         </div>
         
         <div className="flex-1 relative w-full max-w-lg lg:max-w-none">
-          <div className="absolute inset-0 bg-gradient-to-tr from-red-100 to-orange-100 rounded-[3rem] transform rotate-3 scale-[1.02] -z-10"></div>
+          <div className="absolute inset-0 bg-gradient-to-tr from-[#eef5e8] to-[#f4e8d1] rounded-[3rem] transform rotate-3 scale-[1.02] -z-10"></div>
           <img 
             src="/hero_food_platter.jpg" 
             alt="Delicious food" 
