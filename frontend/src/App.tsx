@@ -1,11 +1,13 @@
-import { useState, useEffect, type ReactNode } from 'react'
+import { useState, useEffect } from 'react'
 import RoleSelector, { type Role } from './portals/RoleSelector'
 import AdminPortal from './portals/AdminPortal'
 import DeliveryPortal from './portals/DeliveryPortal'
 import RestaurantPortal from './portals/RestaurantPortal'
 
-import { SplashScreen, OnboardingScreen, HomeScreen, RestaurantListScreen, RestaurantDetailScreen, FoodDetailScreen, CartScreen, OrderTrackingScreen, OrderSuccessScreen, OrderHistoryScreen, FavoritesScreen, NotificationsScreen, ProfileScreen, LoginScreen, SignUpScreen, ForgotScreen, OTPScreen, ResetScreen, SettingsScreen, TABS, TAB_SCREEN, SCREEN_TAB, SwitchRoleButton, LandingPageScreen } from './screens';
+import { SplashScreen, OnboardingScreen, HomeScreen, RestaurantListScreen, RestaurantDetailScreen, FoodDetailScreen, CartScreen, CheckoutScreen, OrderTrackingScreen, OrderSuccessScreen, OrderHistoryScreen, FavoritesScreen, NotificationsScreen, ProfileScreen, LoginScreen, SignUpScreen, ForgotScreen, OTPScreen, ResetScreen, SettingsScreen, TABS, TAB_SCREEN, SCREEN_TAB, SwitchRoleButton, LandingPageScreen } from './screens';
 import { Restaurant, MenuItem, CartItem, Screen, type NavTab } from './types';
+import { MENU_ITEMS } from './data/mockData';
+import C from './theme/colors';
 export default function App() {
   const [role, setRole] = useState<Role>('customer')
   const [showRoleSelector, setShowRoleSelector] = useState(false)
@@ -62,10 +64,10 @@ export default function App() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', justifyContent: 'center', position: 'relative', overflow: 'hidden', padding: '14px 0' }}>
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 15% 15%, rgba(226, 55, 68, 0.10), transparent 26%), radial-gradient(circle at 85% 0%, rgba(255, 122, 0, 0.10), transparent 24%), radial-gradient(circle at 50% 100%, rgba(22, 163, 74, 0.08), transparent 28%)' }} />
+    <div className="swift-app-frame">
+      <div className="swift-app-bg" />
       {showRoleSelector && <RoleSelector current={role} onSelect={r => { setRole(r); setShowRoleSelector(false) }} onClose={() => setShowRoleSelector(false)} />}
-      <div style={{ width: '100%', maxWidth: 430, minHeight: 'calc(100vh - 28px)', background: 'linear-gradient(180deg, #FFFFFF 0%, #FAFAFA 100%)', position: 'relative', overflow: 'hidden', boxShadow: '0 24px 80px rgba(15,23,42,0.18)', border: '1px solid rgba(255,255,255,0.65)', borderRadius: 32, zIndex: 1 }}>
+      <div className="swift-app-shell">
         <div className="screen-enter" key={screen} style={{ paddingBottom: showNav ? 92 : 0 }}>
           {screen === 'splash' && <SplashScreen />}
           {screen === 'onboarding' && <OnboardingScreen step={onboStep} onNext={() => onboStep < 2 ? setOnboStep(s => s + 1) : goto('auth-login')} onSkip={() => goto('auth-login')} />}
@@ -91,7 +93,7 @@ export default function App() {
 
         {/* Bottom nav */}
         {showNav && (
-          <nav style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 430, backgroundColor: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderTop: `1px solid rgba(229,231,235,0.9)`, padding: '10px 0 calc(18px + env(safe-area-inset-bottom))', display: 'flex', justifyContent: 'space-around', zIndex: 100, boxShadow: '0 -12px 32px rgba(15,23,42,0.08)' }}>
+          <nav className="swift-bottom-nav">
             {TABS.map(({ id, label, IconComp }) => (
               <button key={id} onClick={() => handleTab(id)} className="btn-press" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer', padding: '0 20px', position: 'relative' }}>
                 <IconComp active={activeTab === id} />

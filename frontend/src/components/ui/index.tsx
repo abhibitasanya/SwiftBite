@@ -63,7 +63,7 @@ function RestaurantCard({ restaurant: r, onClick, isFav, onFav }: { restaurant: 
 function CartFAB({ count, total, onClick, animating }: { count: number; total: number; onClick: () => void; animating: boolean }) {
   if (count === 0) return null
   return (
-    <div style={{ position: 'fixed', bottom: 90, left: '50%', transform: 'translateX(-50%)', zIndex: 99, width: 'calc(100% - 40px)', maxWidth: 390 }}>
+    <div style={{ position: 'fixed', bottom: 90, left: '50%', transform: 'translateX(-50%)', zIndex: 99, width: 'min(calc(100% - 40px), 760px)' }}>
       <button onClick={onClick} className={`btn-press ${animating ? 'animate-swift-cart-pop' : ''}`} style={{
         width: '100%', padding: '15px 20px', backgroundColor: C.red, color: 'white',
         border: 'none', borderRadius: 16, cursor: 'pointer', display: 'flex',

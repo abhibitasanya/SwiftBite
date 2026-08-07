@@ -12,9 +12,10 @@ export function LandingPageScreen({ onGetStarted }: { onGetStarted: () => void }
       {/* Navbar */}
       <nav className="absolute top-0 w-full flex items-center justify-between px-6 py-6 md:px-12 z-20">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 bg-red-600 rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg shadow-red-500/30">
+          <div className="hidden">
             ⚡
           </div>
+          <img src="/swiftbite-logo.png" alt="SwiftBite logo" className="swift-brand-logo" />
           <span className="text-2xl font-extrabold text-gray-900 tracking-tight">SwiftBite</span>
         </div>
         <div className="hidden md:flex items-center gap-10 text-sm font-bold text-gray-600">

@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, type ReactNode } from 'react';
 import C from '../theme/colors';
 import Icon from '../components/icons';
 import { SectionHeader, RestaurantCard, CartFAB, BackButton } from '../components/ui';
 import { RESTAURANTS, MENU_ITEMS, CATEGORIES, ONBOARDING } from '../data/mockData';
-import { Restaurant, MenuItem, CartItem, Screen } from '../types';
+import { Restaurant, MenuItem, CartItem, Screen, type NavTab } from '../types';
 
 function SplashScreen() {
   return (
@@ -60,7 +60,11 @@ function HomeScreen({ onRestaurantClick, onSearch, cartTotal, cartCount, onCartC
   return (
     <div style={{ backgroundColor: C.bg, overflowY: 'auto', minHeight: 'calc(100vh - 80px)' }}>
       {/* Header */}
-      <div style={{ backgroundColor: C.surface, padding: '56px 20px 20px' }}>
+      <div className="swift-content-pad" style={{ backgroundColor: C.surface, padding: '42px 20px 20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
+          <img src="/swiftbite-logo.png" alt="SwiftBite logo" className="swift-brand-logo" />
+          <span style={{ fontSize: 18, fontWeight: 900, color: C.text }}>SwiftBite</span>
+        </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
           <div>
             <p style={{ fontSize: 13, color: C.muted, margin: '0 0 2px', fontWeight: 500 }}>Good afternoon 👋</p>
@@ -88,7 +92,7 @@ function HomeScreen({ onRestaurantClick, onSearch, cartTotal, cartCount, onCartC
       </div>
 
       {/* Promo banner */}
-      <div style={{ padding: '16px 20px' }}>
+      <div className="swift-content-pad" style={{ padding: '16px 20px' }}>
         <div style={{ background: `linear-gradient(130deg, ${C.red} 0%, ${C.orange} 100%)`, borderRadius: 20, padding: 20, position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', right: -8, top: -8, fontSize: 84, opacity: 0.12, lineHeight: 1 }}>🎉</div>
           <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: 11, fontWeight: 700, margin: '0 0 4px', letterSpacing: 1, textTransform: 'uppercase' }}>Limited Time</p>
@@ -101,7 +105,7 @@ function HomeScreen({ onRestaurantClick, onSearch, cartTotal, cartCount, onCartC
       </div>
 
       {/* Categories */}
-      <div style={{ padding: '0 20px 16px' }}>
+      <div className="swift-content-pad" style={{ padding: '0 20px 16px' }}>
         <SectionHeader title="What's on your mind?" />
         <div style={{ display: 'flex', gap: 10, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 4 }}>
           {CATEGORIES.map(cat => (
@@ -119,9 +123,9 @@ function HomeScreen({ onRestaurantClick, onSearch, cartTotal, cartCount, onCartC
       </div>
 
       {/* Trending */}
-      <div style={{ padding: '0 20px 16px' }}>
+      <div className="swift-content-pad" style={{ padding: '0 20px 16px' }}>
         <SectionHeader title="Trending Near You" subtitle="Top picks right now" onSeeAll={() => {}} />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <div className="swift-card-grid" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {RESTAURANTS.slice(0, 3).map(r => (
             <RestaurantCard key={r.id} restaurant={r} onClick={() => onRestaurantClick(r)} isFav={favorites.has(r.id)} onFav={() => onFav(r.id)} />
           ))}
@@ -130,10 +134,10 @@ function HomeScreen({ onRestaurantClick, onSearch, cartTotal, cartCount, onCartC
 
       {/* Popular dishes */}
       <div style={{ padding: '0 0 16px' }}>
-        <div style={{ padding: '0 20px' }}><SectionHeader title="Popular Dishes" subtitle="Loved by thousands" onSeeAll={() => {}} /></div>
-        <div style={{ display: 'flex', gap: 12, overflowX: 'auto', padding: '4px 20px', scrollbarWidth: 'none' }}>
+        <div className="swift-content-pad" style={{ padding: '0 20px' }}><SectionHeader title="Popular Dishes" subtitle="Loved by thousands" onSeeAll={() => {}} /></div>
+        <div className="swift-content-pad swift-dish-grid" style={{ display: 'flex', gap: 12, overflowX: 'auto', padding: '4px 20px', scrollbarWidth: 'none' }}>
           {MENU_ITEMS.map(item => (
-            <div key={item.id} className="card-hover" style={{ flex: '0 0 155px', backgroundColor: C.surface, borderRadius: 16, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', cursor: 'pointer' }}>
+            <div key={item.id} className="card-hover swift-dish-card" style={{ flex: '0 0 155px', backgroundColor: C.surface, borderRadius: 16, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', cursor: 'pointer' }}>
               <div style={{ height: 110, overflow: 'hidden', backgroundColor: C.bgGray }}>
                 <img src={`https://images.unsplash.com/${item.image}?w=310&h=220&fit=crop&auto=format`} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
@@ -147,9 +151,9 @@ function HomeScreen({ onRestaurantClick, onSearch, cartTotal, cartCount, onCartC
       </div>
 
       {/* More restaurants */}
-      <div style={{ padding: '0 20px 24px' }}>
+      <div className="swift-content-pad" style={{ padding: '0 20px 24px' }}>
         <SectionHeader title="All Restaurants" onSeeAll={() => {}} />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <div className="swift-card-grid" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {RESTAURANTS.slice(3).map(r => (
             <RestaurantCard key={r.id} restaurant={r} onClick={() => onRestaurantClick(r)} isFav={favorites.has(r.id)} onFav={() => onFav(r.id)} />
           ))}
@@ -171,7 +175,7 @@ function RestaurantListScreen({ onBack, onRestaurantClick, favorites, onFav }: a
   )
   return (
     <div style={{ backgroundColor: C.bg, minHeight: '100vh' }}>
-      <div style={{ backgroundColor: C.surface, padding: '56px 20px 16px' }}>
+      <div className="swift-content-pad" style={{ backgroundColor: C.surface, padding: '42px 20px 16px' }}>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 16 }}>
           <BackButton onClick={onBack} />
           <h1 style={{ fontSize: 20, fontWeight: 800, color: C.text, margin: 0, flex: 1 }}>Explore</h1>
@@ -193,7 +197,7 @@ function RestaurantListScreen({ onBack, onRestaurantClick, favorites, onFav }: a
           ))}
         </div>
       </div>
-      <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div className="swift-content-pad swift-card-grid" style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 14 }}>
         <p style={{ fontSize: 13, color: C.muted, margin: 0, fontWeight: 500 }}>{filtered.length} restaurants found</p>
         {filtered.map(r => (
           <RestaurantCard key={r.id} restaurant={r} onClick={() => onRestaurantClick(r)} isFav={favorites.has(r.id)} onFav={() => onFav(r.id)} />
@@ -856,6 +860,17 @@ function AuthInput({ label, type = 'text', placeholder, value, onChange, icon, r
   )
 }
 
+type ContactMode = 'email' | 'phone'
+
+function ContactModeToggle({ mode, onMode }: { mode: ContactMode; onMode: (mode: ContactMode) => void }) {
+  return (
+    <div className="swift-contact-toggle" role="tablist" aria-label="Choose contact method">
+      <button type="button" data-active={mode === 'email'} onClick={() => onMode('email')}>Email</button>
+      <button type="button" data-active={mode === 'phone'} onClick={() => onMode('phone')}>Phone</button>
+    </div>
+  )
+}
+
 function SocialLogin() {
   return (
     <div>
@@ -881,14 +896,17 @@ function SocialLogin() {
 
 // ── Auth: Login ───────────────────────────────────────────────────────────────
 function LoginScreen({ onLogin, onSignUp, onForgot }: { onLogin: () => void; onSignUp: () => void; onForgot: () => void }) {
+  const [contactMode, setContactMode] = useState<ContactMode>('email')
   const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
   const [showPw, setShowPw] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
   const handleLogin = () => {
-    if (!email || !password) { setError("Please fill in your email and password."); return }
+    const contact = contactMode === 'email' ? email : phone
+    if (!contact || !password) { setError(`Please fill in your ${contactMode} and password.`); return }
     setError(''); setLoading(true)
     setTimeout(() => { setLoading(false); onLogin() }, 1200)
   }
@@ -899,13 +917,19 @@ function LoginScreen({ onLogin, onSignUp, onForgot }: { onLogin: () => void; onS
       <div style={{ height: 6, background: `linear-gradient(90deg, ${C.red}, ${C.orange})` }} />
 
       <div style={{ padding: '40px 24px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 8 }}>
-        <div style={{ width: 64, height: 64, backgroundColor: C.redLight, borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, marginBottom: 16 }}>⚡</div>
+        <img src="/swiftbite-logo.png" alt="SwiftBite logo" className="swift-auth-logo" style={{ marginBottom: 16 }} />
+        <div style={{ display: 'none' }}>⚡</div>
         <h1 style={{ fontSize: 28, fontWeight: 800, color: C.text, margin: '0 0 6px', letterSpacing: -0.6 }}>Welcome back!</h1>
         <p style={{ fontSize: 14, color: C.muted, margin: 0, textAlign: 'center' }}>Sign in to continue ordering your favourites</p>
       </div>
 
-      <div style={{ padding: '24px 24px 0' }}>
-        <AuthInput label="Email address" type="email" placeholder="alex@example.com" value={email} onChange={setEmail} icon="✉️" />
+      <div className="swift-auth-panel" style={{ padding: '24px 24px 0' }}>
+        <ContactModeToggle mode={contactMode} onMode={setContactMode} />
+        {contactMode === 'email' ? (
+          <AuthInput label="Email address" type="email" placeholder="alex@example.com" value={email} onChange={setEmail} icon="✉️" />
+        ) : (
+          <AuthInput label="Phone number" type="tel" placeholder="+1 (555) 000-0000" value={phone} onChange={setPhone} icon="📱" />
+        )}
         <AuthInput
           label="Password" type={showPw ? 'text' : 'password'} placeholder="Your password" value={password} onChange={setPassword} icon="🔒"
           right={
@@ -941,6 +965,7 @@ function LoginScreen({ onLogin, onSignUp, onForgot }: { onLogin: () => void; onS
 // ── Auth: Sign Up ─────────────────────────────────────────────────────────────
 function SignUpScreen({ onSignUp, onLogin }: { onSignUp: () => void; onLogin: () => void }) {
   const [name, setName] = useState('')
+  const [contactMode, setContactMode] = useState<ContactMode>('email')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
@@ -961,10 +986,14 @@ function SignUpScreen({ onSignUp, onLogin }: { onSignUp: () => void; onLogin: ()
     <div style={{ backgroundColor: 'white', minHeight: '100vh', overflowY: 'auto' }}>
       <div style={{ height: 6, background: `linear-gradient(90deg, ${C.red}, ${C.orange})` }} />
       <AuthHeader title="Create account" subtitle="Join SwiftBite and start ordering amazing food today." />
-      <div style={{ padding: '0 24px 40px' }}>
+      <div className="swift-auth-panel" style={{ padding: '0 24px 40px' }}>
         <AuthInput label="Full name" placeholder="Alex Johnson" value={name} onChange={setName} icon="👤" />
-        <AuthInput label="Email address" type="email" placeholder="alex@example.com" value={email} onChange={setEmail} icon="✉️" />
-        <AuthInput label="Phone number" type="tel" placeholder="+1 (555) 000-0000" value={phone} onChange={setPhone} icon="📱" />
+        <ContactModeToggle mode={contactMode} onMode={setContactMode} />
+        {contactMode === 'email' ? (
+          <AuthInput label="Email address" type="email" placeholder="alex@example.com" value={email} onChange={setEmail} icon="✉️" />
+        ) : (
+          <AuthInput label="Phone number" type="tel" placeholder="+1 (555) 000-0000" value={phone} onChange={setPhone} icon="📱" />
+        )}
         <AuthInput
           label="Password" type={showPw ? 'text' : 'password'} placeholder="Create a strong password" value={password} onChange={setPassword} icon="🔒"
           right={<button onClick={() => setShowPw(!showPw)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, padding: 0 }}>{showPw ? '🙈' : '👁️'}</button>}
@@ -1009,23 +1038,31 @@ function SignUpScreen({ onSignUp, onLogin }: { onSignUp: () => void; onLogin: ()
 
 // ── Auth: Forgot Password ─────────────────────────────────────────────────────
 function ForgotScreen({ onSend, onBack }: { onSend: () => void; onBack: () => void }) {
+  const [contactMode, setContactMode] = useState<ContactMode>('email')
   const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
   const [loading, setLoading] = useState(false)
 
   const handle = () => {
     setLoading(true)
     setTimeout(() => { setLoading(false); onSend() }, 1200)
   }
+  const contact = contactMode === 'email' ? email : phone
 
   return (
     <div style={{ backgroundColor: 'white', minHeight: '100vh' }}>
       <div style={{ height: 6, background: `linear-gradient(90deg, ${C.red}, ${C.orange})` }} />
-      <AuthHeader title="Forgot password?" subtitle="No worries! Enter your email and we'll send you a reset code right away." onBack={onBack} />
-      <div style={{ padding: '0 24px' }}>
+      <AuthHeader title="Forgot password?" subtitle="No worries! Choose email or phone and we'll send you a reset code right away." onBack={onBack} />
+      <div className="swift-auth-panel" style={{ padding: '0 24px' }}>
         <div style={{ width: 80, height: 80, backgroundColor: C.redLight, borderRadius: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40, marginBottom: 28 }}>🔑</div>
-        <AuthInput label="Email address" type="email" placeholder="alex@example.com" value={email} onChange={setEmail} icon="✉️" />
-        <p style={{ fontSize: 13, color: C.muted, margin: '4px 0 24px', lineHeight: 1.6 }}>We'll send a 6-digit verification code to this email. Check your spam folder if you don't see it.</p>
-        <button onClick={handle} disabled={!email || loading} className="btn-press" style={{ width: '100%', padding: 18, backgroundColor: !email || loading ? '#F9FAFB' : C.red, color: !email || loading ? C.muted : 'white', border: `1.5px solid ${!email || loading ? C.border : C.red}`, borderRadius: 16, fontSize: 16, fontWeight: 700, cursor: !email || loading ? 'not-allowed' : 'pointer', transition: 'all 0.2s', boxShadow: !email || loading ? 'none' : '0 8px 24px rgba(226,55,68,0.3)' }}>
+        <ContactModeToggle mode={contactMode} onMode={setContactMode} />
+        {contactMode === 'email' ? (
+          <AuthInput label="Email address" type="email" placeholder="alex@example.com" value={email} onChange={setEmail} icon="✉️" />
+        ) : (
+          <AuthInput label="Phone number" type="tel" placeholder="+1 (555) 000-0000" value={phone} onChange={setPhone} icon="📱" />
+        )}
+        <p style={{ fontSize: 13, color: C.muted, margin: '4px 0 24px', lineHeight: 1.6 }}>We'll send a 6-digit verification code to your selected contact method.</p>
+        <button onClick={handle} disabled={!contact || loading} className="btn-press" style={{ width: '100%', padding: 18, backgroundColor: !contact || loading ? '#F9FAFB' : C.red, color: !contact || loading ? C.muted : 'white', border: `1.5px solid ${!contact || loading ? C.border : C.red}`, borderRadius: 16, fontSize: 16, fontWeight: 700, cursor: !contact || loading ? 'not-allowed' : 'pointer', transition: 'all 0.2s', boxShadow: !contact || loading ? 'none' : '0 8px 24px rgba(226,55,68,0.3)' }}>
           {loading ? 'Sending code…' : 'Send Reset Code'}
         </button>
       </div>
@@ -1281,4 +1318,4 @@ export function SwitchRoleButton({ onClick }: { onClick: () => void }) {
 
 import { LandingPageScreen } from './LandingPageScreen';
 
-export { LandingPageScreen, SplashScreen, OnboardingScreen, HomeScreen, RestaurantListScreen, RestaurantDetailScreen, FoodDetailScreen, CartScreen, OrderTrackingScreen, OrderSuccessScreen, OrderHistoryScreen, FavoritesScreen, NotificationsScreen, ProfileScreen, LoginScreen, SignUpScreen, ForgotScreen, OTPScreen, ResetScreen, SettingsScreen };
+export { LandingPageScreen, SplashScreen, OnboardingScreen, HomeScreen, RestaurantListScreen, RestaurantDetailScreen, FoodDetailScreen, CartScreen, CheckoutScreen, OrderTrackingScreen, OrderSuccessScreen, OrderHistoryScreen, FavoritesScreen, NotificationsScreen, ProfileScreen, LoginScreen, SignUpScreen, ForgotScreen, OTPScreen, ResetScreen, SettingsScreen };

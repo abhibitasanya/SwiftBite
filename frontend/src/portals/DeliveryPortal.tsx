@@ -42,7 +42,7 @@ function DeliveryNav({ tab, onTab }: { tab: DeliveryTab; onTab: (t: DeliveryTab)
     { id: 'profile',  label: 'Profile',  icon: '👤' },
   ]
   return (
-    <nav style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 430, backgroundColor: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderTop: `1px solid rgba(229,231,235,0.9)`, padding: '10px 0 calc(18px + env(safe-area-inset-bottom))', display: 'flex', justifyContent: 'space-around', zIndex: 100, boxShadow: '0 -12px 32px rgba(15,23,42,0.08)' }}>
+    <nav className="portal-bottom-nav">
       {tabs.map(t => (
         <button key={t.id} onClick={() => onTab(t.id)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', padding: '0 16px' }}>
           <span style={{ fontSize: 20 }}>{t.icon}</span>

@@ -19,7 +19,7 @@ const ROLES: { id: Role; label: string; sub: string; emoji: string; accent: stri
 export default function RoleSelector({ current, onSelect, onClose }: Props) {
   return (
     <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15, 23, 42, 0.58)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', zIndex: 200, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', padding: '16px 0 0' }} onClick={onClose}>
-      <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 430, background: 'linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.96) 100%)', borderRadius: '28px 28px 0 0', padding: '10px 0 calc(40px + env(safe-area-inset-bottom))', boxShadow: '0 -24px 60px rgba(15, 23, 42, 0.28)', border: '1px solid rgba(255,255,255,0.35)' }}>
+      <div onClick={e => e.stopPropagation()} style={{ width: 'min(100%, 560px)', background: 'linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.96) 100%)', borderRadius: '28px 28px 0 0', padding: '10px 0 calc(40px + env(safe-area-inset-bottom))', boxShadow: '0 -24px 60px rgba(15, 23, 42, 0.28)', border: '1px solid rgba(255,255,255,0.35)' }}>
         {/* Handle */}
         <div style={{ width: 44, height: 4, backgroundColor: '#D1D5DB', borderRadius: 999, margin: '10px auto 18px' }} />
 

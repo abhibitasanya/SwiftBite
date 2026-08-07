@@ -105,6 +105,160 @@ input, textarea {
   -webkit-appearance: none;
 }
 
+button, input, textarea {
+  font: inherit;
+}
+
+img {
+  max-width: 100%;
+}
+
+.swift-app-frame {
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.swift-app-bg {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at 15% 15%, rgba(226, 55, 68, 0.10), transparent 26%),
+    radial-gradient(circle at 85% 0%, rgba(255, 122, 0, 0.10), transparent 24%),
+    linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+  pointer-events: none;
+}
+
+.swift-app-shell {
+  width: 100%;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #FFFFFF 0%, #FAFAFA 100%);
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.swift-bottom-nav,
+.portal-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(100%, 1180px);
+  background-color: rgba(255,255,255,0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(229,231,235,0.9);
+  padding: 10px max(16px, env(safe-area-inset-left)) calc(18px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-right));
+  display: flex;
+  justify-content: space-around;
+  z-index: 100;
+  box-shadow: 0 -12px 32px rgba(15,23,42,0.08);
+}
+
+.swift-content-pad {
+  padding-left: clamp(20px, 4vw, 48px) !important;
+  padding-right: clamp(20px, 4vw, 48px) !important;
+}
+
+.swift-card-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)) !important;
+}
+
+.swift-card-grid > p {
+  grid-column: 1 / -1;
+}
+
+.swift-dish-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+  overflow: visible !important;
+}
+
+.swift-dish-card {
+  flex: unset !important;
+}
+
+.swift-auth-panel {
+  width: min(100%, 520px);
+  margin: 0 auto;
+}
+
+.swift-brand-logo {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  border-radius: 14px;
+  box-shadow: 0 10px 24px rgba(226,55,68,0.18);
+}
+
+.swift-auth-logo {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  border-radius: 20px;
+  background: #FFF5F5;
+  padding: 8px;
+  box-shadow: 0 10px 28px rgba(226,55,68,0.18);
+}
+
+.swift-contact-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 4px;
+  background: #F9FAFB;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 16px;
+  margin-bottom: 16px;
+}
+
+.swift-contact-toggle button {
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: transparent;
+  color: #6B7280;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.swift-contact-toggle button[data-active="true"] {
+  background: #FFFFFF;
+  color: #E23744;
+  box-shadow: 0 6px 18px rgba(15,23,42,0.08);
+}
+
+@media (min-width: 760px) {
+  .swift-app-frame {
+    padding: 0;
+  }
+
+  .swift-app-shell {
+    min-height: 100vh;
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  .screen-enter {
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 759px) {
+  .swift-card-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .swift-dish-grid {
+    display: flex !important;
+    overflow-x: auto !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
