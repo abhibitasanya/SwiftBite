@@ -1,0 +1,10 @@
+{
+  "description": "Effortlessly upload and analyze documents to extract key insights, making it ideal for professionals seeking to streamline data processing and decision-making.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
