@@ -1258,18 +1258,18 @@ function SettingsScreen({ onBack }: { onBack: () => void }) {
 
 // ── Bottom Navigation ─────────────────────────────────────────────────────────
 
-const TABS: { id: NavTab; label: string; IconComp: (p: { active?: boolean }) => ReactNode }[] = [
+export const TABS: { id: NavTab; label: string; IconComp: (p: { active?: boolean }) => ReactNode }[] = [
   { id: 'home', label: 'Home', IconComp: Icon.Home },
   { id: 'explore', label: 'Explore', IconComp: ({ active }) => <Icon.Search active={active} /> },
   { id: 'orders', label: 'Orders', IconComp: Icon.Bag },
   { id: 'profile', label: 'Profile', IconComp: Icon.User },
 ]
 
-const TAB_SCREEN: Record<NavTab, Screen> = { home: 'home', explore: 'restaurants', orders: 'history', profile: 'profile' }
-const SCREEN_TAB: Partial<Record<Screen, NavTab>> = { home: 'home', restaurants: 'explore', 'restaurant-detail': 'explore', 'food-detail': 'explore', history: 'orders', favorites: 'profile', notifications: 'profile', profile: 'profile' }
+export const TAB_SCREEN: Record<NavTab, Screen> = { home: 'home', explore: 'restaurants', orders: 'history', profile: 'profile' }
+export const SCREEN_TAB: Partial<Record<Screen, NavTab>> = { home: 'home', restaurants: 'explore', 'restaurant-detail': 'explore', 'food-detail': 'explore', history: 'orders', favorites: 'profile', notifications: 'profile', profile: 'profile' }
 
 // Floating pill shown in non-customer portals so user can always switch back
-function SwitchRoleButton({ onClick }: { onClick: () => void }) {
+export function SwitchRoleButton({ onClick }: { onClick: () => void }) {
   return (
     <button onClick={onClick} style={{ position: 'fixed', bottom: 96, right: 16, zIndex: 150, background: 'rgba(17, 24, 39, 0.92)', color: 'white', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 999, padding: '10px 16px', fontSize: 12, fontWeight: 700, cursor: 'pointer', boxShadow: '0 14px 30px rgba(15,23,42,0.28)', display: 'flex', alignItems: 'center', gap: 6, backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)' }}>
       <span style={{ fontSize: 14 }}>⇄</span> Switch Role

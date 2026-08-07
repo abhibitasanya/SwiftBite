@@ -4,8 +4,8 @@ import AdminPortal from './portals/AdminPortal'
 import DeliveryPortal from './portals/DeliveryPortal'
 import RestaurantPortal from './portals/RestaurantPortal'
 
-import { SplashScreen, OnboardingScreen, HomeScreen, RestaurantListScreen, RestaurantDetailScreen, FoodDetailScreen, CartScreen, OrderTrackingScreen, OrderSuccessScreen, OrderHistoryScreen, FavoritesScreen, NotificationsScreen, ProfileScreen, LoginScreen, SignUpScreen, ForgotScreen, OTPScreen, ResetScreen, SettingsScreen } from './screens';
-import { Restaurant, MenuItem, CartItem, Screen } from './types';
+import { SplashScreen, OnboardingScreen, HomeScreen, RestaurantListScreen, RestaurantDetailScreen, FoodDetailScreen, CartScreen, OrderTrackingScreen, OrderSuccessScreen, OrderHistoryScreen, FavoritesScreen, NotificationsScreen, ProfileScreen, LoginScreen, SignUpScreen, ForgotScreen, OTPScreen, ResetScreen, SettingsScreen, TABS, TAB_SCREEN, SCREEN_TAB, SwitchRoleButton, LandingPageScreen } from './screens';
+import { Restaurant, MenuItem, CartItem, Screen, type NavTab } from './types';
 export default function App() {
   const [role, setRole] = useState<Role>('customer')
   const [showRoleSelector, setShowRoleSelector] = useState(false)
