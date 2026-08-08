@@ -82,9 +82,18 @@ export async function askChatbot(params: {
   sessionId?: string
   role?: ChatbotRole
 }): Promise<{ reply: string; sessionId: string; offline: boolean }> {
+  // If API_BASE is not configured, use local responses immediately
+  if (!API_BASE) {
+    return {
+      reply: localChatbotReply(params.messages, params.role ?? 'customer'),
+      sessionId: params.sessionId ?? '',
+      offline: true,
+    }
+  }
+
   try {
     const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 3000) // 3 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 5000) // Increased to 5 second timeout
 
     const response = await fetch(`${API_BASE}/api/chatbot/assist`, {
       method: 'POST',
