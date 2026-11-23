@@ -920,9 +920,12 @@ function LoginScreen({ onLogin, onSignUp, onForgot }: { onLogin: (user: { fullNa
     setError('')
     setLoading(true)
     try {
+      const controller = new AbortController()
+      const timeout = window.setTimeout(() => controller.abort(), 15000)
       const response = await fetch(`${API_BASE}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
         body: JSON.stringify({
           identifier: contact.trim(),
           password,
@@ -930,6 +933,7 @@ function LoginScreen({ onLogin, onSignUp, onForgot }: { onLogin: (user: { fullNa
           loginMode: contactMode,
         }),
       })
+      window.clearTimeout(timeout)
       const data = await response.json().catch(() => ({}))
       if (!response.ok) {
         setError(data.message || 'Invalid email or password.')
@@ -937,7 +941,7 @@ function LoginScreen({ onLogin, onSignUp, onForgot }: { onLogin: (user: { fullNa
       }
       onLogin(data.user)
     } catch {
-      setError('Unable to reach the server. Please try again.')
+      setError(`Unable to reach the server (${API_BASE || 'same-origin'}). Please try again.`)
     } finally {
       setLoading(false)
     }
@@ -1019,9 +1023,12 @@ function SignUpScreen({ onSignUp, onLogin }: { onSignUp: () => void; onLogin: ()
     setError('')
     setLoading(true)
     try {
+      const controller = new AbortController()
+      const timeout = window.setTimeout(() => controller.abort(), 15000)
       const response = await fetch(`${API_BASE}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
         body: JSON.stringify({
           fullName: name.trim(),
           identifier,
@@ -1030,6 +1037,7 @@ function SignUpScreen({ onSignUp, onLogin }: { onSignUp: () => void; onLogin: ()
           loginMode: contactMode,
         }),
       })
+      window.clearTimeout(timeout)
       const data = await response.json().catch(() => ({}))
       if (!response.ok) {
         setError(data.message || 'Unable to create your account.')
@@ -1037,7 +1045,7 @@ function SignUpScreen({ onSignUp, onLogin }: { onSignUp: () => void; onLogin: ()
       }
       onSignUp()
     } catch {
-      setError('Unable to reach the server. Please try again.')
+      setError(`Unable to reach the server (${API_BASE || 'same-origin'}). Please try again.`)
     } finally {
       setLoading(false)
     }

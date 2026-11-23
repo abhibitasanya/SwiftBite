@@ -6,3 +6,30 @@ services:
     buildCommand: NODE_OPTIONS=--max_old_space_size=4096 npm install && NODE_OPTIONS=--max_old_space_size=4096 npm run build
     startCommand: npm start
     plan: free
+    envVars:
+      - key: CORS_ORIGIN
+        value: https://swiftbite-ryf2.onrender.com
+      - key: NODE_ENV
+        value: production
+      - key: MYSQL_HOST
+        value: mysql-102acf26-swiftbite1.c.aivencloud.com
+      - key: MYSQL_PORT
+        value: "27904"
+      - key: MYSQL_USER
+        value: avnadmin
+      - key: MYSQL_DATABASE
+        value: defaultdb
+      - key: MYSQL_SSL
+        value: "true"
+      - key: MYSQL_PASSWORD
+        sync: false
+
+  - type: web
+    name: swiftbite
+    env: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://swiftbite-backend-f3do.onrender.com
