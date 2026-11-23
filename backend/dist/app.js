@@ -932,7 +932,26 @@ export function createApp() {
     const app = express();
     const corsOrigin = process.env.CORS_ORIGIN ?? "http://localhost:3000";
     app.use(helmet());
-    app.use(cors({ origin: corsOrigin }));
+    app.use(cors({
+        origin: (origin, callback) => {
+            if (!origin) {
+                callback(null, true);
+                return;
+            }
+            const allowedOrigins = corsOrigin
+                .split(",")
+                .map((value) => value.trim())
+                .filter(Boolean);
+            if (allowedOrigins.includes(origin)
+                || origin === "http://localhost:3000"
+                || origin === "http://localhost:8443"
+                || origin.endsWith(".onrender.com")) {
+                callback(null, true);
+                return;
+            }
+            callback(new Error("Origin not allowed"), false);
+        },
+    }));
     app.use(express.json({ limit: "10mb" }));
     app.use(express.urlencoded({ extended: true }));
     app.use(morgan("dev"));

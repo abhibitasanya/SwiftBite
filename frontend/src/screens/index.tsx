@@ -4,6 +4,7 @@ import Icon from '../components/icons';
 import { SectionHeader, RestaurantCard, CartFAB, BackButton } from '../components/ui';
 import { RESTAURANTS, MENU_ITEMS, CATEGORIES, ONBOARDING } from '../data/mockData';
 import { Restaurant, MenuItem, CartItem, Screen, type NavTab } from '../types';
+import { API_BASE } from '../services/api';
 
 function SplashScreen() {
   return (
@@ -919,8 +920,7 @@ function LoginScreen({ onLogin, onSignUp, onForgot }: { onLogin: (user: { fullNa
     setError('')
     setLoading(true)
     try {
-      const apiUrl = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, '') ?? ''
-      const response = await fetch(`${apiUrl}/api/auth/login`, {
+      const response = await fetch(`${API_BASE}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1019,8 +1019,7 @@ function SignUpScreen({ onSignUp, onLogin }: { onSignUp: () => void; onLogin: ()
     setError('')
     setLoading(true)
     try {
-      const apiUrl = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, '') ?? ''
-      const response = await fetch(`${apiUrl}/api/auth/register`, {
+      const response = await fetch(`${API_BASE}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
