@@ -239,14 +239,7 @@ type HealthStatus = {
 const uploadDirectory = path.resolve(process.cwd(), "uploads");
 mkdirSync(uploadDirectory, { recursive: true });
 
-const fallbackUsers = new Map<string, AuthRecord>(
-  [
-    ["customer@example.com::customer", { id: 1, fullName: "Customer Demo", identifier: "customer@example.com", role: "customer", passwordHash: sha256Hex("Password123") }],
-    ["9876543210::delivery", { id: 2, fullName: "Delivery Demo", identifier: "9876543210", role: "delivery", passwordHash: sha256Hex("Password123") }],
-    ["restaurant@example.com::restaurant", { id: 3, fullName: "Restaurant Demo", identifier: "restaurant@example.com", role: "restaurant", passwordHash: sha256Hex("Password123") }],
-    ["platform@example.com::platform", { id: 4, fullName: "Platform Demo", identifier: "platform@example.com", role: "platform", passwordHash: sha256Hex("Password123") }],
-  ]
-);
+const fallbackUsers = new Map<string, AuthRecord>();
 
 let fallbackRestaurants: RestaurantRecord[] = [
   {
@@ -318,12 +311,7 @@ const fallbackDeliveryTasks: DeliveryTask[] = [
 
 let fallbackOrders: OrderRecord[] = [];
 
-const fallbackPlatformUsers: PlatformUser[] = [
-  { fullName: "Customer Demo", identifier: "customer@example.com", role: "customer" },
-  { fullName: "Delivery Demo", identifier: "9876543210", role: "delivery" },
-  { fullName: "Restaurant Demo", identifier: "restaurant@example.com", role: "restaurant" },
-  { fullName: "Platform Demo", identifier: "platform@example.com", role: "platform" },
-];
+const fallbackPlatformUsers: PlatformUser[] = [];
 
 const fallbackRiderProfiles: RiderProfileRecord[] = [
   {
@@ -683,7 +671,7 @@ function sha256Hex(value: string) {
 }
 
 function fallbackKey(identifier: string, role: AuthRecord["role"]) {
-  return `${identifier}::${role}`;
+  return `${identifier.trim().toLowerCase()}::${role}`;
 }
 
 function buildMenuForRestaurant(name: string, cuisine: string) {
@@ -1668,9 +1656,24 @@ export function createApp() {
       return;
     }
 
+    const legacyDemoIdentifiers = new Set([
+      "customer@example.com",
+      "9876543210",
+      "restaurant@example.com",
+      "platform@example.com",
+    ])
+
+    if (legacyDemoIdentifiers.has(parsed.data.identifier.trim().toLowerCase())) {
+      response.status(401).json({
+        message: "This account is not registered. Please sign up or use your own registered account.",
+        nextStep: "create a new account before signing in",
+      });
+      return;
+    }
+
     try {
       const [rows] = await db.query<RowDataPacket[]>(
-        "SELECT id, full_name, identifier, role FROM users WHERE identifier = ? AND role = ? AND password_hash = SHA2(?, 256) LIMIT 1",
+        "SELECT id, full_name, identifier, role FROM users WHERE LOWER(TRIM(identifier)) = LOWER(TRIM(?)) AND role = ? AND password_hash = SHA2(?, 256) LIMIT 1",
         [parsed.data.identifier, parsed.data.role, parsed.data.password]
       );
 
@@ -1741,7 +1744,7 @@ export function createApp() {
     try {
       await db.query(
         "INSERT INTO users (full_name, identifier, role, password_hash) VALUES (?, ?, ?, SHA2(?, 256))",
-        [parsed.data.fullName, parsed.data.identifier, parsed.data.role, parsed.data.password]
+        [parsed.data.fullName, parsed.data.identifier.trim().toLowerCase(), parsed.data.role, parsed.data.password]
       );
 
       response.status(201).json({

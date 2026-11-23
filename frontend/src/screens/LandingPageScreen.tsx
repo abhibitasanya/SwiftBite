@@ -2,7 +2,7 @@ import React from 'react';
 import C from '../theme/colors';
 import Icon from '../components/icons';
 
-export function LandingPageScreen({ onGetStarted }: { onGetStarted: () => void }) {
+export function LandingPageScreen({ onGetStarted, onInstall, installAvailable }: { onGetStarted: () => void; onInstall: () => void; installAvailable: boolean }) {
   return (
     <div className="min-h-screen w-full bg-[#f8f2e7] relative overflow-x-hidden font-sans">
       {/* Background gradients */}
@@ -28,6 +28,12 @@ export function LandingPageScreen({ onGetStarted }: { onGetStarted: () => void }
           className="hidden md:block bg-[#425132] hover:bg-[#39472b] text-white px-7 py-3 rounded-xl font-bold transition shadow-xl border-none cursor-pointer"
         >
           Sign In
+        </button>
+        <button
+          onClick={onInstall}
+          className="absolute right-6 top-[88px] md:static md:ml-3 bg-white text-[#425132] px-5 py-3 rounded-xl font-bold transition shadow-lg border border-[#dfe8cf] cursor-pointer"
+        >
+          {installAvailable ? 'Install App' : 'Download App'}
         </button>
       </nav>
 

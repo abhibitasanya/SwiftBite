@@ -13,17 +13,6 @@ CREATE TABLE IF NOT EXISTS users (
   UNIQUE KEY uniq_users_identifier_role (identifier, role)
 );
 
-INSERT INTO users (full_name, identifier, role, password_hash)
-VALUES
-  ('Customer Demo', 'customer@example.com', 'customer', SHA2('Password123', 256)),
-  ('Delivery Demo', '9876543210', 'delivery', SHA2('Password123', 256)),
-  ('Restaurant Demo', 'restaurant@example.com', 'restaurant', SHA2('Password123', 256)),
-  ('Platform Demo', 'platform@example.com', 'platform', SHA2('Password123', 256))
-ON DUPLICATE KEY UPDATE
-  full_name = VALUES(full_name),
-  password_hash = VALUES(password_hash),
-  updated_at = CURRENT_TIMESTAMP;
-
 CREATE TABLE IF NOT EXISTS restaurants (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR(140) NOT NULL,
@@ -85,17 +74,6 @@ CREATE TABLE IF NOT EXISTS rider_profiles (
   CONSTRAINT fk_rider_profiles_user_identifier FOREIGN KEY (user_identifier) REFERENCES users(identifier) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-INSERT INTO rider_profiles (
-  user_identifier, full_name, profile_image_url, age, gender, phone_number, alternate_phone_number, email,
-  residential_address, city_state, emergency_contact, vehicle_type, vehicle_number, driving_license_number,
-  availability_status, is_online, delivery_zone, joining_date, completed_orders_count, active_deliveries,
-  earnings_today, verification_status, id_proof_url, driving_license_url, profile_photo_url
-)
-VALUES
-  ('9876543210', 'Delivery Demo', '/message-icon.svg', 29, 'Male', '9876543210', '9876500000', 'delivery@example.com', 'Sector 12, Block C', 'Kolkata, West Bengal', 'Ravi: 9876501234', 'Scooter', 'WB20AB1234', 'DL-DEL-123456', 'available', 1, 'Central Kolkata', '2024-01-12', 284, 2, '₹1,240', 'verified', NULL, NULL, NULL)
-ON DUPLICATE KEY UPDATE
-  full_name = VALUES(full_name), profile_image_url = VALUES(profile_image_url), age = VALUES(age), gender = VALUES(gender), phone_number = VALUES(phone_number), alternate_phone_number = VALUES(alternate_phone_number), email = VALUES(email), residential_address = VALUES(residential_address), city_state = VALUES(city_state), emergency_contact = VALUES(emergency_contact), vehicle_type = VALUES(vehicle_type), vehicle_number = VALUES(vehicle_number), driving_license_number = VALUES(driving_license_number), availability_status = VALUES(availability_status), is_online = VALUES(is_online), delivery_zone = VALUES(delivery_zone), joining_date = VALUES(joining_date), completed_orders_count = VALUES(completed_orders_count), active_deliveries = VALUES(active_deliveries), earnings_today = VALUES(earnings_today), verification_status = VALUES(verification_status), id_proof_url = VALUES(id_proof_url), driving_license_url = VALUES(driving_license_url), profile_photo_url = VALUES(profile_photo_url), updated_at = CURRENT_TIMESTAMP;
-
 CREATE TABLE IF NOT EXISTS restaurant_profiles (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   user_identifier VARCHAR(191) NOT NULL,
@@ -120,14 +98,6 @@ CREATE TABLE IF NOT EXISTS restaurant_profiles (
   KEY idx_restaurant_profiles_cuisine (cuisine_type),
   CONSTRAINT fk_restaurant_profiles_user_identifier FOREIGN KEY (user_identifier) REFERENCES users(identifier) ON DELETE CASCADE ON UPDATE CASCADE
 );
-
-INSERT INTO restaurant_profiles (
-  user_identifier, restaurant_name, restaurant_logo_url, cover_image_url, owner_name, contact_number, email, restaurant_address, city_state, cuisine_type, gst_license_number, opening_hours, delivery_radius, description, verification_status
-)
-VALUES
-  ('restaurant@example.com', 'Restaurant Demo Kitchen', '/message-icon.svg', NULL, 'Restaurant Demo', '9876543211', 'restaurant@example.com', 'Market Road, Kolkata', 'Kolkata, West Bengal', 'North Indian', 'GST-DEMO-001', '10:00 AM - 11:30 PM', 8, 'Comfort meals, curries, and tandoor plates for dinner.', 'verified')
-ON DUPLICATE KEY UPDATE
-  restaurant_name = VALUES(restaurant_name), restaurant_logo_url = VALUES(restaurant_logo_url), cover_image_url = VALUES(cover_image_url), owner_name = VALUES(owner_name), contact_number = VALUES(contact_number), email = VALUES(email), restaurant_address = VALUES(restaurant_address), city_state = VALUES(city_state), cuisine_type = VALUES(cuisine_type), gst_license_number = VALUES(gst_license_number), opening_hours = VALUES(opening_hours), delivery_radius = VALUES(delivery_radius), description = VALUES(description), verification_status = VALUES(verification_status), updated_at = CURRENT_TIMESTAMP;
 
 CREATE TABLE IF NOT EXISTS restaurant_categories (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -173,15 +143,6 @@ CREATE TABLE IF NOT EXISTS menu_items (
   KEY idx_menu_items_featured (is_featured, is_bestseller, is_recommended),
   CONSTRAINT fk_menu_items_restaurant_identifier FOREIGN KEY (restaurant_identifier) REFERENCES users(identifier) ON DELETE CASCADE ON UPDATE CASCADE
 );
-
-INSERT INTO menu_items (
-  restaurant_identifier, dish_name, dish_image_url, price, category, description, spice_level, veg_type, is_available, preparation_time_minutes, is_featured, is_bestseller, is_recommended
-)
-VALUES
-  ('restaurant@example.com', 'Paneer Tikka Bowl', NULL, 189, 'Featured', 'Spicy grilled paneer with rice and fresh salad.', 'medium', 'veg', 1, 18, 1, 1, 1),
-  ('restaurant@example.com', 'Butter Naan Combo', NULL, 159, 'Combos', 'Soft naan with rich curry and house salad.', 'mild', 'veg', 1, 14, 0, 1, 0)
-ON DUPLICATE KEY UPDATE
-  dish_name = VALUES(dish_name), dish_image_url = VALUES(dish_image_url), price = VALUES(price), category = VALUES(category), description = VALUES(description), spice_level = VALUES(spice_level), veg_type = VALUES(veg_type), is_available = VALUES(is_available), preparation_time_minutes = VALUES(preparation_time_minutes), is_featured = VALUES(is_featured), is_bestseller = VALUES(is_bestseller), is_recommended = VALUES(is_recommended), updated_at = CURRENT_TIMESTAMP;
 
 CREATE TABLE IF NOT EXISTS uploaded_images (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,

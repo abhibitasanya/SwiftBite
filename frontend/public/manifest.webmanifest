@@ -1,0 +1,17 @@
+{
+  "name": "SwiftBite",
+  "short_name": "SwiftBite",
+  "description": "Food delivery for nearby restaurants",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8f2e7",
+  "theme_color": "#425132",
+  "icons": [
+    {
+      "src": "/swiftbite-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

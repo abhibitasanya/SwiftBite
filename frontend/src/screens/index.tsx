@@ -55,7 +55,7 @@ function OnboardingScreen({ step, onNext, onSkip }: { step: number; onNext: () =
   )
 }
 
-function HomeScreen({ onRestaurantClick, onSearch, onNotifications, cartTotal, cartCount, onCartClick, favorites, onFav, cartAnimating }: any) {
+function HomeScreen({ onRestaurantClick, onSearch, onNotifications, cartTotal, cartCount, onCartClick, favorites, onFav, cartAnimating, user }: any) {
   const [selCat, setSelCat] = useState<number | null>(null)
   return (
     <div style={{ backgroundColor: C.bg, overflowY: 'auto', minHeight: 'calc(100vh - 80px)' }}>
@@ -68,7 +68,7 @@ function HomeScreen({ onRestaurantClick, onSearch, onNotifications, cartTotal, c
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
           <div>
             <p style={{ fontSize: 13, color: C.muted, margin: '0 0 2px', fontWeight: 500 }}>Good afternoon 👋</p>
-            <h1 style={{ fontSize: 22, fontWeight: 800, color: C.text, margin: 0, letterSpacing: -0.4 }}>Alex Johnson</h1>
+            <h1 style={{ fontSize: 22, fontWeight: 800, color: C.text, margin: 0, letterSpacing: -0.4 }}>{user?.fullName || 'SwiftBite Member'}</h1>
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <button onClick={onNotifications} style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.redLight, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
@@ -772,7 +772,7 @@ function NotificationsScreen() {
   )
 }
 
-function ProfileScreen({ onSwitchRole, onSettings, onNavigate, onSignOut }: { onSwitchRole: () => void; onSettings: () => void; onNavigate: (label: string) => void; onSignOut: () => void }) {
+function ProfileScreen({ onSwitchRole, onSettings, onNavigate, onSignOut, user }: { onSwitchRole: () => void; onSettings: () => void; onNavigate: (label: string) => void; onSignOut: () => void; user?: { fullName: string; identifier: string } }) {
   const rows = [
     { icon: '📍', label: 'Saved Addresses', sub: '3 addresses saved' },
     { icon: '💳', label: 'Payment Methods', sub: 'Visa, Apple Pay' },
@@ -792,8 +792,8 @@ function ProfileScreen({ onSwitchRole, onSettings, onNavigate, onSignOut }: { on
             <div style={{ position: 'absolute', bottom: -2, right: -2, width: 22, height: 22, backgroundColor: C.red, borderRadius: '50%', border: '2px solid white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10 }}>✏️</div>
           </div>
           <div>
-            <h2 style={{ fontSize: 20, fontWeight: 800, color: C.text, margin: '0 0 4px' }}>Alex Johnson</h2>
-            <p style={{ fontSize: 13, color: C.muted, margin: '0 0 5px' }}>alex.johnson@gmail.com</p>
+            <h2 style={{ fontSize: 20, fontWeight: 800, color: C.text, margin: '0 0 4px' }}>{user?.fullName || 'SwiftBite Member'}</h2>
+            <p style={{ fontSize: 13, color: C.muted, margin: '0 0 5px' }}>{user?.identifier || ''}</p>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, backgroundColor: '#FFF8E1', padding: '3px 10px', borderRadius: 8 }}>
               <Icon.Star /><span style={{ fontSize: 12, fontWeight: 700, color: C.orange }}>Gold Member</span>
             </div>
@@ -904,7 +904,7 @@ function SocialLogin() {
 }
 
 // ── Auth: Login ───────────────────────────────────────────────────────────────
-function LoginScreen({ onLogin, onSignUp, onForgot }: { onLogin: () => void; onSignUp: () => void; onForgot: () => void }) {
+function LoginScreen({ onLogin, onSignUp, onForgot }: { onLogin: (user: { fullName: string; identifier: string; role: string }) => void; onSignUp: () => void; onForgot: () => void }) {
   const [contactMode, setContactMode] = useState<ContactMode>('email')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
@@ -935,7 +935,7 @@ function LoginScreen({ onLogin, onSignUp, onForgot }: { onLogin: () => void; onS
         setError(data.message || 'Invalid email or password.')
         return
       }
-      onLogin()
+      onLogin(data.user)
     } catch {
       setError('Unable to reach the server. Please try again.')
     } finally {
