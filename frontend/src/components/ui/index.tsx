@@ -23,7 +23,7 @@ function RestaurantCard({ restaurant: r, onClick, isFav, onFav }: { restaurant: 
   return (
     <div className="card-hover" onClick={onClick} style={{ backgroundColor: C.surface, borderRadius: 20, overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.06)', cursor: 'pointer' }}>
       <div style={{ position: 'relative', height: 180 }}>
-        <img src={`https://images.unsplash.com/${r.image}?w=800&h=360&fit=crop&auto=format`} alt={r.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        <img src={`https://images.unsplash.com/₹{r.image}?w=800&h=360&fit=crop&auto=format`} alt={r.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.45) 0%, transparent 55%)' }} />
         {r.offer && (
           <div style={{ position: 'absolute', top: 12, left: 12, backgroundColor: C.green, color: 'white', padding: '4px 10px', borderRadius: 8, fontSize: 10, fontWeight: 700 }}>
@@ -52,7 +52,11 @@ function RestaurantCard({ restaurant: r, onClick, isFav, onFav }: { restaurant: 
             <span style={{ fontSize: 12, color: C.muted, fontWeight: 500 }}>{r.distance}</span>
           </div>
           <span style={{ fontSize: 12, color: r.deliveryFee === 0 ? C.green : C.muted, fontWeight: r.deliveryFee === 0 ? 600 : 400 }}>
+<<<<<<< HEAD
             {r.deliveryFee === 0 ? 'Free delivery' : `₹${r.deliveryFee.toFixed(0)} delivery`}
+=======
+            {r.deliveryFee === 0 ? 'Free delivery' : `₹₹{r.deliveryFee.toFixed(2)} delivery`}
+>>>>>>> 6c645a4aabccadf6169430c85efe9b533efa0540
           </span>
         </div>
       </div>
@@ -64,7 +68,7 @@ function CartFAB({ count, total, onClick, animating }: { count: number; total: n
   if (count === 0) return null
   return (
     <div style={{ position: 'fixed', bottom: 90, left: '50%', transform: 'translateX(-50%)', zIndex: 99, width: 'min(calc(100% - 40px), 760px)' }}>
-      <button onClick={onClick} className={`btn-press ${animating ? 'animate-swift-cart-pop' : ''}`} style={{
+      <button onClick={onClick} className={`btn-press ₹{animating ? 'animate-swift-cart-pop' : ''}`} style={{
         width: '100%', padding: '15px 20px', backgroundColor: C.red, color: 'white',
         border: 'none', borderRadius: 16, cursor: 'pointer', display: 'flex',
         justifyContent: 'space-between', alignItems: 'center',
@@ -74,7 +78,11 @@ function CartFAB({ count, total, onClick, animating }: { count: number; total: n
           <div style={{ backgroundColor: 'rgba(255,255,255,0.22)', borderRadius: 8, padding: '3px 9px', fontSize: 13, fontWeight: 700 }}>{count}</div>
           <span style={{ fontSize: 15, fontWeight: 700 }}>View Cart</span>
         </div>
+<<<<<<< HEAD
         <span style={{ fontSize: 15, fontWeight: 700 }}>₹{total.toFixed(0)}</span>
+=======
+        <span style={{ fontSize: 15, fontWeight: 700 }}>₹{total.toFixed(2)}</span>
+>>>>>>> 6c645a4aabccadf6169430c85efe9b533efa0540
       </button>
     </div>
   )
@@ -82,7 +90,7 @@ function CartFAB({ count, total, onClick, animating }: { count: number; total: n
 
 function BackButton({ onClick }: { onClick: () => void }) {
   return (
-    <button onClick={onClick} className="btn-press" style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.surface, border: `1px solid ${C.border}`, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+    <button onClick={onClick} className="btn-press" style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.surface, border: `1px solid ₹{C.border}`, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
       <Icon.Back />
     </button>
   )
