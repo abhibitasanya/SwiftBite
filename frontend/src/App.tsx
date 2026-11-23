@@ -195,7 +195,7 @@ export default function App() {
             maxHeight: 450,
             borderRadius: 18,
             background: 'rgba(255,253,248,0.98)',
-            border: `1px solid ${C.border}`,
+            border: `1px solid ₹{C.border}`,
             boxShadow: '0 18px 40px rgba(47,58,45,0.16)',
             zIndex: 130,
             backdropFilter: 'blur(10px)',
@@ -204,7 +204,7 @@ export default function App() {
             overflow: 'hidden',
           }}>
             {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', borderBottom: `1px solid ${C.border}` }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', borderBottom: `1px solid ₹{C.border}` }}>
               <div style={{ fontSize: 13, fontWeight: 800, color: C.text }}>🤖 SwiftBot</div>
               <button onClick={() => setChatOpen(false)} style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 16, color: C.muted }}>×</button>
             </div>
@@ -242,7 +242,7 @@ export default function App() {
                         onClick={() => sendChatMessage(prompt)}
                         disabled={chatLoading}
                         style={{
-                          border: `1px solid ${C.border}`,
+                          border: `1px solid ₹{C.border}`,
                           borderRadius: 999,
                           padding: '6px 10px',
                           backgroundColor: 'white',
@@ -293,7 +293,7 @@ export default function App() {
             </div>
 
             {/* Input */}
-            <div style={{ padding: '10px 12px', borderTop: `1px solid ${C.border}`, display: 'flex', gap: 6 }}>
+            <div style={{ padding: '10px 12px', borderTop: `1px solid ₹{C.border}`, display: 'flex', gap: 6 }}>
               <input
                 type="text"
                 value={chatInput}
@@ -308,7 +308,7 @@ export default function App() {
                 disabled={chatLoading}
                 style={{
                   flex: 1,
-                  border: `1px solid ${C.border}`,
+                  border: `1px solid ₹{C.border}`,
                   borderRadius: 10,
                   padding: '8px 10px',
                   fontSize: 12,

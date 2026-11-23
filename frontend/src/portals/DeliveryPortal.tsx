@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { askChatbot, type ChatbotRole } from '../services/chatbot'
 
 const C = {
   primary: '#2563EB',
@@ -21,17 +22,17 @@ const C = {
 type DeliveryTab = 'home' | 'orders' | 'earnings' | 'profile'
 
 const AVAILABLE_ORDERS = [
-  { id: 'SWB-20848', restaurant: 'The Burger Lab', customer: 'Priya Sharma', address: '45 Oak Avenue, Apt 2', distance: '0.8 km', payout: '$4.50', items: 2, eta: '12 min', urgent: true },
-  { id: 'SWB-20849', restaurant: 'Pizza Piazza',   customer: 'Marcus Lee',   address: '12 Park Street, #3A', distance: '1.4 km', payout: '$5.20', items: 3, eta: '18 min', urgent: false },
-  { id: 'SWB-20850', restaurant: 'Spice Route',    customer: 'Emma Wilson',  address: '88 Elm Road',        distance: '2.1 km', payout: '$6.80', items: 4, eta: '25 min', urgent: false },
+  { id: 'SWB-20848', restaurant: 'The Burger Lab', customer: 'Priya Sharma', address: '45 Oak Avenue, Apt 2', distance: '0.8 km', payout: '₹4.50', items: 2, eta: '12 min', urgent: true },
+  { id: 'SWB-20849', restaurant: 'Pizza Piazza',   customer: 'Marcus Lee',   address: '12 Park Street, #3A', distance: '1.4 km', payout: '₹5.20', items: 3, eta: '18 min', urgent: false },
+  { id: 'SWB-20850', restaurant: 'Spice Route',    customer: 'Emma Wilson',  address: '88 Elm Road',        distance: '2.1 km', payout: '₹6.80', items: 4, eta: '25 min', urgent: false },
 ]
 
 const DELIVERY_HISTORY = [
-  { id: 'SWB-20847', restaurant: 'The Burger Lab', customer: 'Alex Johnson', payout: '$4.20', time: '2:58 PM', rating: 5 },
-  { id: 'SWB-20831', restaurant: 'Sakura Garden',  customer: 'Sofia Martinez', payout: '$5.60', time: '1:45 PM', rating: 5 },
-  { id: 'SWB-20820', restaurant: 'Green Bowl',     customer: 'David Kim',    payout: '$6.10', time: '12:30 PM', rating: 4 },
-  { id: 'SWB-20811', restaurant: 'Wok & Roll',     customer: 'James Park',   payout: '$3.90', time: '11:15 AM', rating: 5 },
-  { id: 'SWB-20803', restaurant: 'Pizza Piazza',   customer: 'Lily Chen',    payout: '$4.80', time: '10:02 AM', rating: 5 },
+  { id: 'SWB-20847', restaurant: 'The Burger Lab', customer: 'Alex Johnson', payout: '₹4.20', time: '2:58 PM', rating: 5 },
+  { id: 'SWB-20831', restaurant: 'Sakura Garden',  customer: 'Sofia Martinez', payout: '₹5.60', time: '1:45 PM', rating: 5 },
+  { id: 'SWB-20820', restaurant: 'Green Bowl',     customer: 'David Kim',    payout: '₹6.10', time: '12:30 PM', rating: 4 },
+  { id: 'SWB-20811', restaurant: 'Wok & Roll',     customer: 'James Park',   payout: '₹3.90', time: '11:15 AM', rating: 5 },
+  { id: 'SWB-20803', restaurant: 'Pizza Piazza',   customer: 'Lily Chen',    payout: '₹4.80', time: '10:02 AM', rating: 5 },
 ]
 
 function DeliveryNav({ tab, onTab }: { tab: DeliveryTab; onTab: (t: DeliveryTab) => void }) {
@@ -69,7 +70,7 @@ function DeliveryHome({ onGoToOrders }: { onGoToOrders: () => void }) {
   return (
     <div style={{ backgroundColor: C.bg, minHeight: '100vh', paddingBottom: 100 }}>
       {/* Header */}
-      <div style={{ background: `linear-gradient(135deg, ${C.primary} 0%, #1D4ED8 100%)`, padding: '56px 20px 24px' }}>
+      <div style={{ background: `linear-gradient(135deg, ₹{C.primary} 0%, #1D4ED8 100%)`, padding: '56px 20px 24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
           <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
             <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop" alt="Marcus" style={{ width: 48, height: 48, borderRadius: 16, objectFit: 'cover', border: '2px solid rgba(255,255,255,0.3)' }} />
@@ -81,7 +82,7 @@ function DeliveryHome({ onGoToOrders }: { onGoToOrders: () => void }) {
           {/* Online toggle */}
           <button
             onClick={() => setIsOnline(!isOnline)}
-            style={{ display: 'flex', alignItems: 'center', gap: 8, backgroundColor: isOnline ? 'rgba(74,222,128,0.2)' : 'rgba(255,255,255,0.15)', border: `1.5px solid ${isOnline ? '#4ADE80' : 'rgba(255,255,255,0.3)'}`, borderRadius: 100, padding: '8px 14px', cursor: 'pointer' }}
+            style={{ display: 'flex', alignItems: 'center', gap: 8, backgroundColor: isOnline ? 'rgba(74,222,128,0.2)' : 'rgba(255,255,255,0.15)', border: `1.5px solid ₹{isOnline ? '#4ADE80' : 'rgba(255,255,255,0.3)'}`, borderRadius: 100, padding: '8px 14px', cursor: 'pointer' }}
           >
             <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: isOnline ? '#4ADE80' : '#9CA3AF' }} />
             <span style={{ color: 'white', fontSize: 13, fontWeight: 700 }}>{isOnline ? 'Online' : 'Offline'}</span>
@@ -92,7 +93,7 @@ function DeliveryHome({ onGoToOrders }: { onGoToOrders: () => void }) {
         <div style={{ display: 'flex', gap: 10 }}>
           {[
             { label: "Today's Deliveries", value: '8', icon: '🛵' },
-            { label: "Today's Earnings", value: '$127.50', icon: '💰' },
+            { label: "Today's Earnings", value: '₹127.50', icon: '💰' },
             { label: 'Rating', value: '4.9★', icon: '⭐' },
           ].map(s => (
             <div key={s.label} style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.12)', borderRadius: 14, padding: '10px 8px', textAlign: 'center' }}>
@@ -108,7 +109,7 @@ function DeliveryHome({ onGoToOrders }: { onGoToOrders: () => void }) {
         <>
           {/* Active delivery */}
           <div style={{ padding: '16px 20px 0' }}>
-            <div style={{ backgroundColor: C.surface, borderRadius: 20, overflow: 'hidden', boxShadow: '0 4px 16px rgba(37,99,235,0.15)', border: `1.5px solid ${C.primaryBorder}` }}>
+            <div style={{ backgroundColor: C.surface, borderRadius: 20, overflow: 'hidden', boxShadow: '0 4px 16px rgba(37,99,235,0.15)', border: `1.5px solid ₹{C.primaryBorder}` }}>
               <div style={{ backgroundColor: C.primaryLight, padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <div style={{ width: 8, height: 8, backgroundColor: C.primary, borderRadius: '50%' }} />
@@ -136,7 +137,7 @@ function DeliveryHome({ onGoToOrders }: { onGoToOrders: () => void }) {
                 ].map(s => (
                   <div key={s.step} style={{ display: 'flex', gap: 12, marginBottom: s.step < 3 ? 0 : 0 }}>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                      <div style={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: activeStep >= s.step ? C.primary : '#F3F4F6', border: `2px solid ${activeStep >= s.step ? C.primary : C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, transition: 'all 0.5s', flexShrink: 0 }}>
+                      <div style={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: activeStep >= s.step ? C.primary : '#F3F4F6', border: `2px solid ₹{activeStep >= s.step ? C.primary : C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, transition: 'all 0.5s', flexShrink: 0 }}>
                         {activeStep > s.step ? <span style={{ color: 'white', fontWeight: 700 }}>✓</span> : <span style={{ fontSize: 12 }}>{s.icon}</span>}
                       </div>
                       {s.step < 3 && <div style={{ width: 2, height: 24, backgroundColor: activeStep > s.step ? C.primary : C.border, transition: 'background 0.5s' }} />}
@@ -150,8 +151,8 @@ function DeliveryHome({ onGoToOrders }: { onGoToOrders: () => void }) {
               </div>
 
               <div style={{ padding: '0 16px 16px', display: 'flex', gap: 8 }}>
-                <button style={{ flex: 1, padding: '12px', backgroundColor: C.primary, color: 'white', border: 'none', borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>Mark Picked Up</button>
-                <button style={{ width: 44, padding: '12px', backgroundColor: C.primaryLight, border: `1.5px solid ${C.primaryBorder}`, borderRadius: 12, fontSize: 18, cursor: 'pointer' }}>📞</button>
+                <button onClick={() => console.log('Mark Picked Up')} style={{ flex: 1, padding: '12px', backgroundColor: C.primary, color: 'white', border: 'none', borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>Mark Picked Up</button>
+                <button onClick={() => console.log('Call restaurant')} style={{ width: 44, padding: '12px', backgroundColor: C.primaryLight, border: `1.5px solid ₹{C.primaryBorder}`, borderRadius: 12, fontSize: 18, cursor: 'pointer' }}>📞</button>
               </div>
             </div>
           </div>
@@ -173,7 +174,7 @@ function DeliveryHome({ onGoToOrders }: { onGoToOrders: () => void }) {
                     </div>
                     <span style={{ fontSize: 18, fontWeight: 800, color: C.primary }}>{o.payout}</span>
                   </div>
-                  <button style={{ width: '100%', padding: '10px', backgroundColor: C.primary, color: 'white', border: 'none', borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>Accept Order</button>
+                  <button onClick={() => console.log('Accept order:', o.id)} style={{ width: '100%', padding: '10px', backgroundColor: C.primary, color: 'white', border: 'none', borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>Accept Order</button>
                 </div>
               ))}
             </div>
@@ -195,13 +196,13 @@ function DeliveryHome({ onGoToOrders }: { onGoToOrders: () => void }) {
 function AvailableOrdersTab() {
   return (
     <div style={{ backgroundColor: C.bg, minHeight: '100vh', paddingBottom: 100 }}>
-      <div style={{ background: `linear-gradient(135deg, ${C.primary} 0%, #1D4ED8 100%)`, padding: '56px 20px 20px' }}>
+      <div style={{ background: `linear-gradient(135deg, ₹{C.primary} 0%, #1D4ED8 100%)`, padding: '56px 20px 20px' }}>
         <h1 style={{ color: 'white', fontSize: 22, fontWeight: 800, margin: '0 0 4px', letterSpacing: -0.4 }}>Available Orders</h1>
         <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, margin: 0 }}>{AVAILABLE_ORDERS.length} orders near you</p>
       </div>
       <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
         {AVAILABLE_ORDERS.map(o => (
-          <div key={o.id} style={{ backgroundColor: C.surface, borderRadius: 18, padding: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', border: o.urgent ? `1.5px solid #FDE68A` : `1.5px solid ${C.border}` }}>
+          <div key={o.id} style={{ backgroundColor: C.surface, borderRadius: 18, padding: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', border: o.urgent ? `1.5px solid #FDE68A` : `1.5px solid ₹{C.border}` }}>
             {o.urgent && <div style={{ fontSize: 10, fontWeight: 700, color: '#D97706', backgroundColor: '#FFFBEB', padding: '3px 10px', borderRadius: 6, display: 'inline-block', marginBottom: 10 }}>⚡ URGENT ORDER</div>}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
               <div>
@@ -215,8 +216,8 @@ function AvailableOrdersTab() {
               </div>
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
-              <button style={{ flex: 1, padding: '12px', backgroundColor: C.primary, color: 'white', border: 'none', borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>✓ Accept</button>
-              <button style={{ flex: 1, padding: '12px', backgroundColor: '#F9FAFB', color: C.muted, border: `1.5px solid ${C.border}`, borderRadius: 12, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Skip</button>
+              <button onClick={() => console.log('Accept order:', o.id)} style={{ flex: 1, padding: '12px', backgroundColor: C.primary, color: 'white', border: 'none', borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>✓ Accept</button>
+              <button onClick={() => console.log('Skip order:', o.id)} style={{ flex: 1, padding: '12px', backgroundColor: '#F9FAFB', color: C.muted, border: `1.5px solid ₹{C.border}`, borderRadius: 12, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Skip</button>
             </div>
           </div>
         ))}
@@ -233,13 +234,13 @@ function EarningsTab() {
 
   return (
     <div style={{ backgroundColor: C.bg, minHeight: '100vh', paddingBottom: 100 }}>
-      <div style={{ background: `linear-gradient(135deg, ${C.primary} 0%, #1D4ED8 100%)`, padding: '56px 20px 24px' }}>
+      <div style={{ background: `linear-gradient(135deg, ₹{C.primary} 0%, #1D4ED8 100%)`, padding: '56px 20px 24px' }}>
         <h1 style={{ color: 'white', fontSize: 22, fontWeight: 800, margin: '0 0 4px', letterSpacing: -0.4 }}>My Earnings</h1>
         <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, margin: '0 0 20px' }}>July 2026</p>
         <div style={{ backgroundColor: 'rgba(255,255,255,0.12)', borderRadius: 20, padding: 20 }}>
           <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: 13, margin: '0 0 6px', fontWeight: 500 }}>This Week's Total</p>
-          <p style={{ color: 'white', fontSize: 36, fontWeight: 800, margin: '0 0 4px', letterSpacing: -1 }}>$742.30</p>
-          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12, margin: 0 }}>47 deliveries · avg $15.79/hr</p>
+          <p style={{ color: 'white', fontSize: 36, fontWeight: 800, margin: '0 0 4px', letterSpacing: -1 }}>₹742.30</p>
+          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12, margin: 0 }}>47 deliveries · avg ₹15.79/hr</p>
         </div>
       </div>
 
@@ -251,7 +252,7 @@ function EarningsTab() {
             {weekData.map((v, i) => (
               <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
                 <div style={{ width: '100%', height: 60, display: 'flex', alignItems: 'flex-end', backgroundColor: C.primaryLight, borderRadius: 6, overflow: 'hidden' }}>
-                  <div style={{ width: '100%', height: `${(v / maxVal) * 100}%`, backgroundColor: i === 5 ? C.primary : '#93C5FD', borderRadius: 6, transition: 'height 0.5s' }} />
+                  <div style={{ width: '100%', height: `₹{(v / maxVal) * 100}%`, backgroundColor: i === 5 ? C.primary : '#93C5FD', borderRadius: 6, transition: 'height 0.5s' }} />
                 </div>
                 <span style={{ fontSize: 9, color: C.muted, fontWeight: 600 }}>{weekLabels[i]}</span>
               </div>
@@ -264,7 +265,7 @@ function EarningsTab() {
           {[
             { label: 'Deliveries', value: '47', icon: '🛵' },
             { label: 'Online Hours', value: '31 hrs', icon: '⏱️' },
-            { label: 'Avg per Delivery', value: '$15.79', icon: '💵' },
+            { label: 'Avg per Delivery', value: '₹15.79', icon: '💵' },
             { label: 'Customer Rating', value: '4.9 ★', icon: '⭐' },
           ].map(s => (
             <div key={s.label} style={{ backgroundColor: C.surface, borderRadius: 16, padding: 14, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
@@ -301,7 +302,7 @@ function EarningsTab() {
 function DeliveryProfile() {
   return (
     <div style={{ backgroundColor: C.bg, minHeight: '100vh', paddingBottom: 100 }}>
-      <div style={{ background: `linear-gradient(135deg, ${C.primary} 0%, #1D4ED8 100%)`, padding: '56px 20px 28px' }}>
+      <div style={{ background: `linear-gradient(135deg, ₹{C.primary} 0%, #1D4ED8 100%)`, padding: '56px 20px 28px' }}>
         <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 16 }}>
           <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=160&h=160&fit=crop" alt="Marcus" style={{ width: 72, height: 72, borderRadius: 22, objectFit: 'cover', border: '3px solid rgba(255,255,255,0.3)' }} />
           <div>
@@ -344,6 +345,256 @@ function DeliveryProfile() {
   )
 }
 
+// ── Chatbot Component ──────────────────────────────────────────────────────────
+function DeliveryChatbot() {
+  const [chatOpen, setChatOpen] = useState(false)
+  const [chatMessages, setChatMessages] = useState<Array<{ id: string; role: 'user' | 'bot'; text: string; timestamp: number }>>([])
+  const [chatInput, setChatInput] = useState('')
+  const [chatLoading, setChatLoading] = useState(false)
+  const [chatSessionId, setChatSessionId] = useState<string>()
+  const [chatError, setChatError] = useState<string | null>(null)
+  const chatEndRef = useRef<HTMLDivElement>(null)
+
+  const chatQuickReplies = [
+    'Show available orders',
+    'Check my earnings',
+    'Help with delivery',
+    'Contact support',
+  ]
+
+  useEffect(() => {
+    if (chatOpen) {
+      chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [chatMessages, chatLoading, chatOpen])
+
+  const sendChatMessage = async (msg: string) => {
+    const text = msg.trim()
+    if (!text || chatLoading) return
+
+    setChatError(null)
+
+    const userMsg = { id: Date.now().toString(), role: 'user' as const, text, timestamp: Date.now() }
+    const nextMessages = [...chatMessages, userMsg]
+    setChatMessages(nextMessages)
+    setChatInput('')
+    setChatLoading(true)
+
+    await new Promise(resolve => setTimeout(resolve, 800))
+
+    try {
+      const apiMessages = nextMessages.map((message) => ({
+        role: message.role === 'user' ? ('user' as const) : ('assistant' as const),
+        text: message.text,
+        timestamp: new Date(message.timestamp).toISOString(),
+      }))
+
+      const { reply, sessionId, offline } = await askChatbot({
+        messages: apiMessages,
+        sessionId: chatSessionId,
+        role: 'delivery',
+      })
+
+      if (sessionId) setChatSessionId(sessionId)
+
+      const botMsg = {
+        id: (Date.now() + 1).toString(),
+        role: 'bot' as const,
+        text: reply,
+        timestamp: Date.now(),
+      }
+      setChatMessages((prev) => [...prev, botMsg])
+    } catch (error) {
+      setChatError('Something went wrong. Please try again.')
+    } finally {
+      setChatLoading(false)
+    }
+  }
+
+  return (
+    <>
+      <button
+        onClick={() => setChatOpen(v => !v)}
+        aria-label="Open AI assistant"
+        style={{
+          position: 'fixed',
+          right: 18,
+          bottom: 80,
+          width: 56,
+          height: 56,
+          borderRadius: '50%',
+          border: 'none',
+          background: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)',
+          color: 'white',
+          boxShadow: '0 14px 34px rgba(37,99,235,0.30)',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 120,
+          fontSize: 24,
+        }}
+      >
+        🤖
+      </button>
+
+      {chatOpen && (
+        <div style={{
+          position: 'fixed',
+          right: 18,
+          bottom: 148,
+          width: 320,
+          maxHeight: 450,
+          borderRadius: 18,
+          background: 'rgba(255,253,248,0.98)',
+          border: `1px solid ₹{C.border}`,
+          boxShadow: '0 18px 40px rgba(47,58,45,0.16)',
+          zIndex: 130,
+          backdropFilter: 'blur(10px)',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', borderBottom: `1px solid ₹{C.border}` }}>
+            <div style={{ fontSize: 13, fontWeight: 800, color: C.text }}>🤖 DeliveryBot</div>
+            <button onClick={() => setChatOpen(false)} style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 16, color: C.muted }}>×</button>
+          </div>
+
+          <div style={{ flex: 1, overflowY: 'auto', padding: '12px 12px', display: 'flex', flexDirection: 'column', gap: 10, minHeight: 280 }}>
+            {chatMessages.length === 0 && (
+              <div style={{ color: C.muted, fontSize: 12, textAlign: 'center', paddingTop: 12 }}>
+                <div style={{ fontSize: 28, marginBottom: 8 }}>👋</div>
+                <div style={{ marginBottom: 14, lineHeight: 1.5 }}>Hi! I can help with orders, earnings, navigation, and delivery support.</div>
+                <button
+                  type="button"
+                  onClick={() => sendChatMessage('Hi')}
+                  disabled={chatLoading}
+                  style={{
+                    border: 'none',
+                    borderRadius: 999,
+                    padding: '10px 16px',
+                    background: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)',
+                    color: 'white',
+                    fontSize: 12,
+                    fontWeight: 700,
+                    cursor: chatLoading ? 'not-allowed' : 'pointer',
+                    opacity: chatLoading ? 0.7 : 1,
+                    marginBottom: 12,
+                  }}
+                >
+                  Start chatting
+                </button>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, justifyContent: 'center' }}>
+                  {chatQuickReplies.map((prompt) => (
+                    <button
+                      key={prompt}
+                      type="button"
+                      onClick={() => sendChatMessage(prompt)}
+                      disabled={chatLoading}
+                      style={{
+                        border: `1px solid ₹{C.border}`,
+                        borderRadius: 999,
+                        padding: '6px 10px',
+                        backgroundColor: 'white',
+                        color: C.text,
+                        fontSize: 11,
+                        cursor: chatLoading ? 'not-allowed' : 'pointer',
+                      }}
+                    >
+                      {prompt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            {chatMessages.map(msg => (
+              <div key={msg.id} style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
+                <div style={{
+                  maxWidth: '75%',
+                  padding: '8px 12px',
+                  borderRadius: 12,
+                  backgroundColor: msg.role === 'user' ? C.primary : '#F3F4F6',
+                  color: msg.role === 'user' ? 'white' : C.text,
+                  fontSize: 12,
+                  lineHeight: 1.4,
+                  whiteSpace: 'pre-wrap',
+                }}>
+                  {msg.text}
+                </div>
+              </div>
+            ))}
+            {chatLoading && (
+              <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                <div style={{ padding: '8px 12px', borderRadius: 12, backgroundColor: '#F3F4F6', color: C.text, fontSize: 12 }}>
+                  <div style={{ display: 'flex', gap: 4, alignItems: 'center', height: 16 }}>
+                    <span style={{ animation: 'swiftPulse 1s infinite', animationDelay: '0s' }}>●</span>
+                    <span style={{ animation: 'swiftPulse 1s infinite', animationDelay: '0.2s' }}>●</span>
+                    <span style={{ animation: 'swiftPulse 1s infinite', animationDelay: '0.4s' }}>●</span>
+                  </div>
+                </div>
+              </div>
+            )}
+            {chatError && (
+              <div style={{ fontSize: 11, color: '#B45309', backgroundColor: '#FFFBEB', borderRadius: 10, padding: '8px 10px', lineHeight: 1.4 }}>
+                {chatError}
+              </div>
+            )}
+            <div ref={chatEndRef} />
+          </div>
+
+          <div style={{ padding: '10px 12px', borderTop: `1px solid ₹{C.border}`, display: 'flex', gap: 6 }}>
+            <input
+              type="text"
+              value={chatInput}
+              onChange={e => setChatInput(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault()
+                  sendChatMessage(chatInput)
+                }
+              }}
+              placeholder="Ask about deliveries..."
+              disabled={chatLoading}
+              style={{
+                flex: 1,
+                border: `1px solid ₹{C.border}`,
+                borderRadius: 10,
+                padding: '8px 10px',
+                fontSize: 12,
+                fontFamily: 'inherit',
+                outline: 'none',
+                backgroundColor: '#F9FAFB',
+                color: C.text,
+                opacity: chatLoading ? 0.6 : 1,
+              }}
+            />
+            <button
+              onClick={() => sendChatMessage(chatInput)}
+              disabled={chatLoading || !chatInput.trim()}
+              style={{
+                width: 36,
+                height: 36,
+                border: 'none',
+                borderRadius: 10,
+                backgroundColor: C.primary,
+                color: 'white',
+                cursor: chatLoading || !chatInput.trim() ? 'not-allowed' : 'pointer',
+                fontSize: 16,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: chatLoading || !chatInput.trim() ? 0.6 : 1,
+              }}
+            >
+              ↑
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
+
 // ── Root export ───────────────────────────────────────────────────────────────
 export default function DeliveryPortal() {
   const [tab, setTab] = useState<DeliveryTab>('home')
@@ -354,6 +605,7 @@ export default function DeliveryPortal() {
       {tab === 'earnings' && <EarningsTab />}
       {tab === 'profile'  && <DeliveryProfile />}
       <DeliveryNav tab={tab} onTab={setTab} />
+      <DeliveryChatbot />
     </div>
   )
 }

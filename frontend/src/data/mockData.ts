@@ -1,7 +1,7 @@
 import { Restaurant, MenuItem, CartItem, Screen } from '../types';
 
 const RESTAURANTS: Restaurant[] = [
-  { id: 1, name: 'The Burger Lab', cuisine: 'American • Burgers • Fast Food', rating: 4.8, reviews: 2847, deliveryTime: 25, distance: '0.8 km', deliveryFee: 1.99, image: 'photo-1568901346375-23c9450c58cd', offer: '20% off orders above $25', tags: ['Trending', 'Top Rated'] },
+  { id: 1, name: 'The Burger Lab', cuisine: 'American • Burgers • Fast Food', rating: 4.8, reviews: 2847, deliveryTime: 25, distance: '0.8 km', deliveryFee: 1.99, image: 'photo-1568901346375-23c9450c58cd', offer: '20% off orders above ₹25', tags: ['Trending', 'Top Rated'] },
   { id: 2, name: 'Sakura Garden', cuisine: 'Japanese • Sushi • Asian', rating: 4.6, reviews: 1923, deliveryTime: 35, distance: '1.2 km', deliveryFee: 2.49, image: 'photo-1553621042-f6e147245754', offer: 'Free delivery on first order', tags: ['Popular'] },
   { id: 3, name: 'Spice Route', cuisine: 'Indian • Curry • Biryani', rating: 4.7, reviews: 3124, deliveryTime: 30, distance: '1.5 km', deliveryFee: 1.49, image: 'photo-1585937421612-70a008356fbe', offer: 'Buy 2 get 1 free on curries', tags: ["Editor's Pick"] },
   { id: 4, name: 'Pizza Piazza', cuisine: 'Italian • Pizza • Pasta', rating: 4.5, reviews: 1456, deliveryTime: 20, distance: '0.5 km', deliveryFee: 0.99, image: 'photo-1565299624946-b28f40a0ae38', tags: ['Nearby', 'Fast Delivery'] },
