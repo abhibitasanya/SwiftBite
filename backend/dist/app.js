@@ -2,7 +2,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import { createHash, randomUUID } from "crypto";
-import { mkdirSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import helmet from "helmet";
 import morgan from "morgan";
 import path from "path";
@@ -111,7 +111,24 @@ const restaurantSchema = z.object({
 });
 const uploadDirectory = path.resolve(process.cwd(), "uploads");
 mkdirSync(uploadDirectory, { recursive: true });
+const fallbackDataDirectory = path.resolve(process.cwd(), "data");
+const fallbackUsersFile = path.resolve(fallbackDataDirectory, "auth-users.json");
+mkdirSync(fallbackDataDirectory, { recursive: true });
 const fallbackUsers = new Map();
+if (existsSync(fallbackUsersFile)) {
+    try {
+        const storedUsers = JSON.parse(readFileSync(fallbackUsersFile, "utf8"));
+        for (const user of storedUsers) {
+            fallbackUsers.set(fallbackKey(user.identifier, user.role), user);
+        }
+    }
+    catch {
+        // Start with an empty in-memory account store if the persisted file is invalid.
+    }
+}
+function persistFallbackUsers() {
+    writeFileSync(fallbackUsersFile, JSON.stringify([...fallbackUsers.values()], null, 2), "utf8");
+}
 let fallbackRestaurants = [
     {
         id: 1,
@@ -1354,19 +1371,6 @@ export function createApp() {
             });
             return;
         }
-        const legacyDemoIdentifiers = new Set([
-            "customer@example.com",
-            "9876543210",
-            "restaurant@example.com",
-            "platform@example.com",
-        ]);
-        if (legacyDemoIdentifiers.has(parsed.data.identifier.trim().toLowerCase())) {
-            response.status(401).json({
-                message: "This account is not registered. Please sign up or use your own registered account.",
-                nextStep: "create a new account before signing in",
-            });
-            return;
-        }
         try {
             const [rows] = await db.query("SELECT id, full_name, identifier, role FROM users WHERE LOWER(TRIM(identifier)) = LOWER(TRIM(?)) AND role = ? AND password_hash = SHA2(?, 256) LIMIT 1", [parsed.data.identifier, parsed.data.role, parsed.data.password]);
             const user = rows[0];
@@ -1459,6 +1463,7 @@ export function createApp() {
                 passwordHash: sha256Hex(parsed.data.password),
             };
             fallbackUsers.set(fallbackKeyValue, fallbackUser);
+            persistFallbackUsers();
             response.status(201).json({
                 message: "Account created.",
                 nextStep: "sign in with the same role and identifier",
