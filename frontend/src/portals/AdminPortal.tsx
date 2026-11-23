@@ -23,31 +23,18 @@ type AdminTab = 'dashboard' | 'orders' | 'restaurants' | 'users'
 
 const STATS = [
   { label: 'Orders Today',    value: '12,847',  delta: '+18%',  positive: true,  icon: '📦', color: C.primary,    bg: C.primaryLight },
-<<<<<<< HEAD
   { label: 'Revenue Today',   value: '₹7,83,000', delta: '+22%',  positive: true,  icon: '💰', color: C.green,      bg: C.greenLight },
-=======
-  { label: 'Revenue Today',   value: '₹94,320', delta: '+22%',  positive: true,  icon: '💰', color: C.green,      bg: C.greenLight },
->>>>>>> 6c645a4aabccadf6169430c85efe9b533efa0540
   { label: 'Active Users',    value: '3,241',   delta: '+5%',   positive: true,  icon: '👥', color: '#2563EB',    bg: '#EFF6FF' },
   { label: 'Restaurants',     value: '142',     delta: '+3 new',positive: true,  icon: '🍽️', color: C.orange,     bg: C.orangeLight },
 ]
 
 const RECENT_ORDERS = [
-<<<<<<< HEAD
   { id: 'SWB-20847', customer: 'Alex Johnson',   restaurant: 'The Burger Lab',  amount: '₹1,575', status: 'Delivered', time: '2:58 PM' },
   { id: 'SWB-20846', customer: 'Priya Sharma',   restaurant: 'Spice Route',     amount: '₹2033', status: 'In Transit', time: '3:02 PM' },
   { id: 'SWB-20845', customer: 'Marcus Lee',     restaurant: 'Sakura Garden',   amount: '₹2589', status: 'Preparing', time: '3:05 PM' },
   { id: 'SWB-20844', customer: 'Emma Wilson',    restaurant: 'Pizza Piazza',    amount: '₹1639', status: 'Delivered', time: '3:10 PM' },
   { id: 'SWB-20843', customer: 'David Kim',      restaurant: 'Green Bowl',      amount: '₹1244', status: 'Pending', time: '3:12 PM' },
   { id: 'SWB-20842', customer: 'Sofia Martinez', restaurant: 'Wok & Roll',      amount: '₹1859', status: 'Cancelled', time: '3:14 PM' },
-=======
-  { id: 'SWB-20847', customer: 'Alex Johnson',   restaurant: 'The Burger Lab',  amount: '₹18.98', status: 'Delivered', time: '2:58 PM' },
-  { id: 'SWB-20846', customer: 'Priya Sharma',   restaurant: 'Spice Route',     amount: '₹24.50', status: 'In Transit', time: '3:02 PM' },
-  { id: 'SWB-20845', customer: 'Marcus Lee',     restaurant: 'Sakura Garden',   amount: '₹31.20', status: 'Preparing', time: '3:05 PM' },
-  { id: 'SWB-20844', customer: 'Emma Wilson',    restaurant: 'Pizza Piazza',    amount: '₹19.75', status: 'Delivered', time: '3:10 PM' },
-  { id: 'SWB-20843', customer: 'David Kim',      restaurant: 'Green Bowl',      amount: '₹14.99', status: 'Pending', time: '3:12 PM' },
-  { id: 'SWB-20842', customer: 'Sofia Martinez', restaurant: 'Wok & Roll',      amount: '₹22.40', status: 'Cancelled', time: '3:14 PM' },
->>>>>>> 6c645a4aabccadf6169430c85efe9b533efa0540
 ]
 
 const PENDING_RESTAURANTS = [
@@ -57,7 +44,6 @@ const PENDING_RESTAURANTS = [
 ]
 
 const ALL_RESTAURANTS = [
-<<<<<<< HEAD
   { name: 'The Burger Lab',  cuisine: 'American',  orders: 234, revenue: '₹4,00,000', rating: 4.8, status: 'Active' },
   { name: 'Sakura Garden',   cuisine: 'Japanese',  orders: 189, revenue: '₹4,70,000', rating: 4.6, status: 'Active' },
   { name: 'Spice Route',     cuisine: 'Indian',    orders: 312, revenue: '₹5,18,000', rating: 4.7, status: 'Active' },
@@ -73,23 +59,6 @@ const USERS = [
   { name: 'Emma Wilson',    email: 'emma.w@gmail.com',   orders: 62,  spent: '₹92,960', joined: 'Jan 2024', status: 'Active' },
   { name: 'David Kim',      email: 'david.k@gmail.com',  orders: 8,   spent: '₹11,952', joined: 'Jun 2024', status: 'Suspended' },
   { name: 'Sofia Martinez', email: 'sofia.m@gmail.com',  orders: 25,  spent: '₹37,350', joined: 'Feb 2024', status: 'Active' },
-=======
-  { name: 'The Burger Lab',  cuisine: 'American',  orders: 234, revenue: '₹4,820', rating: 4.8, status: 'Active' },
-  { name: 'Sakura Garden',   cuisine: 'Japanese',  orders: 189, revenue: '₹5,670', rating: 4.6, status: 'Active' },
-  { name: 'Spice Route',     cuisine: 'Indian',    orders: 312, revenue: '₹6,240', rating: 4.7, status: 'Active' },
-  { name: 'Pizza Piazza',    cuisine: 'Italian',   orders: 145, revenue: '₹2,900', rating: 4.5, status: 'Active' },
-  { name: 'Green Bowl',      cuisine: 'Healthy',   orders: 98,  revenue: '₹1,960', rating: 4.9, status: 'Active' },
-  { name: 'Wok & Roll',      cuisine: 'Asian Fusion', orders: 210, revenue: '₹4,200', rating: 4.4, status: 'Suspended' },
-]
-
-const USERS = [
-  { name: 'Alex Johnson',   email: 'alex.j@gmail.com',   orders: 47,  spent: '₹842', joined: 'Mar 2024', status: 'Active' },
-  { name: 'Priya Sharma',   email: 'priya.s@gmail.com',  orders: 31,  spent: '₹560', joined: 'Apr 2024', status: 'Active' },
-  { name: 'Marcus Lee',     email: 'marcus.l@gmail.com', orders: 18,  spent: '₹324', joined: 'May 2024', status: 'Active' },
-  { name: 'Emma Wilson',    email: 'emma.w@gmail.com',   orders: 62,  spent: '₹1,120', joined: 'Jan 2024', status: 'Active' },
-  { name: 'David Kim',      email: 'david.k@gmail.com',  orders: 8,   spent: '₹144', joined: 'Jun 2024', status: 'Suspended' },
-  { name: 'Sofia Martinez', email: 'sofia.m@gmail.com',  orders: 25,  spent: '₹450', joined: 'Feb 2024', status: 'Active' },
->>>>>>> 6c645a4aabccadf6169430c85efe9b533efa0540
 ]
 
 const STATUS_STYLE: Record<string, { color: string; bg: string }> = {
@@ -142,7 +111,7 @@ function Dashboard() {
   return (
     <div style={{ backgroundColor: C.bg, minHeight: '100vh', paddingBottom: 100 }}>
       {/* Header */}
-      <div style={{ background: `linear-gradient(135deg, ₹{C.primary} 0%, #5B21B6 100%)`, padding: '56px 20px 28px' }}>
+      <div style={{ background: `linear-gradient(135deg, ${C.primary} 0%, #5B21B6 100%)`, padding: '56px 20px 28px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
           <div>
             <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: 13, margin: '0 0 2px', fontWeight: 500 }}>Admin Console</p>
@@ -181,18 +150,14 @@ function Dashboard() {
               <p style={{ fontSize: 12, color: C.muted, margin: 0 }}>Daily earnings in thousands</p>
             </div>
             <div style={{ backgroundColor: C.primaryLight, padding: '6px 12px', borderRadius: 10 }}>
-<<<<<<< HEAD
               <span style={{ fontSize: 12, fontWeight: 700, color: C.primary }}>₹39.5L total</span>
-=======
-              <span style={{ fontSize: 12, fontWeight: 700, color: C.primary }}>₹476k total</span>
->>>>>>> 6c645a4aabccadf6169430c85efe9b533efa0540
             </div>
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', height: 80 }}>
             {weekData.map((v, i) => (
               <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
                 <div style={{ width: '100%', backgroundColor: C.primaryLight, borderRadius: 6, overflow: 'hidden', height: 60 }}>
-                  <div style={{ width: '100%', height: `₹{(v / maxVal) * 100}%`, backgroundColor: i === 5 ? C.primary : '#A78BFA', borderRadius: 6, marginTop: 'auto', transition: 'height 0.5s ease' }} />
+                  <div style={{ width: '100%', height: `${(v / maxVal) * 100}%`, backgroundColor: i === 5 ? C.primary : '#A78BFA', borderRadius: 6, marginTop: 'auto', transition: 'height 0.5s ease' }} />
                 </div>
                 <span style={{ fontSize: 9, color: C.muted, fontWeight: 600 }}>{weekLabels[i]}</span>
               </div>
@@ -217,13 +182,8 @@ function Dashboard() {
               </div>
               <StatusBadge status={r.docs} />
               <div style={{ display: 'flex', gap: 6 }}>
-<<<<<<< HEAD
                 <button onClick={() => window.alert(`${r.name} approved`)} style={{ width: 30, height: 30, borderRadius: 8, backgroundColor: C.greenLight, border: `1px solid #BBF7D0`, fontSize: 14, cursor: 'pointer' }}>✓</button>
                 <button onClick={() => window.alert(`${r.name} rejected`)} style={{ width: 30, height: 30, borderRadius: 8, backgroundColor: C.redLight, border: `1px solid #FECDD3`, fontSize: 14, cursor: 'pointer' }}>✕</button>
-=======
-                <button onClick={() => console.log('Approve:', r.name)} style={{ width: 30, height: 30, borderRadius: 8, backgroundColor: C.greenLight, border: `1px solid #BBF7D0`, fontSize: 14, cursor: 'pointer' }}>✓</button>
-                <button onClick={() => console.log('Reject:', r.name)} style={{ width: 30, height: 30, borderRadius: 8, backgroundColor: C.redLight, border: `1px solid #FECDD3`, fontSize: 14, cursor: 'pointer' }}>✕</button>
->>>>>>> 6c645a4aabccadf6169430c85efe9b533efa0540
               </div>
             </div>
           ))}
@@ -265,14 +225,14 @@ function OrdersTab() {
 
   return (
     <div style={{ backgroundColor: C.bg, minHeight: '100vh', paddingBottom: 100 }}>
-      <div style={{ background: `linear-gradient(135deg, ₹{C.primary} 0%, #5B21B6 100%)`, padding: '56px 20px 20px' }}>
+      <div style={{ background: `linear-gradient(135deg, ${C.primary} 0%, #5B21B6 100%)`, padding: '56px 20px 20px' }}>
         <h1 style={{ color: 'white', fontSize: 22, fontWeight: 800, margin: '0 0 4px', letterSpacing: -0.4 }}>Order Management</h1>
         <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, margin: 0 }}>{RECENT_ORDERS.length} orders today</p>
       </div>
-      <div style={{ backgroundColor: 'white', padding: '12px 20px', borderBottom: `1px solid ₹{C.border}` }}>
+      <div style={{ backgroundColor: 'white', padding: '12px 20px', borderBottom: `1px solid ${C.border}` }}>
         <div style={{ display: 'flex', gap: 8, overflowX: 'auto', scrollbarWidth: 'none' }}>
           {filters.map(f => (
-            <button key={f} onClick={() => setFilter(f)} style={{ flex: '0 0 auto', padding: '7px 14px', backgroundColor: filter === f ? C.primary : 'white', color: filter === f ? 'white' : C.muted, border: `1.5px solid ₹{filter === f ? C.primary : C.border}`, borderRadius: 100, fontSize: 12, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.2s' }}>
+            <button key={f} onClick={() => setFilter(f)} style={{ flex: '0 0 auto', padding: '7px 14px', backgroundColor: filter === f ? C.primary : 'white', color: filter === f ? 'white' : C.muted, border: `1.5px solid ${filter === f ? C.primary : C.border}`, borderRadius: 100, fontSize: 12, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.2s' }}>
               {f}
             </button>
           ))}
@@ -306,12 +266,12 @@ function RestaurantsTab() {
 
   return (
     <div style={{ backgroundColor: C.bg, minHeight: '100vh', paddingBottom: 100 }}>
-      <div style={{ background: `linear-gradient(135deg, ₹{C.primary} 0%, #5B21B6 100%)`, padding: '56px 20px 20px' }}>
+      <div style={{ background: `linear-gradient(135deg, ${C.primary} 0%, #5B21B6 100%)`, padding: '56px 20px 20px' }}>
         <h1 style={{ color: 'white', fontSize: 22, fontWeight: 800, margin: '0 0 4px', letterSpacing: -0.4 }}>Restaurants</h1>
         <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, margin: 0 }}>{ALL_RESTAURANTS.length} registered · 3 pending approval</p>
       </div>
-      <div style={{ backgroundColor: 'white', padding: '12px 20px', borderBottom: `1px solid ₹{C.border}` }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, backgroundColor: '#F9FAFB', border: `1.5px solid ₹{C.border}`, borderRadius: 14, padding: '11px 14px' }}>
+      <div style={{ backgroundColor: 'white', padding: '12px 20px', borderBottom: `1px solid ${C.border}` }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, backgroundColor: '#F9FAFB', border: `1.5px solid ${C.border}`, borderRadius: 14, padding: '11px 14px' }}>
           <span style={{ fontSize: 16 }}>🔍</span>
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search restaurants…" style={{ flex: 1, border: 'none', background: 'transparent', fontSize: 14, color: C.text, outline: 'none' }} />
         </div>
@@ -330,7 +290,7 @@ function RestaurantsTab() {
               {[
                 { label: 'Orders', value: r.orders },
                 { label: 'Revenue', value: r.revenue },
-                { label: 'Rating', value: `₹{r.rating}⭐` },
+                { label: 'Rating', value: `${r.rating}⭐` },
               ].map(s => (
                 <div key={s.label}>
                   <p style={{ fontSize: 14, fontWeight: 700, color: C.text, margin: '0 0 2px' }}>{s.value}</p>
@@ -339,19 +299,11 @@ function RestaurantsTab() {
               ))}
             </div>
             <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-<<<<<<< HEAD
               <button onClick={() => window.alert(`${r.name}\n${r.cuisine}\n${r.orders} orders\nRevenue: ${r.revenue}`)} style={{ flex: 1, padding: '8px', backgroundColor: C.primaryLight, color: C.primary, border: `1px solid ${C.primaryBorder}`, borderRadius: 10, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>View Details</button>
               {r.status === 'Active' ? (
                 <button onClick={() => window.alert(`${r.name} suspended`)} style={{ flex: 1, padding: '8px', backgroundColor: C.redLight, color: C.red, border: `1px solid #FECDD3`, borderRadius: 10, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Suspend</button>
               ) : (
                 <button onClick={() => window.alert(`${r.name} restored`)} style={{ flex: 1, padding: '8px', backgroundColor: C.greenLight, color: C.green, border: `1px solid #BBF7D0`, borderRadius: 10, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Restore</button>
-=======
-              <button onClick={() => console.log('View details:', r.name)} style={{ flex: 1, padding: '8px', backgroundColor: C.primaryLight, color: C.primary, border: `1px solid ₹{C.primaryBorder}`, borderRadius: 10, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>View Details</button>
-              {r.status === 'Active' ? (
-                <button onClick={() => console.log('Suspend:', r.name)} style={{ flex: 1, padding: '8px', backgroundColor: C.redLight, color: C.red, border: `1px solid #FECDD3`, borderRadius: 10, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Suspend</button>
-              ) : (
-                <button onClick={() => console.log('Restore:', r.name)} style={{ flex: 1, padding: '8px', backgroundColor: C.greenLight, color: C.green, border: `1px solid #BBF7D0`, borderRadius: 10, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Restore</button>
->>>>>>> 6c645a4aabccadf6169430c85efe9b533efa0540
               )}
             </div>
           </div>
@@ -368,12 +320,12 @@ function UsersTab() {
 
   return (
     <div style={{ backgroundColor: C.bg, minHeight: '100vh', paddingBottom: 100 }}>
-      <div style={{ background: `linear-gradient(135deg, ₹{C.primary} 0%, #5B21B6 100%)`, padding: '56px 20px 20px' }}>
+      <div style={{ background: `linear-gradient(135deg, ${C.primary} 0%, #5B21B6 100%)`, padding: '56px 20px 20px' }}>
         <h1 style={{ color: 'white', fontSize: 22, fontWeight: 800, margin: '0 0 4px', letterSpacing: -0.4 }}>Users</h1>
         <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, margin: 0 }}>{USERS.length} registered users</p>
       </div>
-      <div style={{ backgroundColor: 'white', padding: '12px 20px', borderBottom: `1px solid ₹{C.border}` }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, backgroundColor: '#F9FAFB', border: `1.5px solid ₹{C.border}`, borderRadius: 14, padding: '11px 14px' }}>
+      <div style={{ backgroundColor: 'white', padding: '12px 20px', borderBottom: `1px solid ${C.border}` }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, backgroundColor: '#F9FAFB', border: `1.5px solid ${C.border}`, borderRadius: 14, padding: '11px 14px' }}>
           <span style={{ fontSize: 16 }}>🔍</span>
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search users…" style={{ flex: 1, border: 'none', background: 'transparent', fontSize: 14, color: C.text, outline: 'none' }} />
         </div>
@@ -382,7 +334,7 @@ function UsersTab() {
         {shown.map(u => (
           <div key={u.email} style={{ backgroundColor: 'white', borderRadius: 18, padding: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
             <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-              <div style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: C.primaryLight, border: `1.5px solid ₹{C.primaryBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>
+              <div style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: C.primaryLight, border: `1.5px solid ${C.primaryBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>
                 {u.name.charAt(0)}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
@@ -507,7 +459,7 @@ function AdminChatbot() {
           maxHeight: 450,
           borderRadius: 18,
           background: 'rgba(255,253,248,0.98)',
-          border: `1px solid ₹{C.border}`,
+          border: `1px solid ${C.border}`,
           boxShadow: '0 18px 40px rgba(47,58,45,0.16)',
           zIndex: 130,
           backdropFilter: 'blur(10px)',
@@ -515,7 +467,7 @@ function AdminChatbot() {
           flexDirection: 'column',
           overflow: 'hidden',
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', borderBottom: `1px solid ₹{C.border}` }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', borderBottom: `1px solid ${C.border}` }}>
             <div style={{ fontSize: 13, fontWeight: 800, color: C.text }}>🤖 AdminBot</div>
             <button onClick={() => setChatOpen(false)} style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 16, color: C.muted }}>×</button>
           </div>
@@ -552,7 +504,7 @@ function AdminChatbot() {
                       onClick={() => sendChatMessage(prompt)}
                       disabled={chatLoading}
                       style={{
-                        border: `1px solid ₹{C.border}`,
+                        border: `1px solid ${C.border}`,
                         borderRadius: 999,
                         padding: '6px 10px',
                         backgroundColor: 'white',
@@ -602,7 +554,7 @@ function AdminChatbot() {
             <div ref={chatEndRef} />
           </div>
 
-          <div style={{ padding: '10px 12px', borderTop: `1px solid ₹{C.border}`, display: 'flex', gap: 6 }}>
+          <div style={{ padding: '10px 12px', borderTop: `1px solid ${C.border}`, display: 'flex', gap: 6 }}>
             <input
               type="text"
               value={chatInput}
@@ -617,7 +569,7 @@ function AdminChatbot() {
               disabled={chatLoading}
               style={{
                 flex: 1,
-                border: `1px solid ₹{C.border}`,
+                border: `1px solid ${C.border}`,
                 borderRadius: 10,
                 padding: '8px 10px',
                 fontSize: 12,

@@ -213,9 +213,9 @@ export default function App() {
         <div className="screen-enter" key={screen} style={{ paddingBottom: showNav ? 92 : 0 }}>
           {screen === 'splash' && <SplashScreen />}
           {screen === 'onboarding' && <OnboardingScreen step={onboStep} onNext={() => onboStep < 2 ? setOnboStep(s => s + 1) : goto('auth-login')} onSkip={() => goto('auth-login')} />}
-          {screen === 'home' && <HomeScreen onRestaurantClick={(r: Restaurant) => { setSelRestaurant(r); goto('restaurant-detail') }} onSearch={() => goto('restaurants')} cart={cart} cartTotal={cartTotal} cartCount={cartCount} onCartClick={() => goto('cart')} favorites={favorites} onFav={toggleFav} cartAnimating={cartAnim} />}
+          {screen === 'home' && <HomeScreen onRestaurantClick={(r: Restaurant) => { setSelRestaurant(r); goto('restaurant-detail') }} onSearch={() => goto('restaurants')} onNotifications={() => goto('notifications')} cart={cart} cartTotal={cartTotal} cartCount={cartCount} onCartClick={() => goto('cart')} favorites={favorites} onFav={toggleFav} cartAnimating={cartAnim} />}
           {screen === 'restaurants' && <RestaurantListScreen onBack={goBack} onRestaurantClick={(r: Restaurant) => { setSelRestaurant(r); goto('restaurant-detail') }} favorites={favorites} onFav={toggleFav} />}
-          {screen === 'restaurant-detail' && selRestaurant && <RestaurantDetailScreen restaurant={selRestaurant} onBack={goBack} onFoodClick={(f: MenuItem) => { setSelFood(f); goto('food-detail') }} onAddToCart={(f: MenuItem) => addToCart(f, selRestaurant.name)} cart={cart} cartTotal={cartTotal} cartCount={cartCount} onCartClick={() => goto('cart')} favorites={favorites} onFav={toggleFav} />}
+          {screen === 'restaurant-detail' && selRestaurant && <RestaurantDetailScreen restaurant={selRestaurant} onBack={goBack} onFoodClick={(f: MenuItem) => { setSelFood(f); goto('food-detail') }} onAddToCart={(f: MenuItem) => addToCart(f, selRestaurant.name)} onRemoveFromCart={removeFromCart} cart={cart} cartTotal={cartTotal} cartCount={cartCount} onCartClick={() => goto('cart')} favorites={favorites} onFav={toggleFav} />}
           {screen === 'food-detail' && selFood && <FoodDetailScreen food={selFood} restaurant={selRestaurant?.name || ''} onBack={goBack} onAddToCart={() => { addToCart(selFood, selRestaurant?.name || ''); goBack() }} />}
           {screen === 'cart' && <CartScreen cart={cart} onBack={goBack} onAddItem={(id: number) => { const it = MENU_ITEMS.find(m => m.id === id); if (it) addToCart(it, selRestaurant?.name || '') }} onRemoveItem={removeFromCart} onCheckout={() => goto('checkout')} cartTotal={cartTotal} />}
           {screen === 'checkout' && <CheckoutScreen onBack={goBack} onPlaceOrder={() => goto('tracking')} cartTotal={cartTotal} />}
@@ -224,13 +224,13 @@ export default function App() {
           {screen === 'auth-login'  && <LoginScreen  onLogin={() => goto('home')} onSignUp={() => goto('auth-signup')} onForgot={() => goto('auth-forgot')} />}
           {screen === 'auth-signup' && <SignUpScreen  onSignUp={() => goto('auth-otp')} onLogin={() => goto('auth-login')} />}
           {screen === 'auth-forgot' && <ForgotScreen  onSend={() => goto('auth-otp')} onBack={() => goto('auth-login')} />}
-          {screen === 'auth-otp'   && <OTPScreen     onVerify={() => goto('auth-reset')} onBack={goBack} onResend={() => {}} />}
+          {screen === 'auth-otp'   && <OTPScreen     onVerify={() => goto('auth-reset')} onBack={goBack} onResend={() => window.alert('A new verification code has been sent.')} />}
           {screen === 'auth-reset' && <ResetScreen   onReset={() => goto('auth-login')} onBack={() => goto('auth-forgot')} />}
           {screen === 'history' && <OrderHistoryScreen />}
           {screen === 'favorites' && <FavoritesScreen favorites={favorites} onRestaurantClick={(r: Restaurant) => { setSelRestaurant(r); goto('restaurant-detail') }} onFav={toggleFav} />}
           {screen === 'notifications' && <NotificationsScreen />}
-          {screen === 'profile' && <ProfileScreen onSwitchRole={() => setShowRoleSelector(true)} onSettings={() => goto('settings')} />}
-          {screen === 'settings' && <SettingsScreen onBack={goBack} />}
+          {screen === 'profile' && <ProfileScreen onSwitchRole={() => setShowRoleSelector(true)} onSettings={() => goto('settings')} onNavigate={(label) => { if (label === 'Order History') goto('history'); else if (label === 'Favourite Restaurants') goto('favorites'); else window.alert(`${label} opened`) }} onSignOut={() => { setCart([]); setHistory([]); setScreen('auth-login') }} />}
+          {screen === 'settings' && <SettingsScreen onBack={goBack} onSignOut={() => { setCart([]); setHistory([]); setScreen('auth-login') }} />}
         </div>
 
         <button
@@ -267,7 +267,7 @@ export default function App() {
             maxHeight: 450,
             borderRadius: 18,
             background: 'rgba(255,253,248,0.98)',
-            border: `1px solid ₹{C.border}`,
+            border: `1px solid ${C.border}`,
             boxShadow: '0 18px 40px rgba(47,58,45,0.16)',
             zIndex: 130,
             backdropFilter: 'blur(10px)',
@@ -276,7 +276,7 @@ export default function App() {
             overflow: 'hidden',
           }}>
             {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', borderBottom: `1px solid ₹{C.border}` }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', borderBottom: `1px solid ${C.border}` }}>
               <div style={{ fontSize: 13, fontWeight: 800, color: C.text }}>🤖 SwiftBot</div>
               <button onClick={() => setChatOpen(false)} style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 16, color: C.muted }}>×</button>
             </div>
@@ -314,7 +314,7 @@ export default function App() {
                         onClick={() => sendChatMessage(prompt)}
                         disabled={chatLoading}
                         style={{
-                          border: `1px solid ₹{C.border}`,
+                          border: `1px solid ${C.border}`,
                           borderRadius: 999,
                           padding: '6px 10px',
                           backgroundColor: 'white',
@@ -365,7 +365,7 @@ export default function App() {
             </div>
 
             {/* Input */}
-            <div style={{ padding: '10px 12px', borderTop: `1px solid ₹{C.border}`, display: 'flex', gap: 6 }}>
+            <div style={{ padding: '10px 12px', borderTop: `1px solid ${C.border}`, display: 'flex', gap: 6 }}>
               <input
                 type="text"
                 value={chatInput}
@@ -380,7 +380,7 @@ export default function App() {
                 disabled={chatLoading}
                 style={{
                   flex: 1,
-                  border: `1px solid ₹{C.border}`,
+                  border: `1px solid ${C.border}`,
                   borderRadius: 10,
                   padding: '8px 10px',
                   fontSize: 12,

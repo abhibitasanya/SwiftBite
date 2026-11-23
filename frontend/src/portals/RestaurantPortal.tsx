@@ -22,35 +22,19 @@ const C = {
 type RestaurantTab = 'dashboard' | 'orders' | 'menu' | 'analytics'
 
 const INCOMING_ORDERS = [
-<<<<<<< HEAD
-  { id: 'SWB-20848', customer: 'Priya Sharma', items: ['Classic Smash Burger ×2', 'Truffle Fries ×1'], total: '₹797', time: '3:08 PM', status: 'New', avatar: '👩' },
-  { id: 'SWB-20849', customer: 'Marcus Lee',   items: ['Crispy Chicken Sandwich ×1', 'Double Cheese ×1'], total: '₹628', time: '3:05 PM', status: 'Preparing', avatar: '👨' },
-  { id: 'SWB-20845', customer: 'Emma Wilson',  items: ['Garden Impossible Burger ×1', 'Fries ×2'], total: '₹697', time: '3:00 PM', status: 'Ready', avatar: '👩' },
-  { id: 'SWB-20843', customer: 'David Kim',    items: ['Classic Smash Burger ×1'], total: '₹299', time: '2:55 PM', status: 'Delivered', avatar: '👦' },
+  { id: 'SWB-20848', customer: 'Priya Sharma', items: ['Classic Smash Burger ×2', 'Truffle Fries ×1'], total: '₹589', time: '3:08 PM', status: 'New', avatar: '👩' },
+  { id: 'SWB-20849', customer: 'Marcus Lee',   items: ['Crispy Chicken Sandwich ×1', 'Double Cheese ×1'], total: '₹450', time: '3:05 PM', status: 'Preparing', avatar: '👨' },
+  { id: 'SWB-20845', customer: 'Emma Wilson',  items: ['Garden Impossible Burger ×1', 'Fries ×2'], total: '₹528', time: '3:00 PM', status: 'Ready', avatar: '👩' },
+  { id: 'SWB-20843', customer: 'David Kim',    items: ['Classic Smash Burger ×1'], total: '₹220', time: '2:55 PM', status: 'Delivered', avatar: '👦' },
 ]
 
 const MENU_ITEMS = [
-  { id: 1, name: 'Classic Smash Burger',      price: '₹299', category: 'Burgers',  orders: 234, active: true,  image: '🍔' },
-  { id: 2, name: 'Double Cheese Deluxe',       price: '₹349', category: 'Burgers',  orders: 189, active: true,  image: '🍔' },
-  { id: 3, name: 'Crispy Chicken Sandwich',    price: '₹279', category: 'Burgers',  orders: 145, active: true,  image: '🥪' },
-  { id: 4, name: 'Truffle Parmesan Fries',     price: '₹199',  category: 'Sides',    orders: 312, active: true,  image: '🍟' },
-  { id: 5, name: 'Garden Impossible Burger',   price: '₹299', category: 'Burgers',  orders: 98,  active: false, image: '🌿' },
-  { id: 6, name: 'Classic Chocolate Shake',    price: '₹179',  category: 'Drinks',   orders: 176, active: true,  image: '🥤' },
-=======
-  { id: 'SWB-20848', customer: 'Priya Sharma', items: ['Classic Smash Burger ×2', 'Truffle Fries ×1'], total: '₹31.97', time: '3:08 PM', status: 'New', avatar: '👩' },
-  { id: 'SWB-20849', customer: 'Marcus Lee',   items: ['Crispy Chicken Sandwich ×1', 'Double Cheese ×1'], total: '₹26.98', time: '3:05 PM', status: 'Preparing', avatar: '👨' },
-  { id: 'SWB-20845', customer: 'Emma Wilson',  items: ['Garden Impossible Burger ×1', 'Fries ×2'], total: '₹25.97', time: '3:00 PM', status: 'Ready', avatar: '👩' },
-  { id: 'SWB-20843', customer: 'David Kim',    items: ['Classic Smash Burger ×1'], total: '₹12.99', time: '2:55 PM', status: 'Delivered', avatar: '👦' },
-]
-
-const MENU_ITEMS = [
-  { id: 1, name: 'Classic Smash Burger',      price: '₹12.99', category: 'Burgers',  orders: 234, active: true,  image: '🍔' },
-  { id: 2, name: 'Double Cheese Deluxe',       price: '₹14.99', category: 'Burgers',  orders: 189, active: true,  image: '🍔' },
-  { id: 3, name: 'Crispy Chicken Sandwich',    price: '₹11.99', category: 'Burgers',  orders: 145, active: true,  image: '🥪' },
-  { id: 4, name: 'Truffle Parmesan Fries',     price: '₹5.99',  category: 'Sides',    orders: 312, active: true,  image: '🍟' },
-  { id: 5, name: 'Garden Impossible Burger',   price: '₹13.99', category: 'Burgers',  orders: 98,  active: false, image: '🌿' },
-  { id: 6, name: 'Classic Chocolate Shake',    price: '₹6.49',  category: 'Drinks',   orders: 176, active: true,  image: '🥤' },
->>>>>>> 6c645a4aabccadf6169430c85efe9b533efa0540
+  { id: 1, name: 'Classic Smash Burger',      price: '₹220', category: 'Burgers',  orders: 234, active: true,  image: '🍔' },
+  { id: 2, name: 'Double Cheese Deluxe',       price: '₹240', category: 'Burgers',  orders: 189, active: true,  image: '🍔' },
+  { id: 3, name: 'Crispy Chicken Sandwich',    price: '₹210', category: 'Burgers',  orders: 145, active: true,  image: '🥪' },
+  { id: 4, name: 'Truffle Parmesan Fries',     price: '₹149',  category: 'Sides',    orders: 312, active: true,  image: '🍟' },
+  { id: 5, name: 'Garden Impossible Burger',   price: '₹230', category: 'Burgers',  orders: 98,  active: false, image: '🌿' },
+  { id: 6, name: 'Classic Chocolate Shake',    price: '₹149',  category: 'Drinks',   orders: 176, active: true,  image: '🥤' },
 ]
 
 const REVIEWS = [
@@ -100,13 +84,13 @@ function RestaurantDashboard({ onGoToOrders }: { onGoToOrders: () => void }) {
 
   return (
     <div style={{ backgroundColor: C.bg, minHeight: '100vh', paddingBottom: 100 }}>
-      <div style={{ background: `linear-gradient(135deg, ₹{C.primary} 0%, #C2410C 100%)`, padding: '56px 20px 24px' }}>
+      <div style={{ background: `linear-gradient(135deg, ${C.primary} 0%, #C2410C 100%)`, padding: '56px 20px 24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
           <div>
             <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: 13, margin: '0 0 2px', fontWeight: 500 }}>Restaurant Console</p>
             <h1 style={{ color: 'white', fontSize: 22, fontWeight: 800, margin: 0, letterSpacing: -0.4 }}>The Burger Lab</h1>
           </div>
-          <button onClick={() => setIsOpen(!isOpen)} style={{ display: 'flex', alignItems: 'center', gap: 8, backgroundColor: isOpen ? 'rgba(74,222,128,0.2)' : 'rgba(255,255,255,0.15)', border: `1.5px solid ₹{isOpen ? '#4ADE80' : 'rgba(255,255,255,0.3)'}`, borderRadius: 100, padding: '8px 14px', cursor: 'pointer' }}>
+          <button onClick={() => setIsOpen(!isOpen)} style={{ display: 'flex', alignItems: 'center', gap: 8, backgroundColor: isOpen ? 'rgba(74,222,128,0.2)' : 'rgba(255,255,255,0.15)', border: `1.5px solid ${isOpen ? '#4ADE80' : 'rgba(255,255,255,0.3)'}`, borderRadius: 100, padding: '8px 14px', cursor: 'pointer' }}>
             <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: isOpen ? '#4ADE80' : '#9CA3AF' }} />
             <span style={{ color: 'white', fontSize: 13, fontWeight: 700 }}>{isOpen ? 'Open' : 'Closed'}</span>
           </button>
@@ -116,11 +100,7 @@ function RestaurantDashboard({ onGoToOrders }: { onGoToOrders: () => void }) {
         <div style={{ display: 'flex', gap: 10 }}>
           {[
             { label: "Today's Orders", value: '23', icon: '📦' },
-<<<<<<< HEAD
             { label: "Today's Revenue", value: '₹74,000', icon: '💰' },
-=======
-            { label: "Today's Revenue", value: '₹892', icon: '💰' },
->>>>>>> 6c645a4aabccadf6169430c85efe9b533efa0540
             { label: 'Pending', value: '3', icon: '⏳' },
           ].map(s => (
             <div key={s.label} style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.12)', borderRadius: 14, padding: '10px 8px', textAlign: 'center' }}>
@@ -159,7 +139,7 @@ function RestaurantDashboard({ onGoToOrders }: { onGoToOrders: () => void }) {
                   <p style={{ fontSize: 13, fontWeight: 700, color: C.text, margin: 0 }}>{o.customer}</p>
                   <StatusBadge status={o.status} />
                 </div>
-                <p style={{ fontSize: 11, color: C.muted, margin: '0 0 2px', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{o.items[0]}{o.items.length > 1 ? ` +₹{o.items.length - 1} more` : ''}</p>
+                <p style={{ fontSize: 11, color: C.muted, margin: '0 0 2px', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{o.items[0]}{o.items.length > 1 ? ` +${o.items.length - 1} more` : ''}</p>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ fontSize: 11, color: C.subtle }}>{o.time}</span>
                   <span style={{ fontSize: 13, fontWeight: 700, color: C.text }}>{o.total}</span>
@@ -183,7 +163,7 @@ function RestaurantDashboard({ onGoToOrders }: { onGoToOrders: () => void }) {
                   <p style={{ fontSize: 11, color: C.muted, margin: 0 }}>{item.orders} orders · {item.price}</p>
                 </div>
                 <div style={{ height: 4, width: 60, backgroundColor: '#F3F4F6', borderRadius: 2, overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: `₹{(item.orders / 312) * 100}%`, backgroundColor: C.primary, borderRadius: 2 }} />
+                  <div style={{ height: '100%', width: `${(item.orders / 312) * 100}%`, backgroundColor: C.primary, borderRadius: 2 }} />
                 </div>
               </div>
               {i < 3 && <div style={{ height: 1, backgroundColor: '#F3F4F6', margin: '0 16px' }} />}
@@ -232,14 +212,14 @@ function OrdersTab() {
 
   return (
     <div style={{ backgroundColor: C.bg, minHeight: '100vh', paddingBottom: 100 }}>
-      <div style={{ background: `linear-gradient(135deg, ₹{C.primary} 0%, #C2410C 100%)`, padding: '56px 20px 16px' }}>
+      <div style={{ background: `linear-gradient(135deg, ${C.primary} 0%, #C2410C 100%)`, padding: '56px 20px 16px' }}>
         <h1 style={{ color: 'white', fontSize: 22, fontWeight: 800, margin: '0 0 4px', letterSpacing: -0.4 }}>Order Management</h1>
         <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, margin: 0 }}>{orders.filter(o => o.status === 'New').length} new orders pending</p>
       </div>
-      <div style={{ backgroundColor: 'white', padding: '12px 20px', borderBottom: `1px solid ₹{C.border}` }}>
+      <div style={{ backgroundColor: 'white', padding: '12px 20px', borderBottom: `1px solid ${C.border}` }}>
         <div style={{ display: 'flex', gap: 8, overflowX: 'auto', scrollbarWidth: 'none' }}>
           {filters.map(f => (
-            <button key={f} onClick={() => setFilter(f)} style={{ flex: '0 0 auto', padding: '7px 14px', backgroundColor: filter === f ? C.primary : 'white', color: filter === f ? 'white' : C.muted, border: `1.5px solid ₹{filter === f ? C.primary : C.border}`, borderRadius: 100, fontSize: 12, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.2s' }}>
+            <button key={f} onClick={() => setFilter(f)} style={{ flex: '0 0 auto', padding: '7px 14px', backgroundColor: filter === f ? C.primary : 'white', color: filter === f ? 'white' : C.muted, border: `1.5px solid ${filter === f ? C.primary : C.border}`, borderRadius: 100, fontSize: 12, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.2s' }}>
               {f}
             </button>
           ))}
@@ -247,7 +227,7 @@ function OrdersTab() {
       </div>
       <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
         {shown.map(o => (
-          <div key={o.id} style={{ backgroundColor: C.surface, borderRadius: 18, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', border: o.status === 'New' ? `1.5px solid #FDE68A` : `1.5px solid ₹{C.border}` }}>
+          <div key={o.id} style={{ backgroundColor: C.surface, borderRadius: 18, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', border: o.status === 'New' ? `1.5px solid #FDE68A` : `1.5px solid ${C.border}` }}>
             <div style={{ padding: '14px 16px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -298,25 +278,21 @@ function MenuTab() {
 
   return (
     <div style={{ backgroundColor: C.bg, minHeight: '100vh', paddingBottom: 100 }}>
-      <div style={{ background: `linear-gradient(135deg, ₹{C.primary} 0%, #C2410C 100%)`, padding: '56px 20px 16px' }}>
+      <div style={{ background: `linear-gradient(135deg, ${C.primary} 0%, #C2410C 100%)`, padding: '56px 20px 16px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
             <h1 style={{ color: 'white', fontSize: 22, fontWeight: 800, margin: '0 0 4px', letterSpacing: -0.4 }}>Menu</h1>
             <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, margin: 0 }}>{items.filter(i => i.active).length} active · {items.filter(i => !i.active).length} unavailable</p>
           </div>
-<<<<<<< HEAD
-          <button onClick={() => { const name = window.prompt('Dish name'); if (name?.trim()) setItems(prev => [...prev, { id: Date.now(), name: name.trim(), price: '₹299', category: 'Burgers', orders: 0, active: true, image: '🍽️' }]) }} style={{ backgroundColor: 'rgba(255,255,255,0.15)', border: '1.5px solid rgba(255,255,255,0.3)', borderRadius: 12, padding: '8px 14px', color: 'white', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
-=======
-          <button onClick={() => console.log('Add new menu item')} style={{ backgroundColor: 'rgba(255,255,255,0.15)', border: '1.5px solid rgba(255,255,255,0.3)', borderRadius: 12, padding: '8px 14px', color: 'white', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
->>>>>>> 6c645a4aabccadf6169430c85efe9b533efa0540
+          <button onClick={() => { const name = window.prompt('Dish name'); if (name?.trim()) setItems(prev => [...prev, { id: Date.now(), name: name.trim(), price: '₹199', category: 'Burgers', orders: 0, active: true, image: '🍽️' }]) }} style={{ backgroundColor: 'rgba(255,255,255,0.15)', border: '1.5px solid rgba(255,255,255,0.3)', borderRadius: 12, padding: '8px 14px', color: 'white', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
             + Add Item
           </button>
         </div>
       </div>
-      <div style={{ backgroundColor: 'white', padding: '12px 20px', borderBottom: `1px solid ₹{C.border}` }}>
+      <div style={{ backgroundColor: 'white', padding: '12px 20px', borderBottom: `1px solid ${C.border}` }}>
         <div style={{ display: 'flex', gap: 8, overflowX: 'auto', scrollbarWidth: 'none' }}>
           {cats.map(c => (
-            <button key={c} onClick={() => setFilter(c)} style={{ flex: '0 0 auto', padding: '7px 14px', backgroundColor: filter === c ? C.primary : 'white', color: filter === c ? 'white' : C.muted, border: `1.5px solid ₹{filter === c ? C.primary : C.border}`, borderRadius: 100, fontSize: 12, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+            <button key={c} onClick={() => setFilter(c)} style={{ flex: '0 0 auto', padding: '7px 14px', backgroundColor: filter === c ? C.primary : 'white', color: filter === c ? 'white' : C.muted, border: `1.5px solid ${filter === c ? C.primary : C.border}`, borderRadius: 100, fontSize: 12, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>
               {c}
             </button>
           ))}
@@ -339,11 +315,7 @@ function MenuTab() {
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
               <div style={{ display: 'flex', gap: 8 }}>
-<<<<<<< HEAD
                 <button onClick={() => { const name = window.prompt('Edit dish name', item.name); if (name?.trim()) setItems(prev => prev.map(i => i.id === item.id ? { ...i, name: name.trim() } : i)) }} style={{ padding: '6px 14px', backgroundColor: C.primaryLight, color: C.primary, border: `1px solid ${C.primaryBorder}`, borderRadius: 8, fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>Edit</button>
-=======
-                <button onClick={() => console.log('Edit item:', item.name)} style={{ padding: '6px 14px', backgroundColor: C.primaryLight, color: C.primary, border: `1px solid ₹{C.primaryBorder}`, borderRadius: 8, fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>Edit</button>
->>>>>>> 6c645a4aabccadf6169430c85efe9b533efa0540
               </div>
               {/* Toggle switch */}
               <button onClick={() => toggle(item.id)} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', cursor: 'pointer' }}>
@@ -368,7 +340,7 @@ function AnalyticsTab() {
 
   return (
     <div style={{ backgroundColor: C.bg, minHeight: '100vh', paddingBottom: 100 }}>
-      <div style={{ background: `linear-gradient(135deg, ₹{C.primary} 0%, #C2410C 100%)`, padding: '56px 20px 20px' }}>
+      <div style={{ background: `linear-gradient(135deg, ${C.primary} 0%, #C2410C 100%)`, padding: '56px 20px 20px' }}>
         <h1 style={{ color: 'white', fontSize: 22, fontWeight: 800, margin: '0 0 4px', letterSpacing: -0.4 }}>Analytics</h1>
         <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, margin: 0 }}>The Burger Lab · July 2026</p>
       </div>
@@ -384,7 +356,7 @@ function AnalyticsTab() {
             {weekData.map((v, i) => (
               <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
                 <div style={{ width: '100%', height: 60, display: 'flex', alignItems: 'flex-end', backgroundColor: C.primaryLight, borderRadius: 6, overflow: 'hidden' }}>
-                  <div style={{ width: '100%', height: `₹{(v / maxVal) * 100}%`, backgroundColor: i === 5 ? C.primary : '#FDBA74', borderRadius: 6, transition: 'height 0.5s' }} />
+                  <div style={{ width: '100%', height: `${(v / maxVal) * 100}%`, backgroundColor: i === 5 ? C.primary : '#FDBA74', borderRadius: 6, transition: 'height 0.5s' }} />
                 </div>
                 <span style={{ fontSize: 9, color: C.muted, fontWeight: 600 }}>{weekLabels[i]}</span>
               </div>
@@ -395,13 +367,8 @@ function AnalyticsTab() {
         {/* KPIs */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
           {[
-<<<<<<< HEAD
             { label: 'Monthly Revenue', value: '₹15.3L', delta: '+14%', icon: '💰', positive: true },
             { label: 'Avg Order Value', value: '₹1,859', delta: '+8%', icon: '🧾', positive: true },
-=======
-            { label: 'Monthly Revenue', value: '₹18,420', delta: '+14%', icon: '💰', positive: true },
-            { label: 'Avg Order Value', value: '₹22.40', delta: '+8%', icon: '🧾', positive: true },
->>>>>>> 6c645a4aabccadf6169430c85efe9b533efa0540
             { label: 'Repeat Customers', value: '68%', delta: '+5%', icon: '💛', positive: true },
             { label: 'Avg Prep Time', value: '12 min', delta: '-2 min', icon: '⏱️', positive: true },
           ].map(s => (
@@ -427,7 +394,7 @@ function AnalyticsTab() {
                 <p style={{ fontSize: 13, fontWeight: 600, color: C.text, margin: '0 0 4px' }}>{item.name}</p>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                   <div style={{ flex: 1, height: 4, backgroundColor: '#F3F4F6', borderRadius: 2, overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `₹{(item.orders / 312) * 100}%`, backgroundColor: i === 0 ? C.primary : '#FDBA74', borderRadius: 2 }} />
+                    <div style={{ height: '100%', width: `${(item.orders / 312) * 100}%`, backgroundColor: i === 0 ? C.primary : '#FDBA74', borderRadius: 2 }} />
                   </div>
                   <span style={{ fontSize: 11, color: C.muted, fontWeight: 600, whiteSpace: 'nowrap' }}>{item.orders}</span>
                 </div>
@@ -542,7 +509,7 @@ function RestaurantChatbot() {
           maxHeight: 450,
           borderRadius: 18,
           background: 'rgba(255,253,248,0.98)',
-          border: `1px solid ₹{C.border}`,
+          border: `1px solid ${C.border}`,
           boxShadow: '0 18px 40px rgba(47,58,45,0.16)',
           zIndex: 130,
           backdropFilter: 'blur(10px)',
@@ -550,7 +517,7 @@ function RestaurantChatbot() {
           flexDirection: 'column',
           overflow: 'hidden',
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', borderBottom: `1px solid ₹{C.border}` }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', borderBottom: `1px solid ${C.border}` }}>
             <div style={{ fontSize: 13, fontWeight: 800, color: C.text }}>🤖 RestaurantBot</div>
             <button onClick={() => setChatOpen(false)} style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 16, color: C.muted }}>×</button>
           </div>
@@ -587,7 +554,7 @@ function RestaurantChatbot() {
                       onClick={() => sendChatMessage(prompt)}
                       disabled={chatLoading}
                       style={{
-                        border: `1px solid ₹{C.border}`,
+                        border: `1px solid ${C.border}`,
                         borderRadius: 999,
                         padding: '6px 10px',
                         backgroundColor: 'white',
@@ -637,7 +604,7 @@ function RestaurantChatbot() {
             <div ref={chatEndRef} />
           </div>
 
-          <div style={{ padding: '10px 12px', borderTop: `1px solid ₹{C.border}`, display: 'flex', gap: 6 }}>
+          <div style={{ padding: '10px 12px', borderTop: `1px solid ${C.border}`, display: 'flex', gap: 6 }}>
             <input
               type="text"
               value={chatInput}
@@ -652,7 +619,7 @@ function RestaurantChatbot() {
               disabled={chatLoading}
               style={{
                 flex: 1,
-                border: `1px solid ₹{C.border}`,
+                border: `1px solid ${C.border}`,
                 borderRadius: 10,
                 padding: '8px 10px',
                 fontSize: 12,

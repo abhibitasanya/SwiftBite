@@ -22,7 +22,6 @@ const C = {
 type DeliveryTab = 'home' | 'orders' | 'earnings' | 'profile'
 
 const AVAILABLE_ORDERS = [
-<<<<<<< HEAD
   { id: 'SWB-20848', restaurant: 'The Burger Lab', customer: 'Priya Sharma', address: '45 Oak Avenue, Apt 2', distance: '0.8 km', payout: '₹374', items: 2, eta: '12 min', urgent: true },
   { id: 'SWB-20849', restaurant: 'Pizza Piazza',   customer: 'Marcus Lee',   address: '12 Park Street, #3A', distance: '1.4 km', payout: '₹432', items: 3, eta: '18 min', urgent: false },
   { id: 'SWB-20850', restaurant: 'Spice Route',    customer: 'Emma Wilson',  address: '88 Elm Road',        distance: '2.1 km', payout: '₹564', items: 4, eta: '25 min', urgent: false },
@@ -34,19 +33,6 @@ const DELIVERY_HISTORY = [
   { id: 'SWB-20820', restaurant: 'Green Bowl',     customer: 'David Kim',    payout: '₹506', time: '12:30 PM', rating: 4 },
   { id: 'SWB-20811', restaurant: 'Wok & Roll',     customer: 'James Park',   payout: '₹324', time: '11:15 AM', rating: 5 },
   { id: 'SWB-20803', restaurant: 'Pizza Piazza',   customer: 'Lily Chen',    payout: '₹398', time: '10:02 AM', rating: 5 },
-=======
-  { id: 'SWB-20848', restaurant: 'The Burger Lab', customer: 'Priya Sharma', address: '45 Oak Avenue, Apt 2', distance: '0.8 km', payout: '₹4.50', items: 2, eta: '12 min', urgent: true },
-  { id: 'SWB-20849', restaurant: 'Pizza Piazza',   customer: 'Marcus Lee',   address: '12 Park Street, #3A', distance: '1.4 km', payout: '₹5.20', items: 3, eta: '18 min', urgent: false },
-  { id: 'SWB-20850', restaurant: 'Spice Route',    customer: 'Emma Wilson',  address: '88 Elm Road',        distance: '2.1 km', payout: '₹6.80', items: 4, eta: '25 min', urgent: false },
-]
-
-const DELIVERY_HISTORY = [
-  { id: 'SWB-20847', restaurant: 'The Burger Lab', customer: 'Alex Johnson', payout: '₹4.20', time: '2:58 PM', rating: 5 },
-  { id: 'SWB-20831', restaurant: 'Sakura Garden',  customer: 'Sofia Martinez', payout: '₹5.60', time: '1:45 PM', rating: 5 },
-  { id: 'SWB-20820', restaurant: 'Green Bowl',     customer: 'David Kim',    payout: '₹6.10', time: '12:30 PM', rating: 4 },
-  { id: 'SWB-20811', restaurant: 'Wok & Roll',     customer: 'James Park',   payout: '₹3.90', time: '11:15 AM', rating: 5 },
-  { id: 'SWB-20803', restaurant: 'Pizza Piazza',   customer: 'Lily Chen',    payout: '₹4.80', time: '10:02 AM', rating: 5 },
->>>>>>> 6c645a4aabccadf6169430c85efe9b533efa0540
 ]
 
 function DeliveryNav({ tab, onTab }: { tab: DeliveryTab; onTab: (t: DeliveryTab) => void }) {
@@ -84,7 +70,7 @@ function DeliveryHome({ onGoToOrders }: { onGoToOrders: () => void }) {
   return (
     <div style={{ backgroundColor: C.bg, minHeight: '100vh', paddingBottom: 100 }}>
       {/* Header */}
-      <div style={{ background: `linear-gradient(135deg, ₹{C.primary} 0%, #1D4ED8 100%)`, padding: '56px 20px 24px' }}>
+      <div style={{ background: `linear-gradient(135deg, ${C.primary} 0%, #1D4ED8 100%)`, padding: '56px 20px 24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
           <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
             <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop" alt="Marcus" style={{ width: 48, height: 48, borderRadius: 16, objectFit: 'cover', border: '2px solid rgba(255,255,255,0.3)' }} />
@@ -96,7 +82,7 @@ function DeliveryHome({ onGoToOrders }: { onGoToOrders: () => void }) {
           {/* Online toggle */}
           <button
             onClick={() => setIsOnline(!isOnline)}
-            style={{ display: 'flex', alignItems: 'center', gap: 8, backgroundColor: isOnline ? 'rgba(74,222,128,0.2)' : 'rgba(255,255,255,0.15)', border: `1.5px solid ₹{isOnline ? '#4ADE80' : 'rgba(255,255,255,0.3)'}`, borderRadius: 100, padding: '8px 14px', cursor: 'pointer' }}
+            style={{ display: 'flex', alignItems: 'center', gap: 8, backgroundColor: isOnline ? 'rgba(74,222,128,0.2)' : 'rgba(255,255,255,0.15)', border: `1.5px solid ${isOnline ? '#4ADE80' : 'rgba(255,255,255,0.3)'}`, borderRadius: 100, padding: '8px 14px', cursor: 'pointer' }}
           >
             <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: isOnline ? '#4ADE80' : '#9CA3AF' }} />
             <span style={{ color: 'white', fontSize: 13, fontWeight: 700 }}>{isOnline ? 'Online' : 'Offline'}</span>
@@ -107,11 +93,7 @@ function DeliveryHome({ onGoToOrders }: { onGoToOrders: () => void }) {
         <div style={{ display: 'flex', gap: 10 }}>
           {[
             { label: "Today's Deliveries", value: '8', icon: '🛵' },
-<<<<<<< HEAD
             { label: "Today's Earnings", value: '₹10,580', icon: '💰' },
-=======
-            { label: "Today's Earnings", value: '₹127.50', icon: '💰' },
->>>>>>> 6c645a4aabccadf6169430c85efe9b533efa0540
             { label: 'Rating', value: '4.9★', icon: '⭐' },
           ].map(s => (
             <div key={s.label} style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.12)', borderRadius: 14, padding: '10px 8px', textAlign: 'center' }}>
@@ -127,7 +109,7 @@ function DeliveryHome({ onGoToOrders }: { onGoToOrders: () => void }) {
         <>
           {/* Active delivery */}
           <div style={{ padding: '16px 20px 0' }}>
-            <div style={{ backgroundColor: C.surface, borderRadius: 20, overflow: 'hidden', boxShadow: '0 4px 16px rgba(37,99,235,0.15)', border: `1.5px solid ₹{C.primaryBorder}` }}>
+            <div style={{ backgroundColor: C.surface, borderRadius: 20, overflow: 'hidden', boxShadow: '0 4px 16px rgba(37,99,235,0.15)', border: `1.5px solid ${C.primaryBorder}` }}>
               <div style={{ backgroundColor: C.primaryLight, padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <div style={{ width: 8, height: 8, backgroundColor: C.primary, borderRadius: '50%' }} />
@@ -155,7 +137,7 @@ function DeliveryHome({ onGoToOrders }: { onGoToOrders: () => void }) {
                 ].map(s => (
                   <div key={s.step} style={{ display: 'flex', gap: 12, marginBottom: s.step < 3 ? 0 : 0 }}>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                      <div style={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: activeStep >= s.step ? C.primary : '#F3F4F6', border: `2px solid ₹{activeStep >= s.step ? C.primary : C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, transition: 'all 0.5s', flexShrink: 0 }}>
+                      <div style={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: activeStep >= s.step ? C.primary : '#F3F4F6', border: `2px solid ${activeStep >= s.step ? C.primary : C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, transition: 'all 0.5s', flexShrink: 0 }}>
                         {activeStep > s.step ? <span style={{ color: 'white', fontWeight: 700 }}>✓</span> : <span style={{ fontSize: 12 }}>{s.icon}</span>}
                       </div>
                       {s.step < 3 && <div style={{ width: 2, height: 24, backgroundColor: activeStep > s.step ? C.primary : C.border, transition: 'background 0.5s' }} />}
@@ -169,13 +151,8 @@ function DeliveryHome({ onGoToOrders }: { onGoToOrders: () => void }) {
               </div>
 
               <div style={{ padding: '0 16px 16px', display: 'flex', gap: 8 }}>
-<<<<<<< HEAD
                 <button onClick={() => setActiveStep(3)} style={{ flex: 1, padding: '12px', backgroundColor: C.primary, color: 'white', border: 'none', borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>Mark Picked Up</button>
                 <button onClick={() => window.location.href = 'tel:+919876543210'} style={{ width: 44, padding: '12px', backgroundColor: C.primaryLight, border: `1.5px solid ${C.primaryBorder}`, borderRadius: 12, fontSize: 18, cursor: 'pointer' }}>📞</button>
-=======
-                <button onClick={() => console.log('Mark Picked Up')} style={{ flex: 1, padding: '12px', backgroundColor: C.primary, color: 'white', border: 'none', borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>Mark Picked Up</button>
-                <button onClick={() => console.log('Call restaurant')} style={{ width: 44, padding: '12px', backgroundColor: C.primaryLight, border: `1.5px solid ₹{C.primaryBorder}`, borderRadius: 12, fontSize: 18, cursor: 'pointer' }}>📞</button>
->>>>>>> 6c645a4aabccadf6169430c85efe9b533efa0540
               </div>
             </div>
           </div>
@@ -197,11 +174,7 @@ function DeliveryHome({ onGoToOrders }: { onGoToOrders: () => void }) {
                     </div>
                     <span style={{ fontSize: 18, fontWeight: 800, color: C.primary }}>{o.payout}</span>
                   </div>
-<<<<<<< HEAD
                   <button onClick={() => window.alert(`Order ${o.id} accepted`)} style={{ width: '100%', padding: '10px', backgroundColor: C.primary, color: 'white', border: 'none', borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>Accept Order</button>
-=======
-                  <button onClick={() => console.log('Accept order:', o.id)} style={{ width: '100%', padding: '10px', backgroundColor: C.primary, color: 'white', border: 'none', borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>Accept Order</button>
->>>>>>> 6c645a4aabccadf6169430c85efe9b533efa0540
                 </div>
               ))}
             </div>
@@ -223,13 +196,13 @@ function DeliveryHome({ onGoToOrders }: { onGoToOrders: () => void }) {
 function AvailableOrdersTab() {
   return (
     <div style={{ backgroundColor: C.bg, minHeight: '100vh', paddingBottom: 100 }}>
-      <div style={{ background: `linear-gradient(135deg, ₹{C.primary} 0%, #1D4ED8 100%)`, padding: '56px 20px 20px' }}>
+      <div style={{ background: `linear-gradient(135deg, ${C.primary} 0%, #1D4ED8 100%)`, padding: '56px 20px 20px' }}>
         <h1 style={{ color: 'white', fontSize: 22, fontWeight: 800, margin: '0 0 4px', letterSpacing: -0.4 }}>Available Orders</h1>
         <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, margin: 0 }}>{AVAILABLE_ORDERS.length} orders near you</p>
       </div>
       <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
         {AVAILABLE_ORDERS.map(o => (
-          <div key={o.id} style={{ backgroundColor: C.surface, borderRadius: 18, padding: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', border: o.urgent ? `1.5px solid #FDE68A` : `1.5px solid ₹{C.border}` }}>
+          <div key={o.id} style={{ backgroundColor: C.surface, borderRadius: 18, padding: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', border: o.urgent ? `1.5px solid #FDE68A` : `1.5px solid ${C.border}` }}>
             {o.urgent && <div style={{ fontSize: 10, fontWeight: 700, color: '#D97706', backgroundColor: '#FFFBEB', padding: '3px 10px', borderRadius: 6, display: 'inline-block', marginBottom: 10 }}>⚡ URGENT ORDER</div>}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
               <div>
@@ -243,13 +216,8 @@ function AvailableOrdersTab() {
               </div>
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
-<<<<<<< HEAD
               <button onClick={() => window.alert(`Order ${o.id} accepted`)} style={{ flex: 1, padding: '12px', backgroundColor: C.primary, color: 'white', border: 'none', borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>✓ Accept</button>
               <button onClick={() => window.alert(`Order ${o.id} skipped`)} style={{ flex: 1, padding: '12px', backgroundColor: '#F9FAFB', color: C.muted, border: `1.5px solid ${C.border}`, borderRadius: 12, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Skip</button>
-=======
-              <button onClick={() => console.log('Accept order:', o.id)} style={{ flex: 1, padding: '12px', backgroundColor: C.primary, color: 'white', border: 'none', borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>✓ Accept</button>
-              <button onClick={() => console.log('Skip order:', o.id)} style={{ flex: 1, padding: '12px', backgroundColor: '#F9FAFB', color: C.muted, border: `1.5px solid ₹{C.border}`, borderRadius: 12, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Skip</button>
->>>>>>> 6c645a4aabccadf6169430c85efe9b533efa0540
             </div>
           </div>
         ))}
@@ -266,18 +234,13 @@ function EarningsTab() {
 
   return (
     <div style={{ backgroundColor: C.bg, minHeight: '100vh', paddingBottom: 100 }}>
-      <div style={{ background: `linear-gradient(135deg, ₹{C.primary} 0%, #1D4ED8 100%)`, padding: '56px 20px 24px' }}>
+      <div style={{ background: `linear-gradient(135deg, ${C.primary} 0%, #1D4ED8 100%)`, padding: '56px 20px 24px' }}>
         <h1 style={{ color: 'white', fontSize: 22, fontWeight: 800, margin: '0 0 4px', letterSpacing: -0.4 }}>My Earnings</h1>
         <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, margin: '0 0 20px' }}>July 2026</p>
         <div style={{ backgroundColor: 'rgba(255,255,255,0.12)', borderRadius: 20, padding: 20 }}>
           <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: 13, margin: '0 0 6px', fontWeight: 500 }}>This Week's Total</p>
-<<<<<<< HEAD
           <p style={{ color: 'white', fontSize: 36, fontWeight: 800, margin: '0 0 4px', letterSpacing: -1 }}>₹61,610</p>
           <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12, margin: 0 }}>47 deliveries · avg ₹1,311/hr</p>
-=======
-          <p style={{ color: 'white', fontSize: 36, fontWeight: 800, margin: '0 0 4px', letterSpacing: -1 }}>₹742.30</p>
-          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12, margin: 0 }}>47 deliveries · avg ₹15.79/hr</p>
->>>>>>> 6c645a4aabccadf6169430c85efe9b533efa0540
         </div>
       </div>
 
@@ -289,7 +252,7 @@ function EarningsTab() {
             {weekData.map((v, i) => (
               <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
                 <div style={{ width: '100%', height: 60, display: 'flex', alignItems: 'flex-end', backgroundColor: C.primaryLight, borderRadius: 6, overflow: 'hidden' }}>
-                  <div style={{ width: '100%', height: `₹{(v / maxVal) * 100}%`, backgroundColor: i === 5 ? C.primary : '#93C5FD', borderRadius: 6, transition: 'height 0.5s' }} />
+                  <div style={{ width: '100%', height: `${(v / maxVal) * 100}%`, backgroundColor: i === 5 ? C.primary : '#93C5FD', borderRadius: 6, transition: 'height 0.5s' }} />
                 </div>
                 <span style={{ fontSize: 9, color: C.muted, fontWeight: 600 }}>{weekLabels[i]}</span>
               </div>
@@ -302,11 +265,7 @@ function EarningsTab() {
           {[
             { label: 'Deliveries', value: '47', icon: '🛵' },
             { label: 'Online Hours', value: '31 hrs', icon: '⏱️' },
-<<<<<<< HEAD
             { label: 'Avg per Delivery', value: '₹1,311', icon: '💵' },
-=======
-            { label: 'Avg per Delivery', value: '₹15.79', icon: '💵' },
->>>>>>> 6c645a4aabccadf6169430c85efe9b533efa0540
             { label: 'Customer Rating', value: '4.9 ★', icon: '⭐' },
           ].map(s => (
             <div key={s.label} style={{ backgroundColor: C.surface, borderRadius: 16, padding: 14, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
@@ -343,7 +302,7 @@ function EarningsTab() {
 function DeliveryProfile() {
   return (
     <div style={{ backgroundColor: C.bg, minHeight: '100vh', paddingBottom: 100 }}>
-      <div style={{ background: `linear-gradient(135deg, ₹{C.primary} 0%, #1D4ED8 100%)`, padding: '56px 20px 28px' }}>
+      <div style={{ background: `linear-gradient(135deg, ${C.primary} 0%, #1D4ED8 100%)`, padding: '56px 20px 28px' }}>
         <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 16 }}>
           <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=160&h=160&fit=crop" alt="Marcus" style={{ width: 72, height: 72, borderRadius: 22, objectFit: 'cover', border: '3px solid rgba(255,255,255,0.3)' }} />
           <div>
@@ -372,7 +331,7 @@ function DeliveryProfile() {
           { icon: '📞', label: 'Support', sub: 'Available 24/7' },
           { icon: '⚙️', label: 'Settings', sub: 'Notifications, navigation' },
         ].map(r => (
-          <button key={r.label} style={{ backgroundColor: C.surface, borderRadius: 16, padding: '14px 16px', display: 'flex', gap: 12, alignItems: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', border: 'none', cursor: 'pointer', textAlign: 'left', width: '100%' }}>
+          <button key={r.label} onClick={() => window.alert(`${r.label}: ${r.sub}`)} style={{ backgroundColor: C.surface, borderRadius: 16, padding: '14px 16px', display: 'flex', gap: 12, alignItems: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', border: 'none', cursor: 'pointer', textAlign: 'left', width: '100%' }}>
             <div style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.primaryLight, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>{r.icon}</div>
             <div style={{ flex: 1 }}>
               <p style={{ fontSize: 14, fontWeight: 700, color: C.text, margin: 0 }}>{r.label}</p>
@@ -488,7 +447,7 @@ function DeliveryChatbot() {
           maxHeight: 450,
           borderRadius: 18,
           background: 'rgba(255,253,248,0.98)',
-          border: `1px solid ₹{C.border}`,
+          border: `1px solid ${C.border}`,
           boxShadow: '0 18px 40px rgba(47,58,45,0.16)',
           zIndex: 130,
           backdropFilter: 'blur(10px)',
@@ -496,7 +455,7 @@ function DeliveryChatbot() {
           flexDirection: 'column',
           overflow: 'hidden',
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', borderBottom: `1px solid ₹{C.border}` }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', borderBottom: `1px solid ${C.border}` }}>
             <div style={{ fontSize: 13, fontWeight: 800, color: C.text }}>🤖 DeliveryBot</div>
             <button onClick={() => setChatOpen(false)} style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 16, color: C.muted }}>×</button>
           </div>
@@ -533,7 +492,7 @@ function DeliveryChatbot() {
                       onClick={() => sendChatMessage(prompt)}
                       disabled={chatLoading}
                       style={{
-                        border: `1px solid ₹{C.border}`,
+                        border: `1px solid ${C.border}`,
                         borderRadius: 999,
                         padding: '6px 10px',
                         backgroundColor: 'white',
@@ -583,7 +542,7 @@ function DeliveryChatbot() {
             <div ref={chatEndRef} />
           </div>
 
-          <div style={{ padding: '10px 12px', borderTop: `1px solid ₹{C.border}`, display: 'flex', gap: 6 }}>
+          <div style={{ padding: '10px 12px', borderTop: `1px solid ${C.border}`, display: 'flex', gap: 6 }}>
             <input
               type="text"
               value={chatInput}
@@ -598,7 +557,7 @@ function DeliveryChatbot() {
               disabled={chatLoading}
               style={{
                 flex: 1,
-                border: `1px solid ₹{C.border}`,
+                border: `1px solid ${C.border}`,
                 borderRadius: 10,
                 padding: '8px 10px',
                 fontSize: 12,
