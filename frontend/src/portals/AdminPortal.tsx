@@ -22,18 +22,18 @@ type AdminTab = 'dashboard' | 'orders' | 'restaurants' | 'users'
 
 const STATS = [
   { label: 'Orders Today',    value: '12,847',  delta: '+18%',  positive: true,  icon: '📦', color: C.primary,    bg: C.primaryLight },
-  { label: 'Revenue Today',   value: '$94,320', delta: '+22%',  positive: true,  icon: '💰', color: C.green,      bg: C.greenLight },
+  { label: 'Revenue Today',   value: '₹7,83,000', delta: '+22%',  positive: true,  icon: '💰', color: C.green,      bg: C.greenLight },
   { label: 'Active Users',    value: '3,241',   delta: '+5%',   positive: true,  icon: '👥', color: '#2563EB',    bg: '#EFF6FF' },
   { label: 'Restaurants',     value: '142',     delta: '+3 new',positive: true,  icon: '🍽️', color: C.orange,     bg: C.orangeLight },
 ]
 
 const RECENT_ORDERS = [
-  { id: 'SWB-20847', customer: 'Alex Johnson',   restaurant: 'The Burger Lab',  amount: '$18.98', status: 'Delivered', time: '2:58 PM' },
-  { id: 'SWB-20846', customer: 'Priya Sharma',   restaurant: 'Spice Route',     amount: '$24.50', status: 'In Transit', time: '3:02 PM' },
-  { id: 'SWB-20845', customer: 'Marcus Lee',     restaurant: 'Sakura Garden',   amount: '$31.20', status: 'Preparing', time: '3:05 PM' },
-  { id: 'SWB-20844', customer: 'Emma Wilson',    restaurant: 'Pizza Piazza',    amount: '$19.75', status: 'Delivered', time: '3:10 PM' },
-  { id: 'SWB-20843', customer: 'David Kim',      restaurant: 'Green Bowl',      amount: '$14.99', status: 'Pending', time: '3:12 PM' },
-  { id: 'SWB-20842', customer: 'Sofia Martinez', restaurant: 'Wok & Roll',      amount: '$22.40', status: 'Cancelled', time: '3:14 PM' },
+  { id: 'SWB-20847', customer: 'Alex Johnson',   restaurant: 'The Burger Lab',  amount: '₹1,575', status: 'Delivered', time: '2:58 PM' },
+  { id: 'SWB-20846', customer: 'Priya Sharma',   restaurant: 'Spice Route',     amount: '₹2033', status: 'In Transit', time: '3:02 PM' },
+  { id: 'SWB-20845', customer: 'Marcus Lee',     restaurant: 'Sakura Garden',   amount: '₹2589', status: 'Preparing', time: '3:05 PM' },
+  { id: 'SWB-20844', customer: 'Emma Wilson',    restaurant: 'Pizza Piazza',    amount: '₹1639', status: 'Delivered', time: '3:10 PM' },
+  { id: 'SWB-20843', customer: 'David Kim',      restaurant: 'Green Bowl',      amount: '₹1244', status: 'Pending', time: '3:12 PM' },
+  { id: 'SWB-20842', customer: 'Sofia Martinez', restaurant: 'Wok & Roll',      amount: '₹1859', status: 'Cancelled', time: '3:14 PM' },
 ]
 
 const PENDING_RESTAURANTS = [
@@ -43,21 +43,21 @@ const PENDING_RESTAURANTS = [
 ]
 
 const ALL_RESTAURANTS = [
-  { name: 'The Burger Lab',  cuisine: 'American',  orders: 234, revenue: '$4,820', rating: 4.8, status: 'Active' },
-  { name: 'Sakura Garden',   cuisine: 'Japanese',  orders: 189, revenue: '$5,670', rating: 4.6, status: 'Active' },
-  { name: 'Spice Route',     cuisine: 'Indian',    orders: 312, revenue: '$6,240', rating: 4.7, status: 'Active' },
-  { name: 'Pizza Piazza',    cuisine: 'Italian',   orders: 145, revenue: '$2,900', rating: 4.5, status: 'Active' },
-  { name: 'Green Bowl',      cuisine: 'Healthy',   orders: 98,  revenue: '$1,960', rating: 4.9, status: 'Active' },
-  { name: 'Wok & Roll',      cuisine: 'Asian Fusion', orders: 210, revenue: '$4,200', rating: 4.4, status: 'Suspended' },
+  { name: 'The Burger Lab',  cuisine: 'American',  orders: 234, revenue: '₹4,00,000', rating: 4.8, status: 'Active' },
+  { name: 'Sakura Garden',   cuisine: 'Japanese',  orders: 189, revenue: '₹4,70,000', rating: 4.6, status: 'Active' },
+  { name: 'Spice Route',     cuisine: 'Indian',    orders: 312, revenue: '₹5,18,000', rating: 4.7, status: 'Active' },
+  { name: 'Pizza Piazza',    cuisine: 'Italian',   orders: 145, revenue: '₹2,41,000', rating: 4.5, status: 'Active' },
+  { name: 'Green Bowl',      cuisine: 'Healthy',   orders: 98,  revenue: '₹1,63,000', rating: 4.9, status: 'Active' },
+  { name: 'Wok & Roll',      cuisine: 'Asian Fusion', orders: 210, revenue: '₹3,49,000', rating: 4.4, status: 'Suspended' },
 ]
 
 const USERS = [
-  { name: 'Alex Johnson',   email: 'alex.j@gmail.com',   orders: 47,  spent: '$842', joined: 'Mar 2024', status: 'Active' },
-  { name: 'Priya Sharma',   email: 'priya.s@gmail.com',  orders: 31,  spent: '$560', joined: 'Apr 2024', status: 'Active' },
-  { name: 'Marcus Lee',     email: 'marcus.l@gmail.com', orders: 18,  spent: '$324', joined: 'May 2024', status: 'Active' },
-  { name: 'Emma Wilson',    email: 'emma.w@gmail.com',   orders: 62,  spent: '$1,120', joined: 'Jan 2024', status: 'Active' },
-  { name: 'David Kim',      email: 'david.k@gmail.com',  orders: 8,   spent: '$144', joined: 'Jun 2024', status: 'Suspended' },
-  { name: 'Sofia Martinez', email: 'sofia.m@gmail.com',  orders: 25,  spent: '$450', joined: 'Feb 2024', status: 'Active' },
+  { name: 'Alex Johnson',   email: 'alex.j@gmail.com',   orders: 47,  spent: '₹69,886', joined: 'Mar 2024', status: 'Active' },
+  { name: 'Priya Sharma',   email: 'priya.s@gmail.com',  orders: 31,  spent: '₹46,480', joined: 'Apr 2024', status: 'Active' },
+  { name: 'Marcus Lee',     email: 'marcus.l@gmail.com', orders: 18,  spent: '₹26,892', joined: 'May 2024', status: 'Active' },
+  { name: 'Emma Wilson',    email: 'emma.w@gmail.com',   orders: 62,  spent: '₹92,960', joined: 'Jan 2024', status: 'Active' },
+  { name: 'David Kim',      email: 'david.k@gmail.com',  orders: 8,   spent: '₹11,952', joined: 'Jun 2024', status: 'Suspended' },
+  { name: 'Sofia Martinez', email: 'sofia.m@gmail.com',  orders: 25,  spent: '₹37,350', joined: 'Feb 2024', status: 'Active' },
 ]
 
 const STATUS_STYLE: Record<string, { color: string; bg: string }> = {
@@ -149,7 +149,7 @@ function Dashboard() {
               <p style={{ fontSize: 12, color: C.muted, margin: 0 }}>Daily earnings in thousands</p>
             </div>
             <div style={{ backgroundColor: C.primaryLight, padding: '6px 12px', borderRadius: 10 }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: C.primary }}>$476k total</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: C.primary }}>₹39.5L total</span>
             </div>
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', height: 80 }}>
@@ -181,8 +181,8 @@ function Dashboard() {
               </div>
               <StatusBadge status={r.docs} />
               <div style={{ display: 'flex', gap: 6 }}>
-                <button style={{ width: 30, height: 30, borderRadius: 8, backgroundColor: C.greenLight, border: `1px solid #BBF7D0`, fontSize: 14, cursor: 'pointer' }}>✓</button>
-                <button style={{ width: 30, height: 30, borderRadius: 8, backgroundColor: C.redLight, border: `1px solid #FECDD3`, fontSize: 14, cursor: 'pointer' }}>✕</button>
+                <button onClick={() => window.alert(`${r.name} approved`)} style={{ width: 30, height: 30, borderRadius: 8, backgroundColor: C.greenLight, border: `1px solid #BBF7D0`, fontSize: 14, cursor: 'pointer' }}>✓</button>
+                <button onClick={() => window.alert(`${r.name} rejected`)} style={{ width: 30, height: 30, borderRadius: 8, backgroundColor: C.redLight, border: `1px solid #FECDD3`, fontSize: 14, cursor: 'pointer' }}>✕</button>
               </div>
             </div>
           ))}
@@ -298,11 +298,11 @@ function RestaurantsTab() {
               ))}
             </div>
             <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-              <button style={{ flex: 1, padding: '8px', backgroundColor: C.primaryLight, color: C.primary, border: `1px solid ${C.primaryBorder}`, borderRadius: 10, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>View Details</button>
+              <button onClick={() => window.alert(`${r.name}\n${r.cuisine}\n${r.orders} orders\nRevenue: ${r.revenue}`)} style={{ flex: 1, padding: '8px', backgroundColor: C.primaryLight, color: C.primary, border: `1px solid ${C.primaryBorder}`, borderRadius: 10, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>View Details</button>
               {r.status === 'Active' ? (
-                <button style={{ flex: 1, padding: '8px', backgroundColor: C.redLight, color: C.red, border: `1px solid #FECDD3`, borderRadius: 10, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Suspend</button>
+                <button onClick={() => window.alert(`${r.name} suspended`)} style={{ flex: 1, padding: '8px', backgroundColor: C.redLight, color: C.red, border: `1px solid #FECDD3`, borderRadius: 10, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Suspend</button>
               ) : (
-                <button style={{ flex: 1, padding: '8px', backgroundColor: C.greenLight, color: C.green, border: `1px solid #BBF7D0`, borderRadius: 10, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Restore</button>
+                <button onClick={() => window.alert(`${r.name} restored`)} style={{ flex: 1, padding: '8px', backgroundColor: C.greenLight, color: C.green, border: `1px solid #BBF7D0`, borderRadius: 10, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Restore</button>
               )}
             </div>
           </div>

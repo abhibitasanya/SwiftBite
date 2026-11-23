@@ -21,19 +21,19 @@ const C = {
 type RestaurantTab = 'dashboard' | 'orders' | 'menu' | 'analytics'
 
 const INCOMING_ORDERS = [
-  { id: 'SWB-20848', customer: 'Priya Sharma', items: ['Classic Smash Burger ×2', 'Truffle Fries ×1'], total: '$31.97', time: '3:08 PM', status: 'New', avatar: '👩' },
-  { id: 'SWB-20849', customer: 'Marcus Lee',   items: ['Crispy Chicken Sandwich ×1', 'Double Cheese ×1'], total: '$26.98', time: '3:05 PM', status: 'Preparing', avatar: '👨' },
-  { id: 'SWB-20845', customer: 'Emma Wilson',  items: ['Garden Impossible Burger ×1', 'Fries ×2'], total: '$25.97', time: '3:00 PM', status: 'Ready', avatar: '👩' },
-  { id: 'SWB-20843', customer: 'David Kim',    items: ['Classic Smash Burger ×1'], total: '$12.99', time: '2:55 PM', status: 'Delivered', avatar: '👦' },
+  { id: 'SWB-20848', customer: 'Priya Sharma', items: ['Classic Smash Burger ×2', 'Truffle Fries ×1'], total: '₹797', time: '3:08 PM', status: 'New', avatar: '👩' },
+  { id: 'SWB-20849', customer: 'Marcus Lee',   items: ['Crispy Chicken Sandwich ×1', 'Double Cheese ×1'], total: '₹628', time: '3:05 PM', status: 'Preparing', avatar: '👨' },
+  { id: 'SWB-20845', customer: 'Emma Wilson',  items: ['Garden Impossible Burger ×1', 'Fries ×2'], total: '₹697', time: '3:00 PM', status: 'Ready', avatar: '👩' },
+  { id: 'SWB-20843', customer: 'David Kim',    items: ['Classic Smash Burger ×1'], total: '₹299', time: '2:55 PM', status: 'Delivered', avatar: '👦' },
 ]
 
 const MENU_ITEMS = [
-  { id: 1, name: 'Classic Smash Burger',      price: '$12.99', category: 'Burgers',  orders: 234, active: true,  image: '🍔' },
-  { id: 2, name: 'Double Cheese Deluxe',       price: '$14.99', category: 'Burgers',  orders: 189, active: true,  image: '🍔' },
-  { id: 3, name: 'Crispy Chicken Sandwich',    price: '$11.99', category: 'Burgers',  orders: 145, active: true,  image: '🥪' },
-  { id: 4, name: 'Truffle Parmesan Fries',     price: '$5.99',  category: 'Sides',    orders: 312, active: true,  image: '🍟' },
-  { id: 5, name: 'Garden Impossible Burger',   price: '$13.99', category: 'Burgers',  orders: 98,  active: false, image: '🌿' },
-  { id: 6, name: 'Classic Chocolate Shake',    price: '$6.49',  category: 'Drinks',   orders: 176, active: true,  image: '🥤' },
+  { id: 1, name: 'Classic Smash Burger',      price: '₹299', category: 'Burgers',  orders: 234, active: true,  image: '🍔' },
+  { id: 2, name: 'Double Cheese Deluxe',       price: '₹349', category: 'Burgers',  orders: 189, active: true,  image: '🍔' },
+  { id: 3, name: 'Crispy Chicken Sandwich',    price: '₹279', category: 'Burgers',  orders: 145, active: true,  image: '🥪' },
+  { id: 4, name: 'Truffle Parmesan Fries',     price: '₹199',  category: 'Sides',    orders: 312, active: true,  image: '🍟' },
+  { id: 5, name: 'Garden Impossible Burger',   price: '₹299', category: 'Burgers',  orders: 98,  active: false, image: '🌿' },
+  { id: 6, name: 'Classic Chocolate Shake',    price: '₹179',  category: 'Drinks',   orders: 176, active: true,  image: '🥤' },
 ]
 
 const REVIEWS = [
@@ -99,7 +99,7 @@ function RestaurantDashboard({ onGoToOrders }: { onGoToOrders: () => void }) {
         <div style={{ display: 'flex', gap: 10 }}>
           {[
             { label: "Today's Orders", value: '23', icon: '📦' },
-            { label: "Today's Revenue", value: '$892', icon: '💰' },
+            { label: "Today's Revenue", value: '₹74,000', icon: '💰' },
             { label: 'Pending', value: '3', icon: '⏳' },
           ].map(s => (
             <div key={s.label} style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.12)', borderRadius: 14, padding: '10px 8px', textAlign: 'center' }}>
@@ -283,7 +283,7 @@ function MenuTab() {
             <h1 style={{ color: 'white', fontSize: 22, fontWeight: 800, margin: '0 0 4px', letterSpacing: -0.4 }}>Menu</h1>
             <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, margin: 0 }}>{items.filter(i => i.active).length} active · {items.filter(i => !i.active).length} unavailable</p>
           </div>
-          <button style={{ backgroundColor: 'rgba(255,255,255,0.15)', border: '1.5px solid rgba(255,255,255,0.3)', borderRadius: 12, padding: '8px 14px', color: 'white', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+          <button onClick={() => { const name = window.prompt('Dish name'); if (name?.trim()) setItems(prev => [...prev, { id: Date.now(), name: name.trim(), price: '₹299', category: 'Burgers', orders: 0, active: true, image: '🍽️' }]) }} style={{ backgroundColor: 'rgba(255,255,255,0.15)', border: '1.5px solid rgba(255,255,255,0.3)', borderRadius: 12, padding: '8px 14px', color: 'white', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
             + Add Item
           </button>
         </div>
@@ -314,7 +314,7 @@ function MenuTab() {
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
               <div style={{ display: 'flex', gap: 8 }}>
-                <button style={{ padding: '6px 14px', backgroundColor: C.primaryLight, color: C.primary, border: `1px solid ${C.primaryBorder}`, borderRadius: 8, fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>Edit</button>
+                <button onClick={() => { const name = window.prompt('Edit dish name', item.name); if (name?.trim()) setItems(prev => prev.map(i => i.id === item.id ? { ...i, name: name.trim() } : i)) }} style={{ padding: '6px 14px', backgroundColor: C.primaryLight, color: C.primary, border: `1px solid ${C.primaryBorder}`, borderRadius: 8, fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>Edit</button>
               </div>
               {/* Toggle switch */}
               <button onClick={() => toggle(item.id)} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', cursor: 'pointer' }}>
@@ -366,8 +366,8 @@ function AnalyticsTab() {
         {/* KPIs */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
           {[
-            { label: 'Monthly Revenue', value: '$18,420', delta: '+14%', icon: '💰', positive: true },
-            { label: 'Avg Order Value', value: '$22.40', delta: '+8%', icon: '🧾', positive: true },
+            { label: 'Monthly Revenue', value: '₹15.3L', delta: '+14%', icon: '💰', positive: true },
+            { label: 'Avg Order Value', value: '₹1,859', delta: '+8%', icon: '🧾', positive: true },
             { label: 'Repeat Customers', value: '68%', delta: '+5%', icon: '💛', positive: true },
             { label: 'Avg Prep Time', value: '12 min', delta: '-2 min', icon: '⏱️', positive: true },
           ].map(s => (

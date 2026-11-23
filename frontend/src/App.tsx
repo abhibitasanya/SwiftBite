@@ -9,6 +9,65 @@ import { SplashScreen, OnboardingScreen, HomeScreen, RestaurantListScreen, Resta
 import { Restaurant, MenuItem, CartItem, Screen, type NavTab } from './types';
 import { MENU_ITEMS } from './data/mockData';
 import C from './theme/colors';
+
+type ChatWidgetProps = {
+  open: boolean
+  setOpen: (open: boolean) => void
+  messages: Array<{ id: string; role: 'user' | 'bot'; text: string; timestamp: number }>
+  input: string
+  setInput: (value: string) => void
+  loading: boolean
+  error: string | null
+  sendMessage: (message: string) => void
+}
+
+function ChatbotWidget({ open, setOpen, messages, input, setInput, loading, error, sendMessage }: ChatWidgetProps) {
+  const quickReplies = ['How do I order food?', 'Where is my order?', 'Show me popular restaurants', 'What can you help with?']
+  return (
+    <>
+      <button
+        onClick={() => setOpen(!open)}
+        aria-label={open ? 'Close AI assistant' : 'Open AI assistant'}
+        style={{ position: 'fixed', right: 18, bottom: 24, width: 56, height: 56, borderRadius: '50%', border: 'none', background: 'linear-gradient(135deg, #6F7F4D 0%, #8E9F63 100%)', color: 'white', boxShadow: '0 14px 34px rgba(111,127,77,0.30)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 120, fontSize: 24 }}
+      >
+        🤖
+      </button>
+      {open && (
+        <div style={{ position: 'fixed', right: 18, bottom: 92, width: 320, maxHeight: 450, borderRadius: 18, background: 'rgba(255,253,248,0.98)', border: `1px solid ${C.border}`, boxShadow: '0 18px 40px rgba(47,58,45,0.16)', zIndex: 130, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', borderBottom: `1px solid ${C.border}` }}>
+            <div style={{ fontSize: 13, fontWeight: 800, color: C.text }}>🤖 SwiftBot</div>
+            <button onClick={() => setOpen(false)} aria-label="Close chat" style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 16, color: C.muted }}>×</button>
+          </div>
+          <div style={{ flex: 1, overflowY: 'auto', padding: 12, display: 'flex', flexDirection: 'column', gap: 10, minHeight: 280 }}>
+            {messages.length === 0 && (
+              <div style={{ color: C.muted, fontSize: 12, textAlign: 'center', paddingTop: 12 }}>
+                <div style={{ fontSize: 28, marginBottom: 8 }}>👋</div>
+                <div style={{ marginBottom: 14, lineHeight: 1.5 }}>Hi! I can help with ordering, tracking, restaurants, and app questions.</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, justifyContent: 'center' }}>
+                  {quickReplies.map(prompt => (
+                    <button key={prompt} type="button" onClick={() => sendMessage(prompt)} disabled={loading} style={{ border: `1px solid ${C.border}`, borderRadius: 999, padding: '6px 10px', backgroundColor: 'white', color: C.text, fontSize: 11, cursor: loading ? 'not-allowed' : 'pointer' }}>{prompt}</button>
+                  ))}
+                </div>
+              </div>
+            )}
+            {messages.map(message => (
+              <div key={message.id} style={{ display: 'flex', justifyContent: message.role === 'user' ? 'flex-end' : 'flex-start' }}>
+                <div style={{ maxWidth: '75%', padding: '8px 12px', borderRadius: 12, backgroundColor: message.role === 'user' ? C.red : C.bgGray, color: message.role === 'user' ? 'white' : C.text, fontSize: 12, lineHeight: 1.4, whiteSpace: 'pre-wrap' }}>{message.text}</div>
+              </div>
+            ))}
+            {loading && <div style={{ fontSize: 12, color: C.muted }}>SwiftBot is typing…</div>}
+            {error && <div style={{ fontSize: 11, color: '#B45309', backgroundColor: '#FFFBEB', borderRadius: 10, padding: '8px 10px' }}>{error}</div>}
+          </div>
+          <div style={{ padding: '10px 12px', borderTop: `1px solid ${C.border}`, display: 'flex', gap: 6 }}>
+            <input value={input} onChange={event => setInput(event.target.value)} onKeyDown={event => { if (event.key === 'Enter') sendMessage(input) }} placeholder="Ask SwiftBot…" disabled={loading} style={{ flex: 1, border: `1px solid ${C.border}`, borderRadius: 10, padding: '8px 10px', fontSize: 12, outline: 'none', backgroundColor: C.bgGray, color: C.text }} />
+            <button onClick={() => sendMessage(input)} disabled={loading || !input.trim()} style={{ width: 36, height: 36, border: 'none', borderRadius: 10, backgroundColor: C.red, color: 'white', cursor: loading || !input.trim() ? 'not-allowed' : 'pointer' }}>↑</button>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
+
 export default function App() {
   const [role, setRole] = useState<Role>('customer')
   const [showRoleSelector, setShowRoleSelector] = useState(false)
@@ -124,13 +183,26 @@ export default function App() {
 
   const handleTab = (tab: NavTab) => goto(TAB_SCREEN[tab])
 
+  const sharedChatbot = (
+    <ChatbotWidget
+      open={chatOpen}
+      setOpen={setChatOpen}
+      messages={chatMessages}
+      input={chatInput}
+      setInput={setChatInput}
+      loading={chatLoading}
+      error={chatError}
+      sendMessage={sendChatMessage}
+    />
+  )
+
   // Non-customer portals render full-screen (they have their own nav)
-  if (role === 'admin')      return <><AdminPortal />{showRoleSelector && <RoleSelector current={role} onSelect={r => { setRole(r); setShowRoleSelector(false) }} onClose={() => setShowRoleSelector(false)} />}<SwitchRoleButton onClick={() => setShowRoleSelector(true)} /></>
-  if (role === 'delivery')   return <><DeliveryPortal />{showRoleSelector && <RoleSelector current={role} onSelect={r => { setRole(r); setShowRoleSelector(false) }} onClose={() => setShowRoleSelector(false)} />}<SwitchRoleButton onClick={() => setShowRoleSelector(true)} /></>
-  if (role === 'restaurant') return <><RestaurantPortal />{showRoleSelector && <RoleSelector current={role} onSelect={r => { setRole(r); setShowRoleSelector(false) }} onClose={() => setShowRoleSelector(false)} />}<SwitchRoleButton onClick={() => setShowRoleSelector(true)} /></>
+  if (role === 'admin')      return <><AdminPortal />{showRoleSelector && <RoleSelector current={role} onSelect={r => { setRole(r); setShowRoleSelector(false) }} onClose={() => setShowRoleSelector(false)} />}<SwitchRoleButton onClick={() => setShowRoleSelector(true)} />{sharedChatbot}</>
+  if (role === 'delivery')   return <><DeliveryPortal />{showRoleSelector && <RoleSelector current={role} onSelect={r => { setRole(r); setShowRoleSelector(false) }} onClose={() => setShowRoleSelector(false)} />}<SwitchRoleButton onClick={() => setShowRoleSelector(true)} />{sharedChatbot}</>
+  if (role === 'restaurant') return <><RestaurantPortal />{showRoleSelector && <RoleSelector current={role} onSelect={r => { setRole(r); setShowRoleSelector(false) }} onClose={() => setShowRoleSelector(false)} />}<SwitchRoleButton onClick={() => setShowRoleSelector(true)} />{sharedChatbot}</>
 
   if (screen === 'landing') {
-    return <LandingPageScreen onGetStarted={() => goto('splash')} />
+    return <><LandingPageScreen onGetStarted={() => goto('splash')} />{sharedChatbot}</>
   }
 
   return (

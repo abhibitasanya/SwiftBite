@@ -143,7 +143,7 @@ function HomeScreen({ onRestaurantClick, onSearch, cartTotal, cartCount, onCartC
               </div>
               <div style={{ padding: '10px 12px 12px' }}>
                 <p style={{ fontSize: 12, fontWeight: 700, color: C.text, margin: '0 0 4px', lineHeight: 1.3 }}>{item.name}</p>
-                <p style={{ fontSize: 13, fontWeight: 800, color: C.red, margin: 0 }}>${item.price.toFixed(2)}</p>
+                <p style={{ fontSize: 13, fontWeight: 800, color: C.red, margin: 0 }}>₹{item.price.toFixed(0)}</p>
               </div>
             </div>
           ))}
@@ -236,7 +236,7 @@ function RestaurantDetailScreen({ restaurant: r, onBack, onFoodClick, onAddToCar
             { icon: '⭐', label: `${r.rating} (${(r.reviews / 1000).toFixed(1)}k)`, bg: '#FFF8E1' },
             { icon: '⏱️', label: `${r.deliveryTime} min`, bg: '#F0FDF4' },
             { icon: '📍', label: r.distance, bg: C.redLight },
-            { icon: '🛵', label: r.deliveryFee === 0 ? 'Free delivery' : `$${r.deliveryFee.toFixed(2)}`, bg: '#EFF6FF' },
+            { icon: '🛵', label: r.deliveryFee === 0 ? 'Free delivery' : `₹${r.deliveryFee.toFixed(0)}`, bg: '#EFF6FF' },
           ].map(chip => (
             <div key={chip.label} style={{ flex: '0 0 auto', backgroundColor: chip.bg, borderRadius: 12, padding: '9px 14px', display: 'flex', alignItems: 'center', gap: 6 }}>
               <span style={{ fontSize: 13 }}>{chip.icon}</span>
@@ -279,7 +279,7 @@ function RestaurantDetailScreen({ restaurant: r, onBack, onFoodClick, onAddToCar
                 <h4 style={{ fontSize: 14, fontWeight: 700, color: C.text, margin: '0 0 4px', letterSpacing: -0.1 }}>{item.name}</h4>
                 <p style={{ fontSize: 12, color: C.muted, margin: '0 0 8px', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{item.description}</p>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: 15, fontWeight: 800, color: C.text }}>${item.price.toFixed(2)}</span>
+                  <span style={{ fontSize: 15, fontWeight: 800, color: C.text }}>₹{item.price.toFixed(0)}</span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}><Icon.Star size={10} /><span style={{ fontSize: 11, fontWeight: 600, color: C.muted }}>{item.rating}</span></div>
                 </div>
               </div>
@@ -314,7 +314,7 @@ function RestaurantDetailScreen({ restaurant: r, onBack, onFoodClick, onAddToCar
               <div style={{ backgroundColor: 'rgba(255,255,255,0.22)', borderRadius: 8, padding: '3px 9px', fontSize: 13, fontWeight: 700 }}>{cartCount}</div>
               View Cart
             </div>
-            <span>${cartTotal.toFixed(2)}</span>
+            <span>₹{cartTotal.toFixed(0)}</span>
           </button>
         </div>
       )}
@@ -325,7 +325,7 @@ function RestaurantDetailScreen({ restaurant: r, onBack, onFoodClick, onAddToCar
 function FoodDetailScreen({ food, restaurant, onBack, onAddToCart }: any) {
   const [qty, setQty] = useState(1)
   const [customs, setCustoms] = useState<string[]>([])
-  const options = ['Extra Cheese  +$1.50', 'Extra Patty  +$3.00', 'No Onions', 'Extra Sauce  +$0.50', 'Gluten-Free Bun  +$2.00']
+  const options = ['Extra Cheese  +₹40', 'Extra Patty  +₹80', 'No Onions', 'Extra Sauce  +₹20', 'Gluten-Free Bun  +₹60']
   return (
     <div style={{ backgroundColor: C.surface, minHeight: '100vh' }}>
       <div style={{ position: 'relative', height: 320 }}>
@@ -338,7 +338,7 @@ function FoodDetailScreen({ food, restaurant, onBack, onAddToCart }: any) {
       <div style={{ padding: 20 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
           <h1 style={{ fontSize: 22, fontWeight: 800, color: C.text, margin: 0, flex: 1, letterSpacing: -0.4, lineHeight: 1.2 }}>{food.name}</h1>
-          <span style={{ fontSize: 22, fontWeight: 800, color: C.red, marginLeft: 12 }}>${food.price.toFixed(2)}</span>
+          <span style={{ fontSize: 22, fontWeight: 800, color: C.red, marginLeft: 12 }}>₹{food.price.toFixed(0)}</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Icon.Star /><span style={{ fontSize: 13, fontWeight: 700, color: C.text }}>{food.rating}</span></div>
@@ -369,7 +369,7 @@ function FoodDetailScreen({ food, restaurant, onBack, onAddToCart }: any) {
             <button onClick={() => setQty(q => q + 1)} style={{ width: 40, height: 40, border: 'none', background: 'none', cursor: 'pointer', fontSize: 20, color: C.red, fontWeight: 700 }}>+</button>
           </div>
           <button onClick={onAddToCart} className="btn-press" style={{ flex: 1, padding: '16px', backgroundColor: C.red, color: 'white', border: 'none', borderRadius: 14, fontSize: 15, fontWeight: 700, cursor: 'pointer', boxShadow: '0 8px 24px rgba(226,55,68,0.3)' }}>
-            Add to Cart — ${(food.price * qty).toFixed(2)}
+            Add to Cart — ₹{(food.price * qty).toFixed(0)}
           </button>
         </div>
       </div>
@@ -412,7 +412,7 @@ function CartScreen({ cart, onBack, onAddItem, onRemoveItem, onCheckout, cartTot
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ fontSize: 14, fontWeight: 700, color: C.text, margin: '0 0 3px' }}>{item.name}</p>
                   <p style={{ fontSize: 12, color: C.muted, margin: '0 0 6px' }}>{item.restaurant}</p>
-                  <p style={{ fontSize: 14, fontWeight: 800, color: C.red, margin: 0 }}>${(item.price * item.quantity).toFixed(2)}</p>
+                  <p style={{ fontSize: 14, fontWeight: 800, color: C.red, margin: 0 }}>₹{(item.price * item.quantity).toFixed(0)}</p>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', backgroundColor: C.bgGray, border: `1.5px solid ${C.border}`, borderRadius: 10 }}>
                   <button onClick={() => onRemoveItem(item.id)} style={{ width: 32, height: 32, border: 'none', background: 'none', cursor: 'pointer', color: C.red, fontWeight: 700, fontSize: 18 }}>−</button>
@@ -450,13 +450,13 @@ function CartScreen({ cart, onBack, onAddItem, onRemoveItem, onCheckout, cartTot
           ].map(row => (
             <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
               <span style={{ fontSize: 13, color: C.muted }}>{row.label}</span>
-              <span style={{ fontSize: 13, fontWeight: 600, color: row.neg ? C.green : C.text }}>{row.neg ? '-' : ''}${row.val.toFixed(2)}</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: row.neg ? C.green : C.text }}>{row.neg ? '-' : ''}₹{row.val.toFixed(0)}</span>
             </div>
           ))}
           <div style={{ height: 1, backgroundColor: C.border, margin: '12px 0' }} />
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <span style={{ fontSize: 15, fontWeight: 800, color: C.text }}>Total</span>
-            <span style={{ fontSize: 15, fontWeight: 800, color: C.red }}>${total.toFixed(2)}</span>
+            <span style={{ fontSize: 15, fontWeight: 800, color: C.red }}>₹{total.toFixed(0)}</span>
           </div>
         </div>
 
@@ -473,7 +473,7 @@ function CartScreen({ cart, onBack, onAddItem, onRemoveItem, onCheckout, cartTot
       </div>
       <div style={{ padding: '0 20px 36px' }}>
         <button onClick={onCheckout} className="btn-press" style={{ width: '100%', padding: 18, backgroundColor: C.red, color: 'white', border: 'none', borderRadius: 16, fontSize: 16, fontWeight: 700, cursor: 'pointer', boxShadow: '0 8px 28px rgba(226,55,68,0.35)' }}>
-          Proceed to Checkout — ${total.toFixed(2)}
+          Proceed to Checkout — ₹{total.toFixed(0)}
         </button>
       </div>
     </div>
@@ -547,19 +547,19 @@ function CheckoutScreen({ onBack, onPlaceOrder, cartTotal }: any) {
           {[{ l: 'Item Total', v: cartTotal }, { l: 'Delivery Fee', v: fee }, { l: 'Taxes & Charges', v: tax }].map(r => (
             <div key={r.l} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
               <span style={{ fontSize: 13, color: C.muted }}>{r.l}</span>
-              <span style={{ fontSize: 13, fontWeight: 600, color: C.text }}>${r.v.toFixed(2)}</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: C.text }}>₹{r.v.toFixed(0)}</span>
             </div>
           ))}
           <div style={{ height: 1, backgroundColor: C.border, margin: '12px 0' }} />
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <span style={{ fontSize: 15, fontWeight: 800, color: C.text }}>Total</span>
-            <span style={{ fontSize: 15, fontWeight: 800, color: C.red }}>${total.toFixed(2)}</span>
+            <span style={{ fontSize: 15, fontWeight: 800, color: C.red }}>₹{total.toFixed(0)}</span>
           </div>
         </div>
       </div>
       <div style={{ padding: '0 20px 36px' }}>
         <button onClick={onPlaceOrder} className="btn-press" style={{ width: '100%', padding: 18, backgroundColor: C.red, color: 'white', border: 'none', borderRadius: 16, fontSize: 16, fontWeight: 700, cursor: 'pointer', boxShadow: '0 8px 28px rgba(226,55,68,0.35)' }}>
-          Place Order — ${total.toFixed(2)}
+          Place Order — ₹{total.toFixed(0)}
         </button>
       </div>
     </div>
@@ -694,7 +694,7 @@ function OrderHistoryScreen() {
               </div>
             </div>
             <div style={{ borderTop: `1px solid #F3F4F6`, padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 15, fontWeight: 800, color: C.text }}>${o.total.toFixed(2)}</span>
+              <span style={{ fontSize: 15, fontWeight: 800, color: C.text }}>₹{o.total.toFixed(0)}</span>
               <div style={{ display: 'flex', gap: 8 }}>
                 <button className="btn-press" style={{ padding: '8px 14px', color: C.muted, fontSize: 12, fontWeight: 600, background: 'none', border: `1.5px solid ${C.border}`, borderRadius: 10, cursor: 'pointer' }}>Rate Order</button>
                 <button className="btn-press" style={{ padding: '8px 14px', color: C.red, fontSize: 12, fontWeight: 700, background: C.redLight, border: `1.5px solid ${C.redBorder}`, borderRadius: 10, cursor: 'pointer' }}>Reorder</button>
@@ -769,7 +769,7 @@ function ProfileScreen({ onSwitchRole, onSettings }: { onSwitchRole: () => void;
     { icon: '💳', label: 'Payment Methods', sub: 'Visa, Apple Pay' },
     { icon: '❤️', label: 'Favourite Restaurants', sub: '2 restaurants' },
     { icon: '📦', label: 'Order History', sub: 'View past orders' },
-    { icon: '🎁', label: 'Refer & Earn', sub: 'Get $10 per referral' },
+    { icon: '🎁', label: 'Refer & Earn', sub: 'Get ₹100 per referral' },
     { icon: '🎧', label: 'Help Centre', sub: 'FAQs and support' },
     { icon: '⚙️', label: 'Settings', sub: 'Notifications, privacy…' },
     { icon: '🚪', label: 'Sign Out', sub: '', danger: true },
@@ -791,7 +791,7 @@ function ProfileScreen({ onSwitchRole, onSettings }: { onSwitchRole: () => void;
           </div>
         </div>
         <div style={{ display: 'flex', backgroundColor: C.bgGray, borderRadius: 16, overflow: 'hidden', border: `1px solid ${C.border}` }}>
-          {[{ v: '47', l: 'Orders' }, { v: '$284', l: 'Saved' }, { v: '4.9★', l: 'Rating' }].map((s, i) => (
+          {[{ v: '47', l: 'Orders' }, { v: '₹2,840', l: 'Saved' }, { v: '4.9★', l: 'Rating' }].map((s, i) => (
             <div key={s.l} style={{ flex: 1, padding: '13px 0', textAlign: 'center', borderRight: i < 2 ? `1px solid ${C.border}` : 'none' }}>
               <p style={{ fontSize: 18, fontWeight: 800, color: C.red, margin: '0 0 2px' }}>{s.v}</p>
               <p style={{ fontSize: 11, color: C.muted, margin: 0, fontWeight: 500 }}>{s.l}</p>
@@ -904,11 +904,34 @@ function LoginScreen({ onLogin, onSignUp, onForgot }: { onLogin: () => void; onS
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     const contact = contactMode === 'email' ? email : phone
     if (!contact || !password) { setError(`Please fill in your ${contactMode} and password.`); return }
-    setError(''); setLoading(true)
-    setTimeout(() => { setLoading(false); onLogin() }, 1200)
+    setError('')
+    setLoading(true)
+    try {
+      const apiUrl = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, '') ?? ''
+      const response = await fetch(`${apiUrl}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          identifier: contact.trim(),
+          password,
+          role: 'customer',
+          loginMode: contactMode,
+        }),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        setError(data.message || 'Invalid email or password.')
+        return
+      }
+      onLogin()
+    } catch {
+      setError('Unable to reach the server. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -972,14 +995,44 @@ function SignUpScreen({ onSignUp, onLogin }: { onSignUp: () => void; onLogin: ()
   const [showPw, setShowPw] = useState(false)
   const [agreed, setAgreed] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const strength = password.length === 0 ? 0 : password.length < 6 ? 1 : password.length < 10 ? 2 : 3
   const strengthColors = ['', C.red, C.orange, C.green]
   const strengthLabels = ['', 'Weak', 'Good', 'Strong']
 
-  const handle = () => {
+  const handle = async () => {
+    const identifier = contactMode === 'email' ? email.trim() : phone.trim()
+    if (!name.trim() || !identifier || password.length < 6) {
+      setError('Please enter your name, a valid identifier, and a password of at least 6 characters.')
+      return
+    }
+    setError('')
     setLoading(true)
-    setTimeout(() => { setLoading(false); onSignUp() }, 1200)
+    try {
+      const apiUrl = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, '') ?? ''
+      const response = await fetch(`${apiUrl}/api/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: name.trim(),
+          identifier,
+          password,
+          role: 'customer',
+          loginMode: contactMode,
+        }),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        setError(data.message || 'Unable to create your account.')
+        return
+      }
+      onSignUp()
+    } catch {
+      setError('Unable to reach the server. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -1008,6 +1061,12 @@ function SignUpScreen({ onSignUp, onLogin }: { onSignUp: () => void; onLogin: ()
               ))}
             </div>
             <p style={{ fontSize: 11, color: strengthColors[strength], fontWeight: 600, margin: 0 }}>{strengthLabels[strength]} password</p>
+          </div>
+        )}
+
+        {error && (
+          <div style={{ backgroundColor: C.redLight, border: `1px solid ${C.redBorder}`, borderRadius: 12, padding: '10px 14px', marginBottom: 16 }}>
+            <p style={{ fontSize: 13, color: C.red, margin: 0, fontWeight: 500 }}>⚠️ {error}</p>
           </div>
         )}
 

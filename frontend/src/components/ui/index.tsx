@@ -52,7 +52,7 @@ function RestaurantCard({ restaurant: r, onClick, isFav, onFav }: { restaurant: 
             <span style={{ fontSize: 12, color: C.muted, fontWeight: 500 }}>{r.distance}</span>
           </div>
           <span style={{ fontSize: 12, color: r.deliveryFee === 0 ? C.green : C.muted, fontWeight: r.deliveryFee === 0 ? 600 : 400 }}>
-            {r.deliveryFee === 0 ? 'Free delivery' : `$${r.deliveryFee.toFixed(2)} delivery`}
+            {r.deliveryFee === 0 ? 'Free delivery' : `₹${r.deliveryFee.toFixed(0)} delivery`}
           </span>
         </div>
       </div>
@@ -74,7 +74,7 @@ function CartFAB({ count, total, onClick, animating }: { count: number; total: n
           <div style={{ backgroundColor: 'rgba(255,255,255,0.22)', borderRadius: 8, padding: '3px 9px', fontSize: 13, fontWeight: 700 }}>{count}</div>
           <span style={{ fontSize: 15, fontWeight: 700 }}>View Cart</span>
         </div>
-        <span style={{ fontSize: 15, fontWeight: 700 }}>${total.toFixed(2)}</span>
+        <span style={{ fontSize: 15, fontWeight: 700 }}>₹{total.toFixed(0)}</span>
       </button>
     </div>
   )

@@ -21,17 +21,17 @@ const C = {
 type DeliveryTab = 'home' | 'orders' | 'earnings' | 'profile'
 
 const AVAILABLE_ORDERS = [
-  { id: 'SWB-20848', restaurant: 'The Burger Lab', customer: 'Priya Sharma', address: '45 Oak Avenue, Apt 2', distance: '0.8 km', payout: '$4.50', items: 2, eta: '12 min', urgent: true },
-  { id: 'SWB-20849', restaurant: 'Pizza Piazza',   customer: 'Marcus Lee',   address: '12 Park Street, #3A', distance: '1.4 km', payout: '$5.20', items: 3, eta: '18 min', urgent: false },
-  { id: 'SWB-20850', restaurant: 'Spice Route',    customer: 'Emma Wilson',  address: '88 Elm Road',        distance: '2.1 km', payout: '$6.80', items: 4, eta: '25 min', urgent: false },
+  { id: 'SWB-20848', restaurant: 'The Burger Lab', customer: 'Priya Sharma', address: '45 Oak Avenue, Apt 2', distance: '0.8 km', payout: '₹374', items: 2, eta: '12 min', urgent: true },
+  { id: 'SWB-20849', restaurant: 'Pizza Piazza',   customer: 'Marcus Lee',   address: '12 Park Street, #3A', distance: '1.4 km', payout: '₹432', items: 3, eta: '18 min', urgent: false },
+  { id: 'SWB-20850', restaurant: 'Spice Route',    customer: 'Emma Wilson',  address: '88 Elm Road',        distance: '2.1 km', payout: '₹564', items: 4, eta: '25 min', urgent: false },
 ]
 
 const DELIVERY_HISTORY = [
-  { id: 'SWB-20847', restaurant: 'The Burger Lab', customer: 'Alex Johnson', payout: '$4.20', time: '2:58 PM', rating: 5 },
-  { id: 'SWB-20831', restaurant: 'Sakura Garden',  customer: 'Sofia Martinez', payout: '$5.60', time: '1:45 PM', rating: 5 },
-  { id: 'SWB-20820', restaurant: 'Green Bowl',     customer: 'David Kim',    payout: '$6.10', time: '12:30 PM', rating: 4 },
-  { id: 'SWB-20811', restaurant: 'Wok & Roll',     customer: 'James Park',   payout: '$3.90', time: '11:15 AM', rating: 5 },
-  { id: 'SWB-20803', restaurant: 'Pizza Piazza',   customer: 'Lily Chen',    payout: '$4.80', time: '10:02 AM', rating: 5 },
+  { id: 'SWB-20847', restaurant: 'The Burger Lab', customer: 'Alex Johnson', payout: '₹349', time: '2:58 PM', rating: 5 },
+  { id: 'SWB-20831', restaurant: 'Sakura Garden',  customer: 'Sofia Martinez', payout: '₹465', time: '1:45 PM', rating: 5 },
+  { id: 'SWB-20820', restaurant: 'Green Bowl',     customer: 'David Kim',    payout: '₹506', time: '12:30 PM', rating: 4 },
+  { id: 'SWB-20811', restaurant: 'Wok & Roll',     customer: 'James Park',   payout: '₹324', time: '11:15 AM', rating: 5 },
+  { id: 'SWB-20803', restaurant: 'Pizza Piazza',   customer: 'Lily Chen',    payout: '₹398', time: '10:02 AM', rating: 5 },
 ]
 
 function DeliveryNav({ tab, onTab }: { tab: DeliveryTab; onTab: (t: DeliveryTab) => void }) {
@@ -92,7 +92,7 @@ function DeliveryHome({ onGoToOrders }: { onGoToOrders: () => void }) {
         <div style={{ display: 'flex', gap: 10 }}>
           {[
             { label: "Today's Deliveries", value: '8', icon: '🛵' },
-            { label: "Today's Earnings", value: '$127.50', icon: '💰' },
+            { label: "Today's Earnings", value: '₹10,580', icon: '💰' },
             { label: 'Rating', value: '4.9★', icon: '⭐' },
           ].map(s => (
             <div key={s.label} style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.12)', borderRadius: 14, padding: '10px 8px', textAlign: 'center' }}>
@@ -150,8 +150,8 @@ function DeliveryHome({ onGoToOrders }: { onGoToOrders: () => void }) {
               </div>
 
               <div style={{ padding: '0 16px 16px', display: 'flex', gap: 8 }}>
-                <button style={{ flex: 1, padding: '12px', backgroundColor: C.primary, color: 'white', border: 'none', borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>Mark Picked Up</button>
-                <button style={{ width: 44, padding: '12px', backgroundColor: C.primaryLight, border: `1.5px solid ${C.primaryBorder}`, borderRadius: 12, fontSize: 18, cursor: 'pointer' }}>📞</button>
+                <button onClick={() => setActiveStep(3)} style={{ flex: 1, padding: '12px', backgroundColor: C.primary, color: 'white', border: 'none', borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>Mark Picked Up</button>
+                <button onClick={() => window.location.href = 'tel:+919876543210'} style={{ width: 44, padding: '12px', backgroundColor: C.primaryLight, border: `1.5px solid ${C.primaryBorder}`, borderRadius: 12, fontSize: 18, cursor: 'pointer' }}>📞</button>
               </div>
             </div>
           </div>
@@ -173,7 +173,7 @@ function DeliveryHome({ onGoToOrders }: { onGoToOrders: () => void }) {
                     </div>
                     <span style={{ fontSize: 18, fontWeight: 800, color: C.primary }}>{o.payout}</span>
                   </div>
-                  <button style={{ width: '100%', padding: '10px', backgroundColor: C.primary, color: 'white', border: 'none', borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>Accept Order</button>
+                  <button onClick={() => window.alert(`Order ${o.id} accepted`)} style={{ width: '100%', padding: '10px', backgroundColor: C.primary, color: 'white', border: 'none', borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>Accept Order</button>
                 </div>
               ))}
             </div>
@@ -215,8 +215,8 @@ function AvailableOrdersTab() {
               </div>
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
-              <button style={{ flex: 1, padding: '12px', backgroundColor: C.primary, color: 'white', border: 'none', borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>✓ Accept</button>
-              <button style={{ flex: 1, padding: '12px', backgroundColor: '#F9FAFB', color: C.muted, border: `1.5px solid ${C.border}`, borderRadius: 12, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Skip</button>
+              <button onClick={() => window.alert(`Order ${o.id} accepted`)} style={{ flex: 1, padding: '12px', backgroundColor: C.primary, color: 'white', border: 'none', borderRadius: 12, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>✓ Accept</button>
+              <button onClick={() => window.alert(`Order ${o.id} skipped`)} style={{ flex: 1, padding: '12px', backgroundColor: '#F9FAFB', color: C.muted, border: `1.5px solid ${C.border}`, borderRadius: 12, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Skip</button>
             </div>
           </div>
         ))}
@@ -238,8 +238,8 @@ function EarningsTab() {
         <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, margin: '0 0 20px' }}>July 2026</p>
         <div style={{ backgroundColor: 'rgba(255,255,255,0.12)', borderRadius: 20, padding: 20 }}>
           <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: 13, margin: '0 0 6px', fontWeight: 500 }}>This Week's Total</p>
-          <p style={{ color: 'white', fontSize: 36, fontWeight: 800, margin: '0 0 4px', letterSpacing: -1 }}>$742.30</p>
-          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12, margin: 0 }}>47 deliveries · avg $15.79/hr</p>
+          <p style={{ color: 'white', fontSize: 36, fontWeight: 800, margin: '0 0 4px', letterSpacing: -1 }}>₹61,610</p>
+          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12, margin: 0 }}>47 deliveries · avg ₹1,311/hr</p>
         </div>
       </div>
 
@@ -264,7 +264,7 @@ function EarningsTab() {
           {[
             { label: 'Deliveries', value: '47', icon: '🛵' },
             { label: 'Online Hours', value: '31 hrs', icon: '⏱️' },
-            { label: 'Avg per Delivery', value: '$15.79', icon: '💵' },
+            { label: 'Avg per Delivery', value: '₹1,311', icon: '💵' },
             { label: 'Customer Rating', value: '4.9 ★', icon: '⭐' },
           ].map(s => (
             <div key={s.label} style={{ backgroundColor: C.surface, borderRadius: 16, padding: 14, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
