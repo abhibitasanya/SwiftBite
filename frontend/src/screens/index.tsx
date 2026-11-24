@@ -76,8 +76,8 @@ function HomeScreen({ onRestaurantClick, onSearch, onNotifications, cartTotal, c
               <Icon.Bell />
               <div style={{ position: 'absolute', top: 9, right: 9, width: 7, height: 7, backgroundColor: C.red, borderRadius: '50%', border: '1.5px solid white' }} />
             </button>
-            <div style={{ width: 40, height: 40, borderRadius: 12, overflow: 'hidden', border: `2px solid ${C.border}` }}>
-              <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop" alt="Alex" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <div style={{ width: 40, height: 40, borderRadius: 12, border: `2px solid ${C.border}`, backgroundColor: C.bgGray, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 21 }}>
+              👤
             </div>
           </div>
         </div>
@@ -622,7 +622,7 @@ function OrderTrackingScreen({ onBack, onViewSuccess }: any) {
 
       {/* Delivery partner */}
       <div style={{ padding: '14px 20px', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', gap: 12 }}>
-        <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop" alt="Marcus" style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${C.border}` }} />
+        <div style={{ width: 48, height: 48, borderRadius: '50%', border: `2px solid ${C.border}`, backgroundColor: C.primaryLight, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>🛵</div>
         <div style={{ flex: 1 }}>
           <p style={{ fontSize: 14, fontWeight: 700, color: C.text, margin: '0 0 3px' }}>Marcus Chen</p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Icon.Star /><span style={{ fontSize: 12, color: C.muted, fontWeight: 500 }}>4.9 · Delivery Partner</span></div>
@@ -789,7 +789,7 @@ function ProfileScreen({ onSwitchRole, onSettings, onNavigate, onSignOut, user }
       <div style={{ backgroundColor: C.surface, padding: '56px 20px 22px', borderBottom: `1px solid ${C.border}` }}>
         <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 20 }}>
           <div style={{ position: 'relative' }}>
-            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=160&h=160&fit=crop" alt="Alex" style={{ width: 72, height: 72, borderRadius: 22, objectFit: 'cover', border: `3px solid ${C.border}` }} />
+            <div style={{ width: 72, height: 72, borderRadius: 22, border: `3px solid ${C.border}`, backgroundColor: C.bgGray, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 36 }}>👤</div>
             <div style={{ position: 'absolute', bottom: -2, right: -2, width: 22, height: 22, backgroundColor: C.red, borderRadius: '50%', border: '2px solid white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10 }}>✏️</div>
           </div>
           <div>

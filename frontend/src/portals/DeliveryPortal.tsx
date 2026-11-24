@@ -73,7 +73,7 @@ function DeliveryHome({ onGoToOrders }: { onGoToOrders: () => void }) {
       <div style={{ background: `linear-gradient(135deg, ${C.primary} 0%, #1D4ED8 100%)`, padding: '56px 20px 24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
           <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-            <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop" alt="Marcus" style={{ width: 48, height: 48, borderRadius: 16, objectFit: 'cover', border: '2px solid rgba(255,255,255,0.3)' }} />
+            <div style={{ width: 48, height: 48, borderRadius: 16, border: '2px solid rgba(255,255,255,0.3)', backgroundColor: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>🛵</div>
             <div>
               <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: 12, margin: '0 0 2px' }}>Delivery Partner</p>
               <h1 style={{ color: 'white', fontSize: 20, fontWeight: 800, margin: 0, letterSpacing: -0.3 }}>Marcus Chen</h1>
@@ -304,7 +304,7 @@ function DeliveryProfile() {
     <div style={{ backgroundColor: C.bg, minHeight: '100vh', paddingBottom: 100 }}>
       <div style={{ background: `linear-gradient(135deg, ${C.primary} 0%, #1D4ED8 100%)`, padding: '56px 20px 28px' }}>
         <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 16 }}>
-          <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=160&h=160&fit=crop" alt="Marcus" style={{ width: 72, height: 72, borderRadius: 22, objectFit: 'cover', border: '3px solid rgba(255,255,255,0.3)' }} />
+          <div style={{ width: 72, height: 72, borderRadius: 22, border: '3px solid rgba(255,255,255,0.3)', backgroundColor: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 34 }}>🛵</div>
           <div>
             <h2 style={{ color: 'white', fontSize: 20, fontWeight: 800, margin: '0 0 4px' }}>Marcus Chen</h2>
             <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, margin: '0 0 6px' }}>Delivery Partner · ID #DP-2041</p>

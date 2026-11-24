@@ -23,18 +23,20 @@ export function LandingPageScreen({ onGetStarted, onInstall, installAvailable }:
           <button onClick={onGetStarted} className="hover:text-[#6f7f4d] transition bg-transparent border-none cursor-pointer">Restaurants</button>
           <button onClick={onGetStarted} className="hover:text-[#6f7f4d] transition bg-transparent border-none cursor-pointer">About Us</button>
         </div>
-        <button 
-          onClick={onGetStarted}
-          className="hidden md:block bg-[#425132] hover:bg-[#39472b] text-white px-7 py-3 rounded-xl font-bold transition shadow-xl border-none cursor-pointer"
-        >
-          Sign In
-        </button>
-        <button
-          onClick={onInstall}
-          className="absolute right-6 top-[88px] md:static md:ml-3 bg-white text-[#425132] px-5 py-3 rounded-xl font-bold transition shadow-lg border border-[#dfe8cf] cursor-pointer"
-        >
-          {installAvailable ? 'Install App' : 'Download App'}
-        </button>
+        <div className="flex items-center gap-2 md:gap-3">
+          <button
+            onClick={onGetStarted}
+            className="bg-[#425132] hover:bg-[#39472b] text-white px-4 md:px-7 py-3 rounded-xl font-bold transition shadow-xl border-none cursor-pointer"
+          >
+            Sign In
+          </button>
+          <button
+            onClick={onInstall}
+            className="bg-white text-[#425132] px-4 md:px-5 py-3 rounded-xl font-bold transition shadow-lg border border-[#dfe8cf] cursor-pointer"
+          >
+            {installAvailable ? 'Install App' : 'Download App'}
+          </button>
+        </div>
       </nav>
 
       {/* Hero Section */}
@@ -70,8 +72,10 @@ export function LandingPageScreen({ onGetStarted, onInstall, installAvailable }:
           
           <div className="mt-14 flex flex-col sm:flex-row items-center gap-6 justify-center lg:justify-start">
             <div className="flex -space-x-3">
-              {[1,2,3,4].map(i => (
-                <img key={i} src={`https://i.pravatar.cc/100?img=${i + 10}`} alt="user" className="w-12 h-12 rounded-full border-4 border-white shadow-sm" />
+              {['A','B','C','D'].map((initial, i) => (
+                <div key={initial} className="w-12 h-12 rounded-full border-4 border-white shadow-sm flex items-center justify-center font-bold text-white" style={{ backgroundColor: ['#6F7F4D', '#C7A96D', '#425132', '#9CA3AF'][i] }}>
+                  {initial}
+                </div>
               ))}
             </div>
             <div className="text-sm text-center sm:text-left">
