@@ -58,6 +58,34 @@ function OnboardingScreen({ step, onNext, onSkip }: { step: number; onNext: () =
 
 function HomeScreen({ onRestaurantClick, onSearch, onNotifications, cartTotal, cartCount, onCartClick, favorites, onFav, cartAnimating, user }: any) {
   const [selCat, setSelCat] = useState<number | null>(null)
+  const categoryName = CATEGORIES.find(category => category.id === selCat)?.name
+  const filteredRestaurants = categoryName
+    ? RESTAURANTS.filter(r => {
+        const cuisine = r.cuisine.toLowerCase()
+        if (categoryName === 'Burgers') return cuisine.includes('burger') || r.name.includes('Burger')
+        if (categoryName === 'Pizza') return cuisine.includes('pizza') || cuisine.includes('italian')
+        if (categoryName === 'Sushi') return cuisine.includes('sushi') || cuisine.includes('japanese')
+        if (categoryName === 'Indian') return cuisine.includes('indian') || cuisine.includes('curry') || cuisine.includes('biryani')
+        if (categoryName === 'Healthy') return cuisine.includes('healthy') || cuisine.includes('salad') || cuisine.includes('bowl')
+        if (categoryName === 'Chinese') return cuisine.includes('chinese') || cuisine.includes('asian') || cuisine.includes('thai')
+        if (categoryName === 'Desserts') return r.name.includes('Sakura') || r.name.includes('Burger')
+        return cuisine.includes('fast') || cuisine.includes('chinese') || cuisine.includes('asian')
+      })
+    : RESTAURANTS
+  const filteredDishes = categoryName
+    ? MENU_ITEMS.filter(item => {
+        const name = item.name.toLowerCase()
+        if (categoryName === 'Burgers') return name.includes('burger') || name.includes('chicken sandwich')
+        if (categoryName === 'Pizza') return name.includes('pizza')
+        if (categoryName === 'Sushi') return name.includes('sushi') || name.includes('roll')
+        if (categoryName === 'Indian') return name.includes('curry') || name.includes('naan') || name.includes('paneer')
+        if (categoryName === 'Healthy') return item.isVeg
+        if (categoryName === 'Chinese') return name.includes('fried') || name.includes('chicken')
+        if (categoryName === 'Desserts') return name.includes('shake') || name.includes('fries')
+        if (categoryName === 'Drinks') return name.includes('shake')
+        return true
+      })
+    : MENU_ITEMS
   return (
     <div style={{ backgroundColor: C.bg, overflowY: 'auto', minHeight: 'calc(100vh - 80px)' }}>
       {/* Header */}
@@ -127,7 +155,7 @@ function HomeScreen({ onRestaurantClick, onSearch, onNotifications, cartTotal, c
       <div className="swift-content-pad" style={{ padding: '0 20px 16px' }}>
         <SectionHeader title="Trending Near You" subtitle="Top picks right now" onSeeAll={onSearch} />
         <div className="swift-card-grid" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {RESTAURANTS.slice(0, 3).map(r => (
+          {filteredRestaurants.slice(0, 3).map(r => (
             <RestaurantCard key={r.id} restaurant={r} onClick={() => onRestaurantClick(r)} isFav={favorites.has(r.id)} onFav={() => onFav(r.id)} />
           ))}
         </div>
@@ -137,7 +165,7 @@ function HomeScreen({ onRestaurantClick, onSearch, onNotifications, cartTotal, c
       <div style={{ padding: '0 0 16px' }}>
         <div className="swift-content-pad" style={{ padding: '0 20px' }}><SectionHeader title="Popular Dishes" subtitle="Loved by thousands" onSeeAll={onSearch} /></div>
         <div className="swift-content-pad swift-dish-grid" style={{ display: 'flex', gap: 12, overflowX: 'auto', padding: '4px 20px', scrollbarWidth: 'none' }}>
-          {MENU_ITEMS.map(item => (
+          {filteredDishes.map(item => (
             <div key={item.id} className="card-hover swift-dish-card" style={{ flex: '0 0 155px', backgroundColor: C.surface, borderRadius: 16, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', cursor: 'pointer' }}>
               <div style={{ height: 110, overflow: 'hidden', backgroundColor: C.bgGray }}>
                 <img src={`https://images.unsplash.com/${item.image}?w=310&h=220&fit=crop&auto=format`} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -155,7 +183,7 @@ function HomeScreen({ onRestaurantClick, onSearch, onNotifications, cartTotal, c
       <div className="swift-content-pad" style={{ padding: '0 20px 24px' }}>
         <SectionHeader title="All Restaurants" onSeeAll={onSearch} />
         <div className="swift-card-grid" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {RESTAURANTS.slice(3).map(r => (
+          {filteredRestaurants.map(r => (
             <RestaurantCard key={r.id} restaurant={r} onClick={() => onRestaurantClick(r)} isFav={favorites.has(r.id)} onFav={() => onFav(r.id)} />
           ))}
         </div>
@@ -910,6 +938,7 @@ function LoginScreen({ onLogin, onSignUp, onForgot }: { onLogin: (user: { fullNa
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [showPw, setShowPw] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -1020,6 +1049,10 @@ function SignUpScreen({ onSignUp, onLogin }: { onSignUp: () => void; onLogin: ()
       setError('Please enter your name, a valid identifier, and a password of at least 6 characters.')
       return
     }
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.')
+      return
+    }
     setError('')
     setLoading(true)
     try {
@@ -1033,6 +1066,7 @@ function SignUpScreen({ onSignUp, onLogin }: { onSignUp: () => void; onLogin: ()
           fullName: name.trim(),
           identifier,
           password,
+          confirmPassword,
           role: 'customer',
           loginMode: contactMode,
         }),
@@ -1067,6 +1101,13 @@ function SignUpScreen({ onSignUp, onLogin }: { onSignUp: () => void; onLogin: ()
           label="Password" type={showPw ? 'text' : 'password'} placeholder="Create a strong password" value={password} onChange={setPassword} icon="🔒"
           right={<button onClick={() => setShowPw(!showPw)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, padding: 0 }}>{showPw ? '🙈' : '👁️'}</button>}
         />
+        <AuthInput
+          label="Confirm password" type={showPw ? 'text' : 'password'} placeholder="Repeat your password" value={confirmPassword} onChange={setConfirmPassword} icon="✅"
+          right={<button onClick={() => setShowPw(!showPw)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, padding: 0 }}>{showPw ? '🙈' : '👁️'}</button>}
+        />
+        {confirmPassword && password !== confirmPassword && (
+          <p style={{ fontSize: 12, color: C.red, margin: '-8px 0 16px', fontWeight: 600 }}>Passwords do not match</p>
+        )}
 
         {/* Password strength */}
         {password.length > 0 && (

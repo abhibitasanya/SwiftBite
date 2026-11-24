@@ -24,8 +24,12 @@ const registerSchema = z.object({
   fullName: z.string().trim().min(2),
   identifier: z.string().min(1),
   password: z.string().min(6),
+  confirmPassword: z.string().min(6).optional(),
   role: z.enum(["customer", "delivery", "restaurant", "platform"]),
   loginMode: z.enum(["email", "phone"]),
+}).refine((data) => !data.confirmPassword || data.password === data.confirmPassword, {
+  message: "Passwords do not match.",
+  path: ["confirmPassword"],
 });
 
 const chatbotMessageSchema = z.object({
