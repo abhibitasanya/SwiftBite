@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI, GoogleGenerativeAIFetchError, } from "@google/generative-ai";
 const API_KEY = process.env.GEMINI_API_KEY;
 if (!API_KEY) {
     console.warn("GEMINI_API_KEY not set in environment variables. AI features will be disabled.");
@@ -13,6 +13,22 @@ if (API_KEY) {
     catch (error) {
         console.error("Failed to initialize Gemini AI:", error);
     }
+}
+const MAX_RETRIES = 2;
+const RETRY_BASE_DELAY_MS = 1000;
+const RETRY_JITTER_MS = 250;
+function getRetryableStatus(error) {
+    if (!(error instanceof GoogleGenerativeAIFetchError)) {
+        return undefined;
+    }
+    const { status } = error;
+    return status === 429 || (status !== undefined && status >= 500 && status <= 599)
+        ? status
+        : undefined;
+}
+function getSafeErrorMessage(error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return API_KEY ? message.split(API_KEY).join("[REDACTED]") : message;
 }
 function getSystemPrompt(role) {
     const basePrompt = `You are a helpful AI assistant for SwiftBite, a food delivery platform. 
@@ -59,35 +75,42 @@ export async function getAIResponse(messages, role = "customer") {
     if (!model) {
         throw new Error("AI model not initialized. Check GEMINI_API_KEY environment variable.");
     }
-    try {
-        const systemPrompt = getSystemPrompt(role);
-        // Convert messages to Gemini format
-        const chatHistory = messages.slice(0, -1).map(msg => ({
-            role: msg.role === "assistant" ? "model" : "user",
-            parts: [{ text: msg.text }]
-        }));
-        const latestMessage = messages[messages.length - 1];
-        if (!latestMessage || latestMessage.role !== "user") {
-            throw new Error("Latest message must be from user");
-        }
-        const chat = model.startChat({
-            history: chatHistory,
-            systemInstruction: {
-                role: "system",
-                parts: [{ text: systemPrompt }],
-            },
-        });
-        const result = await chat.sendMessage(latestMessage.text);
-        const response = await result.response;
-        return response.text();
+    const systemPrompt = getSystemPrompt(role);
+    // Convert messages to Gemini format
+    const chatHistory = messages.slice(0, -1).map(msg => ({
+        role: msg.role === "assistant" ? "model" : "user",
+        parts: [{ text: msg.text }]
+    }));
+    const latestMessage = messages[messages.length - 1];
+    if (!latestMessage || latestMessage.role !== "user") {
+        throw new Error("Latest message must be from user");
     }
-    catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        const safeErrorMessage = API_KEY
-            ? errorMessage.split(API_KEY).join("[REDACTED]")
-            : errorMessage;
-        console.error("Error getting AI response:", safeErrorMessage);
-        throw error;
+    let retries = 0;
+    while (true) {
+        try {
+            const chat = model.startChat({
+                history: chatHistory,
+                systemInstruction: {
+                    role: "system",
+                    parts: [{ text: systemPrompt }],
+                },
+            });
+            const result = await chat.sendMessage(latestMessage.text);
+            const response = await result.response;
+            return response.text();
+        }
+        catch (error) {
+            const status = getRetryableStatus(error);
+            if (status !== undefined && retries < MAX_RETRIES) {
+                const delayMs = RETRY_BASE_DELAY_MS * 2 ** retries + Math.random() * RETRY_JITTER_MS;
+                retries += 1;
+                console.warn(`Gemini returned HTTP ${status}; retrying ${retries}/${MAX_RETRIES} in ${Math.round(delayMs)}ms.`);
+                await new Promise(resolve => setTimeout(resolve, delayMs));
+                continue;
+            }
+            console.error("Error getting AI response:", getSafeErrorMessage(error));
+            throw error;
+        }
     }
 }
 export function isAIInitialized() {
