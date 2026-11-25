@@ -14,13 +14,7 @@ Welcome to **SwiftBite**, a premium food delivery platform designed to seamlessl
 
 ## 🤖 Meet Your AI Food Assistant
 
-What truly sets SwiftBite apart is our deeply integrated **AI Chatbot**. We've moved beyond traditional scrolling and searching by introducing an intelligent, conversational agent designed to make ordering effortless.
-
-**With the SwiftBite AI Chatbot, you can:**
-- 🧠 **Get Personalized Recommendations**: Simply type *"I want something spicy and under $15"* and the AI will instantly curate a list of dishes matching your exact cravings.
-- 💬 **Order via Conversation**: Build your cart naturally through chat. *"Add two smash burgers and a side of truffle fries."*
-- ⏱️ **Real-time Order Tracking**: Ask the chatbot *"Where is my order?"* for instant, up-to-the-minute updates on your delivery partner's location.
-- 🥗 **Dietary Intelligence**: The AI automatically filters out allergens and adheres to your specific dietary requirements (e.g., Vegan, Gluten-Free) by understanding your profile.
+SwiftBite includes a chatbot for general questions about using the app. When `GEMINI_API_KEY` is configured on the backend, it uses Gemini to generate responses; otherwise, it uses a local set of guided replies. The chatbot does not read user profiles, menu inventory, carts, or live order and delivery data, and it cannot place orders or apply dietary filters.
 
 ---
 
@@ -34,6 +28,8 @@ What truly sets SwiftBite apart is our deeply integrated **AI Chatbot**. We've m
 ## 🛠️ Tech Stack
 
 - **Frontend Framework**: React 19 + Vite
+- **Backend and Database**: Node.js, Express, and MySQL
+- **AI Assistant**: Google Gemini API (optional backend environment variable)
 - **Styling**: Tailwind CSS + Custom CSS Variables
 - **Type Safety**: TypeScript
 - **Deployment**: Vercel / Render *(update as needed)*

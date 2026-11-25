@@ -23,6 +23,8 @@ services:
         value: "true"
       - key: MYSQL_PASSWORD
         sync: false
+      - key: GEMINI_API_KEY
+        sync: false
 
   - type: web
     name: swiftbite
