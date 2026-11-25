@@ -20,7 +20,10 @@ The Express application exposes endpoints for authentication, restaurants, profi
 The working MySQL connection and initialized schema support database-backed API operations; the restaurant API has been confirmed to read from MySQL.
 
 \item \textbf{Application Guidance:}
-The chatbot can answer common navigation questions using local responses and can use Gemini through the backend when configured.
+The chatbot can generate responses through the backend Gemini integration; a recipe response was verified during testing. Transient primary-model failures are retried, a secondary model is attempted, and local guidance remains available as a fallback.
+
+\item \textbf{Bhubaneswar Map View:}
+The delivery screen loads OpenStreetMap tiles centered on Bhubaneswar and provides zoom controls, while clearly identifying that the marker is not a live rider location.
 
 \item \textbf{Demonstration of Stakeholder Views:}
 Customer, admin, restaurant-owner, and delivery-partner interfaces illustrate different application workflows. These portal views are demos, not production access-controlled roles.

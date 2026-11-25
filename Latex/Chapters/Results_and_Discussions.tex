@@ -48,7 +48,7 @@ The sign-up form accepts an email address or phone number and includes required 
 
 \subsection{Checkout and Order-Status Demonstrations}
 
-The cart and checkout screens show quantity totals, delivery details, and payment choices. In the current frontend, selecting Place Order advances to a demonstration confirmation and order-status flow. It does not create a persistent order, process a payment, or retrieve live delivery coordinates.
+The cart and checkout screens show quantity totals, delivery details, and payment choices. Selecting Place Order opens a demonstration confirmation screen; Track My Order then opens the delivery map. This flow does not create a persistent order, process a payment, or retrieve live delivery coordinates.
 
 \begin{figure}[H]
     \centering
@@ -59,20 +59,27 @@ The cart and checkout screens show quantity totals, delivery details, and paymen
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth,height=0.35\textheight,keepaspectratio]{Chapters/order_tracking.png}
-    \caption{Demonstration order-status screen; not live GPS tracking}
+    \includegraphics[width=0.9\textwidth,height=0.35\textheight,keepaspectratio]{Chapters/order_tracking_bhubaneswar_app.png}
+    \caption{SwiftBite delivery screen with zoomable OpenStreetMap tiles centered on Bhubaneswar; the marker is approximate and rider GPS is not connected}
     \label{fig:result_tracking}
 \end{figure}
 
 \subsection{Chatbot Assistance}
 
-The chatbot responds to application questions. The frontend can use local rule-based responses when no API base URL is configured; the backend can call Gemini when its server-side key is present. The chatbot is an assistance feature and does not provide personalized food recommendations or place orders.
+During manual testing, the backend chatbot returned a Gemini-generated recipe response. The primary model retries transient HTTP 429 and 5xx failures once, then the backend tries a secondary model; the local rule-based response remains available if model generation fails. The chatbot does not access live menus or order records, provide personalized food recommendations, or place orders.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth,height=0.58\textheight,keepaspectratio]{Chapters/chatbot_test.png}
-    \caption{Chatbot answering a food-ordering navigation question}
+    \caption{Local rule-based response to a food-ordering navigation question}
     \label{fig:result_chatbot}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth,height=0.58\textheight,keepaspectratio]{Chapters/gemini_recipe_response.png}
+    \caption{Gemini-generated recipe response shown in the SwiftBot interface during testing}
+    \label{fig:gemini_recipe_response}
 \end{figure}
 
 \section{Discussion of Findings}
@@ -81,7 +88,7 @@ The chatbot responds to application questions. The frontend can use local rule-b
     \item \textbf{Frontend implementation:} React, TypeScript, and Vite provide a component-based interface. The customer catalogue and order journey currently use sample data and local state.
     \item \textbf{Backend capabilities:} The Express API includes authentication, profile, restaurant, menu, upload, order, dashboard, and chatbot routes. The storefront currently uses the authentication and chatbot services rather than integrating every available backend route.
     \item \textbf{Validation:} Zod validates backend request payloads. Registration requires password confirmation, and the frontend displays a mismatch error before sending the request.
-    \item \textbf{Chatbot behavior:} Gemini is optional. Local rule-based responses allow app guidance without a configured model key or API base URL.
+    \item \textbf{Chatbot behavior:} A Gemini-generated response was verified through the configured backend. Transient primary-model errors receive a retry, followed by one secondary-model attempt; local rule-based replies remain the final fallback.
 \end{itemize}
 
 \section{Challenges and Current Constraints}

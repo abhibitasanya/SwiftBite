@@ -30,7 +30,7 @@ The SwiftBite prototype uses a React and TypeScript frontend, a Node.js and Expr
     \item \textbf{Zod} -- Used to validate authentication, chatbot, and other request payloads.
     \item \textbf{CORS and Helmet} -- Used for cross-origin configuration and HTTP security headers.
     \item \textbf{Morgan and Dotenv} -- Used for HTTP request logging and environment-variable configuration.
-    \item \textbf{Google Generative AI SDK} -- Supports optional Gemini chatbot responses when \texttt{GEMINI\_API\_KEY} is configured.
+    \item \textbf{Google Generative AI SDK} -- Connects the backend chatbot to Gemini. The configured primary model is \texttt{gemini-3.8-flash}; transient HTTP 429 and 5xx failures receive one retry with exponential backoff and jitter, followed by one attempt using \texttt{gemini-3.6-flash}. A local rule-based response remains available if model generation fails. A generated recipe response was verified during testing; the API key is supplied server-side and is not included in this report.
 \end{itemize}
 
 \vspace{3mm}

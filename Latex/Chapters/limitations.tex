@@ -14,7 +14,7 @@ Cart, checkout, confirmation, and tracking are frontend demonstrations. The cust
 Payment choices are displayed in the checkout interface, but no payment gateway or transaction processing is connected.
 
 \item \textbf{No Live Delivery Tracking:}
-The order-status screen shows a demonstration timeline and ETA; it does not display GPS coordinates or receive live delivery updates.
+The order screen loads OpenStreetMap tiles centered on Bhubaneswar and provides zoom controls. Its approximate city-center marker and order timeline are demonstrations; it does not display rider GPS coordinates or receive live delivery updates.
 
 \item \textbf{Demo Portal Authorization:}
 Portal switching is explicitly marked as demo functionality. Production server-side role authorization and protected sessions are not implemented.
@@ -22,8 +22,8 @@ Portal switching is explicitly marked as demo functionality. Production server-s
 \item \textbf{Authentication Hardening:}
 The current authentication endpoints use SHA-256 password digests and do not issue a session token or JWT. Production deployment requires a stronger password-hashing scheme and complete session and authorization controls.
 
-\item \textbf{Optional AI Service:}
-Gemini responses require a server-side API key. Without it, the application relies on local or backend rule-based chatbot responses, which provide limited guidance.
+\item \textbf{External AI Service Availability:}
+Gemini responses require a server-side API key and depend on the external service being available. The primary model retries transient HTTP 429 and 5xx errors once before the backend attempts a secondary model; local rule-based chatbot responses remain available if model generation fails. A generated recipe response was verified during testing. The chatbot is not connected to live menu, profile, or order data.
 
 \item \textbf{Database Integration Coverage:}
 The MySQL connection, schema, and restaurant API have been verified, but registration, login, and order persistence have not been fully integration-tested against the database. The file-backed authentication fallback is intended for continuity in a demo environment, not as a production database.

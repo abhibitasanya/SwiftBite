@@ -1,5 +1,7 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, type Dispatch, type FormEvent, type SetStateAction } from 'react'
 import { askChatbot } from '../services/chatbot'
+import { ProfileForm, useDemoProfiles } from '../profileManagement'
+import HamburgerMenu from '../components/HamburgerMenu'
 
 const C = {
   primary: '#EA580C',
@@ -19,7 +21,7 @@ const C = {
   blueLight: '#EFF6FF',
 }
 
-type RestaurantTab = 'dashboard' | 'orders' | 'menu' | 'analytics'
+type RestaurantTab = 'dashboard' | 'orders' | 'menu' | 'analytics' | 'profile'
 
 const INCOMING_ORDERS = [
   { id: 'SWB-20848', customer: 'Priya Sharma', items: ['Classic Smash Burger ×2', 'Truffle Fries ×1'], total: '₹589', time: '3:08 PM', status: 'New', avatar: '👩' },
@@ -36,6 +38,7 @@ const MENU_ITEMS = [
   { id: 5, name: 'Garden Impossible Burger',   price: '₹230', category: 'Burgers',  orders: 98,  active: false, image: '🌿' },
   { id: 6, name: 'Classic Chocolate Shake',    price: '₹149',  category: 'Drinks',   orders: 176, active: true,  image: '🥤' },
 ]
+type MenuItem = (typeof MENU_ITEMS)[number]
 
 const REVIEWS = [
   { customer: 'Alex Johnson',   rating: 5, text: 'Best smash burger in the city! Crispy edges, juicy inside. Will order again.', time: '2 hours ago' },
@@ -61,6 +64,7 @@ function RestaurantNav({ tab, onTab, newOrders }: { tab: RestaurantTab; onTab: (
     { id: 'orders',    label: 'Orders',    icon: '🧾' },
     { id: 'menu',      label: 'Menu',      icon: '🍽️' },
     { id: 'analytics', label: 'Analytics', icon: '📈' },
+    { id: 'profile',   label: 'Profile',   icon: '👤' },
   ]
   return (
     <nav className="portal-bottom-nav">
@@ -79,7 +83,7 @@ function RestaurantNav({ tab, onTab, newOrders }: { tab: RestaurantTab; onTab: (
 }
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
-function RestaurantDashboard({ onGoToOrders }: { onGoToOrders: () => void }) {
+function RestaurantDashboard({ onGoToOrders, restaurantName }: { onGoToOrders: () => void; restaurantName: string }) {
   const [isOpen, setIsOpen] = useState(true)
 
   return (
@@ -88,7 +92,7 @@ function RestaurantDashboard({ onGoToOrders }: { onGoToOrders: () => void }) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
           <div>
             <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: 13, margin: '0 0 2px', fontWeight: 500 }}>Restaurant Console</p>
-            <h1 style={{ color: 'white', fontSize: 22, fontWeight: 800, margin: 0, letterSpacing: -0.4 }}>The Burger Lab</h1>
+            <h1 style={{ color: 'white', fontSize: 22, fontWeight: 800, margin: 0, letterSpacing: -0.4 }}>{restaurantName}</h1>
           </div>
           <button onClick={() => setIsOpen(!isOpen)} style={{ display: 'flex', alignItems: 'center', gap: 8, backgroundColor: isOpen ? 'rgba(74,222,128,0.2)' : 'rgba(255,255,255,0.15)', border: `1.5px solid ${isOpen ? '#4ADE80' : 'rgba(255,255,255,0.3)'}`, borderRadius: 100, padding: '8px 14px', cursor: 'pointer' }}>
             <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: isOpen ? '#4ADE80' : '#9CA3AF' }} />
@@ -268,13 +272,60 @@ function OrdersTab() {
 }
 
 // ── Menu Management ───────────────────────────────────────────────────────────
-function MenuTab() {
-  const [items, setItems] = useState(MENU_ITEMS)
+function MenuTab({ items, setItems }: { items: MenuItem[]; setItems: Dispatch<SetStateAction<MenuItem[]>> }) {
   const [filter, setFilter] = useState('All')
+  const [formOpen, setFormOpen] = useState(false)
+  const [editingId, setEditingId] = useState<number | null>(null)
+  const [formError, setFormError] = useState('')
+  const [draft, setDraft] = useState({ name: '', category: 'Burgers', price: '' })
   const cats = ['All', 'Burgers', 'Sides', 'Drinks']
 
   const toggle = (id: number) => setItems(prev => prev.map(i => i.id === id ? { ...i, active: !i.active } : i))
   const shown = filter === 'All' ? items : items.filter(i => i.category === filter)
+
+  const openAddForm = () => {
+    setEditingId(null)
+    setDraft({ name: '', category: 'Burgers', price: '' })
+    setFormError('')
+    setFormOpen(true)
+  }
+
+  const openEditForm = (item: MenuItem) => {
+    setEditingId(item.id)
+    setDraft({ name: item.name, category: item.category, price: item.price.replace(/[^\d.]/g, '') })
+    setFormError('')
+    setFormOpen(true)
+  }
+
+  const saveItem = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const name = draft.name.trim()
+    const price = Number(draft.price)
+    if (!name || !Number.isFinite(price) || price <= 0) {
+      setFormError('Enter a dish name and a price greater than zero.')
+      return
+    }
+
+    if (editingId === null) {
+      setItems(prev => [...prev, {
+        id: Date.now(),
+        name,
+        price: `₹${price.toFixed(0)}`,
+        category: draft.category,
+        orders: 0,
+        active: true,
+        image: '🍽️',
+      }])
+    } else {
+      setItems(prev => prev.map(item => item.id === editingId
+        ? { ...item, name, category: draft.category, price: `₹${price.toFixed(0)}` }
+        : item))
+    }
+
+    setFormOpen(false)
+    setEditingId(null)
+    setFormError('')
+  }
 
   return (
     <div style={{ backgroundColor: C.bg, minHeight: '100vh', paddingBottom: 100 }}>
@@ -283,12 +334,39 @@ function MenuTab() {
           <div>
             <h1 style={{ color: 'white', fontSize: 22, fontWeight: 800, margin: '0 0 4px', letterSpacing: -0.4 }}>Menu</h1>
             <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, margin: 0 }}>{items.filter(i => i.active).length} active · {items.filter(i => !i.active).length} unavailable</p>
+            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 11, margin: '5px 0 0' }}>Changes are saved for this demo session only.</p>
           </div>
-          <button onClick={() => { const name = window.prompt('Dish name'); if (name?.trim()) setItems(prev => [...prev, { id: Date.now(), name: name.trim(), price: '₹199', category: 'Burgers', orders: 0, active: true, image: '🍽️' }]) }} style={{ backgroundColor: 'rgba(255,255,255,0.15)', border: '1.5px solid rgba(255,255,255,0.3)', borderRadius: 12, padding: '8px 14px', color: 'white', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
-            + Add Item
+          <button type="button" onClick={openAddForm} style={{ backgroundColor: 'rgba(255,255,255,0.15)', border: '1.5px solid rgba(255,255,255,0.3)', borderRadius: 12, padding: '8px 14px', color: 'white', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
+            + Add Dish
           </button>
         </div>
       </div>
+      {formOpen && (
+        <form onSubmit={saveItem} style={{ margin: 16, padding: 16, backgroundColor: C.surface, borderRadius: 16, border: `1px solid ${C.border}`, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+          <h2 style={{ margin: '0 0 12px', color: C.text, fontSize: 16 }}>{editingId === null ? 'Add a dish' : 'Update dish'}</h2>
+          <label style={{ display: 'block', marginBottom: 10, color: C.muted, fontSize: 12 }}>
+            Dish name
+            <input autoFocus required maxLength={80} value={draft.name} onChange={event => setDraft(prev => ({ ...prev, name: event.target.value }))} style={{ display: 'block', width: '100%', boxSizing: 'border-box', marginTop: 5, padding: 10, border: `1px solid ${C.border}`, borderRadius: 9, color: C.text }} />
+          </label>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <label style={{ display: 'block', color: C.muted, fontSize: 12 }}>
+              Category
+              <select value={draft.category} onChange={event => setDraft(prev => ({ ...prev, category: event.target.value }))} style={{ display: 'block', width: '100%', marginTop: 5, padding: 10, border: `1px solid ${C.border}`, borderRadius: 9, backgroundColor: 'white', color: C.text }}>
+                {cats.slice(1).map(category => <option key={category} value={category}>{category}</option>)}
+              </select>
+            </label>
+            <label style={{ display: 'block', color: C.muted, fontSize: 12 }}>
+              Price (₹)
+              <input required type="number" min="1" step="1" value={draft.price} onChange={event => setDraft(prev => ({ ...prev, price: event.target.value }))} style={{ display: 'block', width: '100%', boxSizing: 'border-box', marginTop: 5, padding: 10, border: `1px solid ${C.border}`, borderRadius: 9, color: C.text }} />
+            </label>
+          </div>
+          {formError && <p role="alert" style={{ margin: '10px 0 0', color: C.red, fontSize: 12 }}>{formError}</p>}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 14 }}>
+            <button type="button" onClick={() => setFormOpen(false)} style={{ padding: '8px 12px', border: `1px solid ${C.border}`, borderRadius: 9, backgroundColor: 'white', color: C.muted, cursor: 'pointer' }}>Cancel</button>
+            <button type="submit" style={{ padding: '8px 14px', border: 0, borderRadius: 9, backgroundColor: C.primary, color: 'white', fontWeight: 700, cursor: 'pointer' }}>{editingId === null ? 'Add dish' : 'Save changes'}</button>
+          </div>
+        </form>
+      )}
       <div style={{ backgroundColor: 'white', padding: '12px 20px', borderBottom: `1px solid ${C.border}` }}>
         <div style={{ display: 'flex', gap: 8, overflowX: 'auto', scrollbarWidth: 'none' }}>
           {cats.map(c => (
@@ -315,7 +393,7 @@ function MenuTab() {
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
               <div style={{ display: 'flex', gap: 8 }}>
-                <button onClick={() => { const name = window.prompt('Edit dish name', item.name); if (name?.trim()) setItems(prev => prev.map(i => i.id === item.id ? { ...i, name: name.trim() } : i)) }} style={{ padding: '6px 14px', backgroundColor: C.primaryLight, color: C.primary, border: `1px solid ${C.primaryBorder}`, borderRadius: 8, fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>Edit</button>
+                <button type="button" onClick={() => openEditForm(item)} style={{ padding: '6px 14px', backgroundColor: C.primaryLight, color: C.primary, border: `1px solid ${C.primaryBorder}`, borderRadius: 8, fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>Edit</button>
               </div>
               {/* Toggle switch */}
               <button onClick={() => toggle(item.id)} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', cursor: 'pointer' }}>
@@ -658,17 +736,28 @@ function RestaurantChatbot() {
 }
 
 // ── Root export ───────────────────────────────────────────────────────────────
-export default function RestaurantPortal() {
+export default function RestaurantPortal({ accountId, fullName, onSignOut }: { accountId: string; fullName: string; onSignOut: () => void }) {
   const [tab, setTab] = useState<RestaurantTab>('dashboard')
+  const [menuItems, setMenuItems] = useState<MenuItem[]>(MENU_ITEMS)
+  const profiles = useDemoProfiles()
+  const profile = profiles.find(item => item.accountId === accountId && item.role === 'restaurant')
   const newOrders = INCOMING_ORDERS.filter(o => o.status === 'New').length
+  const secondaryMenuItems = [
+    { label: 'Profile & verification', description: 'Contact details and review status', icon: '👤', onSelect: () => setTab('profile') },
+    { label: 'Settings', description: 'Notifications and preferences', icon: '⚙️', onSelect: () => window.alert('Settings are not configured in this demo yet.') },
+    { label: 'Help Centre', description: 'Support and app help', icon: '🎧', onSelect: () => window.alert('Help Centre is a demo placeholder; support content is not configured yet.') },
+    { label: 'Sign out', icon: '🚪', danger: true, onSelect: onSignOut },
+  ]
   return (
     <div style={{ minHeight: '100vh' }}>
-      {tab === 'dashboard' && <RestaurantDashboard onGoToOrders={() => setTab('orders')} />}
+      {tab === 'dashboard' && <RestaurantDashboard onGoToOrders={() => setTab('orders')} restaurantName={profile?.businessName || 'The Burger Lab'} />}
       {tab === 'orders'    && <OrdersTab />}
-      {tab === 'menu'      && <MenuTab />}
+      {tab === 'menu'      && <MenuTab items={menuItems} setItems={setMenuItems} />}
       {tab === 'analytics' && <AnalyticsTab />}
+      {tab === 'profile'   && <div style={{ backgroundColor: C.bg, minHeight: '100vh', padding: '56px 16px 100px' }}><ProfileForm role="restaurant" accountId={accountId} fullName={fullName} onSignOut={onSignOut} /></div>}
       <RestaurantNav tab={tab} onTab={setTab} newOrders={newOrders} />
       <RestaurantChatbot />
+      <HamburgerMenu role="Restaurant owner" items={secondaryMenuItems} />
     </div>
   )
 }

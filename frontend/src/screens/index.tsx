@@ -5,6 +5,7 @@ import { SectionHeader, RestaurantCard, CartFAB, BackButton } from '../component
 import { RESTAURANTS, MENU_ITEMS, CATEGORIES, ONBOARDING } from '../data/mockData';
 import { CartItem, Screen, type NavTab } from '../types';
 import { API_BASE } from '../services/api';
+import { ProfileForm } from '../profileManagement';
 
 function SplashScreen() {
   return (
@@ -111,7 +112,7 @@ function HomeScreen({ onRestaurantClick, onSearch, onNotifications, cartTotal, c
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 16 }}>
           <Icon.Pin />
-          <span style={{ fontSize: 13, color: C.text, fontWeight: 600 }}>123 Main St, San Francisco</span>
+          <span style={{ fontSize: 13, color: C.text, fontWeight: 600 }}>Bhubaneswar, Odisha</span>
           <Icon.Chevron dir="down" color={C.muted} />
         </div>
         <button onClick={onSearch} style={{ width: '100%', padding: '13px 16px', backgroundColor: C.bgGray, border: `1.5px solid ${C.border}`, borderRadius: 14, display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', textAlign: 'left' }}>
@@ -416,7 +417,7 @@ function FoodDetailScreen({ food, restaurant, onBack, onAddToCart }: any) {
 function CartScreen({ cart, onBack, onAddItem, onRemoveItem, onCheckout, cartTotal }: any) {
   const [coupon, setCoupon] = useState('')
   const [couponOk, setCouponOk] = useState(false)
-  const [address, setAddress] = useState('123 Main Street, Apt 4B')
+  const [address, setAddress] = useState('Bhubaneswar, Odisha')
   const fee = 29, tax = cartTotal * 0.05
   const discount = couponOk ? (cartTotal + fee + tax) * 0.1 : 0
   const total = cartTotal + fee + tax - discount
@@ -503,7 +504,7 @@ function CartScreen({ cart, onBack, onAddItem, onRemoveItem, onCheckout, cartTot
           <div style={{ flex: 1 }}>
             <p style={{ fontSize: 11, color: C.muted, margin: '0 0 2px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>Delivering to</p>
             <p style={{ fontSize: 14, fontWeight: 700, color: C.text, margin: 0 }}>{address}</p>
-            <p style={{ fontSize: 12, color: C.muted, margin: '2px 0 0' }}>San Francisco, CA 94105</p>
+            <p style={{ fontSize: 12, color: C.muted, margin: '2px 0 0' }}>Bhubaneswar, Odisha, India</p>
           </div>
           <button onClick={() => { const next = window.prompt('Enter delivery address', address); if (next?.trim()) setAddress(next.trim()) }} style={{ color: C.red, fontSize: 13, fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer' }}>Change</button>
         </div>
@@ -520,7 +521,7 @@ function CartScreen({ cart, onBack, onAddItem, onRemoveItem, onCheckout, cartTot
 function CheckoutScreen({ onBack, onPlaceOrder, cartTotal }: any) {
   const [payment, setPayment] = useState('card')
   const [instructions, setInstructions] = useState('')
-  const [address, setAddress] = useState('123 Main Street, Apt 4B, San Francisco, CA 94105')
+  const [address, setAddress] = useState('Bhubaneswar, Odisha, India')
   const fee = 29, tax = cartTotal * 0.05, total = cartTotal + fee + tax
   const methods = [
     { id: 'card', label: 'Credit / Debit Card', icon: '💳', sub: 'Visa ending in 4242' },
@@ -604,15 +605,36 @@ function CheckoutScreen({ onBack, onPlaceOrder, cartTotal }: any) {
   )
 }
 
-function OrderTrackingScreen({ onBack, onViewSuccess }: any) {
+function OrderTrackingScreen({ onBack }: any) {
   const [step, setStep] = useState(1)
+  const [zoom, setZoom] = useState(14)
   useEffect(() => {
     const t1 = setTimeout(() => setStep(2), 2000)
     const t2 = setTimeout(() => setStep(3), 4500)
     const t3 = setTimeout(() => setStep(4), 7500)
-    const t4 = setTimeout(onViewSuccess, 8800)
-    return () => [t1, t2, t3, t4].forEach(clearTimeout)
+    return () => [t1, t2, t3].forEach(clearTimeout)
   }, [])
+
+  const latitude = 20.2961
+  const longitude = 85.8245
+  const tileCount = 2 ** zoom
+  const centerX = ((longitude + 180) / 360) * tileCount
+  const latitudeRadians = (latitude * Math.PI) / 180
+  const centerY = ((1 - Math.asinh(Math.tan(latitudeRadians)) / Math.PI) / 2) * tileCount
+  const centerTileX = Math.floor(centerX)
+  const centerTileY = Math.floor(centerY)
+  const markerLeft = (centerX - centerTileX + 1) * 256
+  const markerTop = (centerY - centerTileY + 1) * 256
+  const mapTiles = Array.from({ length: 9 }, (_, index) => {
+    const column = index % 3
+    const row = Math.floor(index / 3)
+    const x = centerTileX + column - 1
+    const y = centerTileY + row - 1
+    return {
+      key: `${zoom}-${x}-${y}`,
+      src: `https://tile.openstreetmap.org/${zoom}/${x}/${y}.png`,
+    }
+  })
 
   const steps = [
     { label: 'Order Confirmed', desc: 'Your order has been received', time: '2:30 PM' },
@@ -626,27 +648,53 @@ function OrderTrackingScreen({ onBack, onViewSuccess }: any) {
       <div style={{ padding: '56px 20px 16px', borderBottom: `1px solid ${C.border}` }}>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 2 }}>
           <BackButton onClick={onBack} />
-          <h1 style={{ fontSize: 20, fontWeight: 800, color: C.text, margin: 0 }}>Live Tracking</h1>
+          <h1 style={{ fontSize: 20, fontWeight: 800, color: C.text, margin: 0 }}>Delivery Map</h1>
         </div>
         <p style={{ fontSize: 13, color: C.muted, margin: '4px 0 0 52px' }}>Order #SWB-20847</p>
       </div>
 
-      {/* Map mockup */}
-      <div style={{ height: 220, background: 'linear-gradient(135deg, #E8F4FD 0%, #FFF3E0 50%, #F0FDF4 100%)', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.18 }} viewBox="0 0 430 220" fill="none">
-          {[40, 80, 120, 160, 200].map(y => <line key={y} x1="0" y1={y} x2="430" y2={y} stroke="#9CA3AF" strokeWidth="1"/>)}
-          {[60, 120, 180, 240, 300, 360].map(x => <line key={x} x1={x} y1="0" x2={x} y2="220" stroke="#9CA3AF" strokeWidth="1"/>)}
-        </svg>
-        <div style={{ textAlign: 'center', zIndex: 1 }}>
-          <div className={step >= 3 ? 'animate-swift-bounce' : ''} style={{ fontSize: 52, marginBottom: 10 }}>
-            {step >= 4 ? '🏠' : step >= 3 ? '🛵' : step >= 2 ? '👨‍🍳' : '✅'}
-          </div>
-          <div style={{ backgroundColor: C.surface, borderRadius: 14, padding: '10px 20px', boxShadow: '0 4px 16px rgba(0,0,0,0.14)' }}>
-            <p style={{ fontSize: 13, fontWeight: 700, color: C.text, margin: 0 }}>{steps[Math.min(step - 1, 3)].label}</p>
-            <p style={{ fontSize: 11, color: C.muted, margin: '3px 0 0' }}>ETA: {step < 4 ? '25 min' : 'Arrived!'}</p>
-          </div>
+      <div
+        role="region"
+        aria-label="OpenStreetMap centered on Bhubaneswar"
+        style={{ height: 260, maxWidth: 768, margin: '0 auto', overflow: 'hidden', position: 'relative', backgroundColor: '#e8e5df' }}
+      >
+        <div style={{ position: 'absolute', width: 768, height: 768, left: '50%', top: '50%', transform: 'translate(-50%, -50%)', display: 'grid', gridTemplateColumns: 'repeat(3, 256px)', gridTemplateRows: 'repeat(3, 256px)' }}>
+          {mapTiles.map(tile => (
+            <img key={tile.key} src={tile.src} alt="" draggable={false} width={256} height={256} />
+          ))}
+          <div
+            role="img"
+            aria-label="Approximate Bhubaneswar city-center marker"
+            style={{
+              position: 'absolute',
+              left: markerLeft,
+              top: markerTop,
+              width: 18,
+              height: 18,
+              borderRadius: '50%',
+              backgroundColor: C.red,
+              border: '3px solid white',
+              boxShadow: '0 1px 5px rgba(0,0,0,0.4)',
+              transform: 'translate(-50%, -50%)',
+            }}
+          />
+        </div>
+        <div style={{ position: 'absolute', right: 12, top: 12, display: 'flex', flexDirection: 'column', borderRadius: 8, overflow: 'hidden', boxShadow: '0 1px 5px rgba(0,0,0,0.25)' }}>
+          <button type="button" aria-label="Zoom in" onClick={() => setZoom(value => Math.min(value + 1, 18))} style={{ width: 34, height: 34, border: 0, borderBottom: `1px solid ${C.border}`, backgroundColor: C.surface, color: C.text, fontSize: 20, cursor: 'pointer' }}>+</button>
+          <button type="button" aria-label="Zoom out" onClick={() => setZoom(value => Math.max(value - 1, 10))} style={{ width: 34, height: 34, border: 0, backgroundColor: C.surface, color: C.text, fontSize: 20, cursor: 'pointer' }}>−</button>
         </div>
       </div>
+      <p style={{ margin: 0, padding: '8px 20px', color: C.muted, fontSize: 11, textAlign: 'center' }}>
+        Bhubaneswar, Odisha · Interactive map; rider location is not live
+      </p>
+      <a
+        href="https://www.openstreetmap.org/?mlat=20.2961&mlon=85.8245#map=14/20.2961/85.8245"
+        target="_blank"
+        rel="noreferrer"
+        style={{ display: 'block', marginBottom: 8, color: C.muted, fontSize: 11, textAlign: 'center' }}
+      >
+        Map data © OpenStreetMap contributors · Open full map
+      </a>
 
       {/* Delivery partner */}
       <div style={{ padding: '14px 20px', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -803,7 +851,7 @@ function NotificationsScreen() {
 
 function ProfileScreen({ onSwitchRole, onSettings, onNavigate, onSignOut, user }: { onSwitchRole: () => void; onSettings: () => void; onNavigate: (label: string) => void; onSignOut: () => void; user?: { fullName: string; identifier: string } }) {
   const rows = [
-    { icon: '📍', label: 'Saved Addresses', sub: '3 addresses saved' },
+    { icon: '📍', label: 'Saved Addresses', sub: 'Manage your delivery details' },
     { icon: '💳', label: 'Payment Methods', sub: 'Visa, Apple Pay' },
     { icon: '❤️', label: 'Favourite Restaurants', sub: '2 restaurants' },
     { icon: '📦', label: 'Order History', sub: 'View past orders' },
@@ -836,6 +884,9 @@ function ProfileScreen({ onSwitchRole, onSettings, onNavigate, onSignOut, user }
             </div>
           ))}
         </div>
+      </div>
+      <div style={{ padding: '16px 20px 0' }}>
+        <ProfileForm role="customer" accountId={user?.identifier || 'demo-customer'} fullName={user?.fullName || 'SwiftBite Member'} />
       </div>
       <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
         {rows.map((r) => (

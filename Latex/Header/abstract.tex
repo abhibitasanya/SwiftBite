@@ -14,11 +14,11 @@ SwiftBite is a web-based food-ordering prototype developed to demonstrate a cust
 
 \vspace{0.5cm}
 
-The customer storefront currently uses bundled sample restaurant and menu data. Cart, checkout, and order-status interactions are demonstrations and do not yet create persistent orders or process payments. The frontend communicates with the backend for account registration and login and for chatbot assistance. The Express and TypeScript backend exposes additional API routes for restaurants, profiles, menu items, uploads, orders, dashboards, and chatbot requests. The backend is connected to MySQL: the eight-table schema was initialized, four restaurants and four categories were seeded, and the restaurant API was verified to return database-backed records. Authentication retains a file-backed fallback if database operations fail.
+The customer storefront currently uses bundled sample restaurant and menu data. Cart, checkout, and order-status interactions are demonstrations and do not yet create persistent orders or process payments. The delivery screen loads OpenStreetMap tiles centered on Bhubaneswar with zoom controls, but its city-center marker and order timeline are demonstrations rather than live rider tracking. The frontend communicates with the backend for account registration and login and for chatbot assistance. The Express and TypeScript backend exposes additional API routes for restaurants, profiles, menu items, uploads, orders, dashboards, and chatbot requests. The backend is connected to MySQL: the eight-table schema was initialized, four restaurants and four categories were seeded, and the restaurant API was verified to return database-backed records. Authentication retains a file-backed fallback if database operations fail.
 
 \vspace{0.5cm}
 
-The chatbot can use the Google Gemini service when a server API key is configured; a local rule-based response function is available as a fallback. The admin, restaurant-owner, and delivery-partner portals are demonstration interfaces and are not protected by complete server-side role authorization. This report describes the implemented prototype and distinguishes it from integrations and production features that remain future work.
+The backend Gemini integration successfully generated a recipe response during chatbot testing, as shown in the results section. It retries transient primary-model failures, tries a secondary model if the primary fails, and retains a local rule-based response path if Gemini is unavailable. The chatbot does not access live order data or place orders. The admin, restaurant-owner, and delivery-partner portals are demonstration interfaces and are not protected by complete server-side role authorization.
 
 \vspace{5mm}
 

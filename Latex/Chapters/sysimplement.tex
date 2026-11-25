@@ -14,13 +14,13 @@ The backend is a Node.js and Express API written in TypeScript. It provides rout
 The backend is connected to MySQL through a connection pool whose settings are read from environment variables. The eight-table schema was initialized, and the restaurant API returns records from MySQL. The schema defines users, restaurants, rider and restaurant profiles, categories, menu items, uploaded images, and orders. Authentication can use a file-backed fallback when database operations fail. The customer storefront still uses bundled data, and its cart and checkout screens do not create persistent orders.
 
 \item \textbf{Chatbot Module:}
-The chatbot can call the backend assistant endpoint and use Gemini when configured with a server-side API key. A local rule-based response function is also available. The assistant provides app guidance; it does not implement personalized food recommendations or place orders on the user's behalf.
+The chatbot calls the backend assistant endpoint and uses Gemini with a server-side API key. The configured primary model is \texttt{gemini-3.8-flash}; transient HTTP 429 and 5xx errors trigger one retry with exponential backoff and jitter. If primary generation fails, the backend tries \texttt{gemini-3.6-flash} once, then the chatbot route retains its local rule-based fallback. Conversation history is passed to the model, and a Gemini-generated recipe response was verified during testing. The assistant provides guidance; it does not access live order data, provide personalized food recommendations, or place orders on the user's behalf.
 
 \end{itemize}
 
 \section{Current Application Screens}
 
-The following screenshots were captured from the current frontend. The order and portal screens are demonstrations and should not be interpreted as evidence of live payment processing, persistent orders, GPS tracking, or production authorization.
+The following screenshots were captured from the current frontend. After the confirmation screen, the delivery screen displays zoomable OpenStreetMap tiles centered on Bhubaneswar. Its approximate city-center marker and scripted order timeline are demonstrations, not live rider GPS tracking. The screens should not be interpreted as evidence of live payment processing, persistent orders, or production authorization.
 
 \subsection{Landing Page and Customer Home}
 
@@ -74,15 +74,15 @@ The following screenshots were captured from the current frontend. The order and
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth,height=0.9\textheight,keepaspectratio]{Chapters/order_tracking.png}
-    \caption{Demonstration order-status and tracking screen}
+    \includegraphics[width=0.9\textwidth,height=0.9\textheight,keepaspectratio]{Chapters/order_tracking_bhubaneswar_app.png}
+    \caption{SwiftBite delivery screen with zoomable OpenStreetMap tiles centered on Bhubaneswar; rider location is not live}
     \label{fig:tracking_current}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth,height=0.4\textheight,keepaspectratio]{Chapters/chatbot_test.png}
-    \caption{Chatbot response to an app-guidance question}
+    \caption{Local rule-based chatbot fallback response to an app-guidance question}
     \label{fig:chatbot_current}
 \end{figure}
 

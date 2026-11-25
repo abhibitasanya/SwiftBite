@@ -9,6 +9,8 @@ import { SplashScreen, OnboardingScreen, HomeScreen, RestaurantListScreen, Resta
 import { Restaurant, MenuItem, CartItem, Screen, type NavTab } from './types';
 import { MENU_ITEMS } from './data/mockData';
 import C from './theme/colors';
+import { isProfileComplete, ProfileForm, useDemoProfiles } from './profileManagement';
+import HamburgerMenu, { type HamburgerMenuItem } from './components/HamburgerMenu';
 
 declare global {
   interface BeforeInstallPromptEvent extends Event {
@@ -88,6 +90,7 @@ export default function App() {
       return null
     }
   })
+  const demoProfiles = useDemoProfiles()
   const normalizeRole = (role: string): Role => role === 'platform' ? 'admin' : role === 'delivery' || role === 'restaurant' ? role : 'customer'
   const [role, setRole] = useState<Role>(() => sessionUser ? normalizeRole(sessionUser.role) : 'customer')
   const [showRoleSelector, setShowRoleSelector] = useState(false)
@@ -255,9 +258,49 @@ export default function App() {
     setShowRoleSelector(false)
   }
 
-  if (role === 'admin')      return <><AdminPortal />{showRoleSelector && <RoleSelector current={role} onSelect={selectRole} onClose={() => setShowRoleSelector(false)} />}<SwitchRoleButton onClick={() => setShowRoleSelector(true)} />{sharedChatbot}</>
-  if (role === 'delivery')   return <><DeliveryPortal />{showRoleSelector && <RoleSelector current={role} onSelect={selectRole} onClose={() => setShowRoleSelector(false)} />}<SwitchRoleButton onClick={() => setShowRoleSelector(true)} />{sharedChatbot}</>
-  if (role === 'restaurant') return <><RestaurantPortal />{showRoleSelector && <RoleSelector current={role} onSelect={selectRole} onClose={() => setShowRoleSelector(false)} />}<SwitchRoleButton onClick={() => setShowRoleSelector(true)} />{sharedChatbot}</>
+  const signOut = () => {
+    localStorage.removeItem('swiftbite-session')
+    setSessionUser(null)
+    setRole('customer')
+    setCart([])
+    setHistory([])
+    setScreen('auth-login')
+  }
+
+  const profileRole = role === 'delivery' || role === 'restaurant' ? role : 'customer'
+  const profileAccountId = sessionUser?.identifier || `demo-${profileRole}`
+  const profileName = sessionUser?.fullName || (profileRole === 'delivery' ? 'Delivery Partner' : profileRole === 'restaurant' ? 'Restaurant Owner' : 'SwiftBite Member')
+  const currentProfile = demoProfiles.find(profile => profile.accountId === profileAccountId && profile.role === profileRole)
+  const customerMenuItems: HamburgerMenuItem[] = [
+    { label: 'Profile & verification', description: 'Contact details and review status', icon: '👤', onSelect: () => goto('profile') },
+    { label: 'Settings', description: 'Notifications and preferences', icon: '⚙️', onSelect: () => goto('settings') },
+    { label: 'Help Centre', description: 'Support and app help', icon: '🎧', onSelect: () => window.alert('Help Centre is a demo placeholder; support content is not configured yet.') },
+    { label: 'Sign out', icon: '🚪', danger: true, onSelect: signOut },
+  ]
+  const setupMenuItems: HamburgerMenuItem[] = [
+    { label: 'Help Centre', description: 'Support and app help', icon: '🎧', onSelect: () => window.alert('Help Centre is a demo placeholder; support content is not configured yet.') },
+    { label: 'Sign out', icon: '🚪', danger: true, onSelect: signOut },
+  ]
+
+  if (role !== 'admin' && !isProfileComplete(currentProfile) && (sessionUser || role !== 'customer')) {
+    return (
+      <div style={{ minHeight: '100vh', padding: '24px 16px', backgroundColor: '#F9FAFB', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <HamburgerMenu role={profileRole === 'customer' ? 'Customer' : profileRole === 'delivery' ? 'Delivery partner' : 'Restaurant owner'} items={setupMenuItems} />
+        <ProfileForm
+          role={profileRole}
+          accountId={profileAccountId}
+          fullName={profileName}
+          required
+          onSaved={() => setScreen('home')}
+          onSignOut={signOut}
+        />
+      </div>
+    )
+  }
+
+  if (role === 'admin')      return <><AdminPortal onSignOut={signOut} />{showRoleSelector && <RoleSelector current={role} onSelect={selectRole} onClose={() => setShowRoleSelector(false)} />}<SwitchRoleButton onClick={() => setShowRoleSelector(true)} />{sharedChatbot}</>
+  if (role === 'delivery')   return <><DeliveryPortal accountId={profileAccountId} fullName={profileName} onSignOut={signOut} />{showRoleSelector && <RoleSelector current={role} onSelect={selectRole} onClose={() => setShowRoleSelector(false)} />}<SwitchRoleButton onClick={() => setShowRoleSelector(true)} />{sharedChatbot}</>
+  if (role === 'restaurant') return <><RestaurantPortal accountId={profileAccountId} fullName={profileName} onSignOut={signOut} />{showRoleSelector && <RoleSelector current={role} onSelect={selectRole} onClose={() => setShowRoleSelector(false)} />}<SwitchRoleButton onClick={() => setShowRoleSelector(true)} />{sharedChatbot}</>
 
   if (screen === 'landing') {
     return <><LandingPageScreen onGetStarted={() => goto('splash')} onInstall={installApp} installAvailable={installAvailable} />{sharedChatbot}</>
@@ -276,8 +319,8 @@ export default function App() {
           {screen === 'restaurant-detail' && selRestaurant && <RestaurantDetailScreen restaurant={selRestaurant} onBack={goBack} onFoodClick={(f: MenuItem) => { setSelFood(f); goto('food-detail') }} onAddToCart={(f: MenuItem) => addToCart(f, selRestaurant.name)} onRemoveFromCart={removeFromCart} cart={cart} cartTotal={cartTotal} cartCount={cartCount} onCartClick={() => goto('cart')} favorites={favorites} onFav={toggleFav} />}
           {screen === 'food-detail' && selFood && <FoodDetailScreen food={selFood} restaurant={selRestaurant?.name || ''} onBack={goBack} onAddToCart={() => { addToCart(selFood, selRestaurant?.name || ''); goBack() }} />}
           {screen === 'cart' && <CartScreen cart={cart} onBack={goBack} onAddItem={(id: number) => { const it = MENU_ITEMS.find(m => m.id === id); if (it) addToCart(it, selRestaurant?.name || '') }} onRemoveItem={removeFromCart} onCheckout={() => goto('checkout')} cartTotal={cartTotal} />}
-          {screen === 'checkout' && <CheckoutScreen onBack={goBack} onPlaceOrder={() => goto('tracking')} cartTotal={cartTotal} />}
-          {screen === 'tracking' && <OrderTrackingScreen onBack={() => { setCart([]); goto('home') }} onViewSuccess={() => goto('success')} />}
+          {screen === 'checkout' && <CheckoutScreen onBack={goBack} onPlaceOrder={() => goto('success')} cartTotal={cartTotal} />}
+          {screen === 'tracking' && <OrderTrackingScreen onBack={() => { setCart([]); goto('home') }} />}
           {screen === 'success' && <OrderSuccessScreen onDone={() => { setCart([]); goto('home') }} onTrack={() => goto('tracking')} />}
           {screen === 'auth-login'  && <LoginScreen onLogin={(user) => { const normalized = { ...user, role: normalizeRole(user.role) }; setSessionUser(normalized); localStorage.setItem('swiftbite-session', JSON.stringify(normalized)); setRole(normalized.role); setHistory([]); setScreen(normalized.role === 'customer' ? 'home' : normalized.role === 'admin' ? 'home' : 'home') }} onSignUp={() => goto('auth-signup')} onForgot={() => goto('auth-forgot')} />}
           {screen === 'auth-signup' && <SignUpScreen onSignUp={() => goto('auth-login')} onLogin={() => goto('auth-login')} />}
@@ -287,8 +330,8 @@ export default function App() {
           {screen === 'history' && <OrderHistoryScreen />}
           {screen === 'favorites' && <FavoritesScreen favorites={favorites} onRestaurantClick={(r: Restaurant) => { setSelRestaurant(r); goto('restaurant-detail') }} onFav={toggleFav} />}
           {screen === 'notifications' && <NotificationsScreen />}
-          {screen === 'profile' && <ProfileScreen onSwitchRole={() => setShowRoleSelector(true)} onSettings={() => goto('settings')} onNavigate={(label) => { if (label === 'Order History') goto('history'); else if (label === 'Favourite Restaurants') goto('favorites'); else window.alert(`${label} opened`) }} onSignOut={() => { localStorage.removeItem('swiftbite-session'); setSessionUser(null); setRole('customer'); setCart([]); setHistory([]); setScreen('auth-login') }} user={sessionUser || undefined} />}
-          {screen === 'settings' && <SettingsScreen onBack={goBack} onSignOut={() => { localStorage.removeItem('swiftbite-session'); setSessionUser(null); setRole('customer'); setCart([]); setHistory([]); setScreen('auth-login') }} />}
+          {screen === 'profile' && <ProfileScreen onSwitchRole={() => setShowRoleSelector(true)} onSettings={() => goto('settings')} onNavigate={(label) => { if (label === 'Order History') goto('history'); else if (label === 'Favourite Restaurants') goto('favorites'); else window.alert(`${label} opened`) }} onSignOut={signOut} user={sessionUser || undefined} />}
+          {screen === 'settings' && <SettingsScreen onBack={goBack} onSignOut={signOut} />}
         </div>
 
         <button
@@ -489,6 +532,7 @@ export default function App() {
           </nav>
         )}
       </div>
+      {sessionUser && <HamburgerMenu role="Customer" items={customerMenuItems} />}
     </div>
   )
 }

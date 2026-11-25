@@ -1,5 +1,7 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, type Dispatch, type FormEvent, type SetStateAction } from 'react'
 import { askChatbot } from '../services/chatbot'
+import { reviewDemoProfile, useDemoProfiles, type DemoProfile, type ProfileRole } from '../profileManagement'
+import HamburgerMenu from '../components/HamburgerMenu'
 
 const C = {
   primary: '#7C3AED',
@@ -19,7 +21,7 @@ const C = {
   orangeLight: '#FFF7ED',
 }
 
-type AdminTab = 'dashboard' | 'orders' | 'restaurants' | 'users'
+type AdminTab = 'dashboard' | 'orders' | 'restaurants' | 'riders' | 'users' | 'verify'
 
 const STATS = [
   { label: 'Orders Today',    value: '12,847',  delta: '+18%',  positive: true,  icon: '📦', color: C.primary,    bg: C.primaryLight },
@@ -51,6 +53,15 @@ const ALL_RESTAURANTS = [
   { name: 'Green Bowl',      cuisine: 'Healthy',   orders: 98,  revenue: '₹1,63,000', rating: 4.9, status: 'Active' },
   { name: 'Wok & Roll',      cuisine: 'Asian Fusion', orders: 210, revenue: '₹3,49,000', rating: 4.4, status: 'Suspended' },
 ]
+type AdminRestaurant = (typeof ALL_RESTAURANTS)[number]
+
+type AdminRider = { id: string; name: string; zone: string; status: string }
+
+const INITIAL_RIDERS: AdminRider[] = [
+  { id: 'rider-1', name: 'Aarav Das', zone: 'Bhubaneswar North', status: 'Active' },
+  { id: 'rider-2', name: 'Meera Patel', zone: 'Bhubaneswar Central', status: 'Active' },
+  { id: 'rider-3', name: 'Kabir Sahu', zone: 'Bhubaneswar South', status: 'Suspended' },
+]
 
 const USERS = [
   { name: 'Alex Johnson',   email: 'alex.j@gmail.com',   orders: 47,  spent: '₹69,886', joined: 'Mar 2024', status: 'Active' },
@@ -70,6 +81,8 @@ const STATUS_STYLE: Record<string, { color: string; bg: string }> = {
   'Active':     { color: C.green,  bg: C.greenLight },
   'Suspended':  { color: C.red,    bg: C.redLight },
   'Verified':   { color: C.green,  bg: C.greenLight },
+  'Pending review': { color: '#D97706', bg: '#FFFBEB' },
+  'Changes requested': { color: C.red, bg: C.redLight },
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -86,12 +99,14 @@ function AdminNav({ tab, onTab }: { tab: AdminTab; onTab: (t: AdminTab) => void 
     { id: 'dashboard',   label: 'Dashboard',   icon: '📊' },
     { id: 'orders',      label: 'Orders',      icon: '📦' },
     { id: 'restaurants', label: 'Restaurants', icon: '🍽️' },
+    { id: 'riders',      label: 'Riders',      icon: '🛵' },
     { id: 'users',       label: 'Users',       icon: '👥' },
+    { id: 'verify',      label: 'Verify',      icon: '✅' },
   ]
   return (
     <nav className="portal-bottom-nav">
       {tabs.map(t => (
-        <button key={t.id} onClick={() => onTab(t.id)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', padding: '0 16px' }}>
+        <button key={t.id} onClick={() => onTab(t.id)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', padding: '0 8px' }}>
           <span style={{ fontSize: 20 }}>{t.icon}</span>
           <span style={{ fontSize: 10, fontWeight: tab === t.id ? 700 : 500, color: tab === t.id ? C.primary : C.muted }}>{t.label}</span>
           {tab === t.id && <div style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: C.primary }} />}
@@ -260,16 +275,69 @@ function OrdersTab() {
 }
 
 // ── Restaurant Management ─────────────────────────────────────────────────────
-function RestaurantsTab() {
+function RestaurantsTab({ restaurants, setRestaurants }: { restaurants: AdminRestaurant[]; setRestaurants: Dispatch<SetStateAction<AdminRestaurant[]>> }) {
   const [search, setSearch] = useState('')
-  const shown = ALL_RESTAURANTS.filter(r => r.name.toLowerCase().includes(search.toLowerCase()))
+  const [formOpen, setFormOpen] = useState(false)
+  const [formError, setFormError] = useState('')
+  const [draft, setDraft] = useState({ name: '', cuisine: '' })
+  const shown = restaurants.filter(r => r.name.toLowerCase().includes(search.toLowerCase()))
+
+  const addRestaurant = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const name = draft.name.trim()
+    const cuisine = draft.cuisine.trim()
+    if (!name || !cuisine) {
+      setFormError('Enter both a restaurant name and cuisine.')
+      return
+    }
+    if (restaurants.some(restaurant => restaurant.name.toLowerCase() === name.toLowerCase())) {
+      setFormError('A restaurant with this name is already in the demo list.')
+      return
+    }
+
+    setRestaurants(prev => [{
+      name,
+      cuisine,
+      orders: 0,
+      revenue: '₹0',
+      rating: 0,
+      status: 'Active',
+    }, ...prev])
+    setDraft({ name: '', cuisine: '' })
+    setFormError('')
+    setFormOpen(false)
+  }
 
   return (
     <div style={{ backgroundColor: C.bg, minHeight: '100vh', paddingBottom: 100 }}>
       <div style={{ background: `linear-gradient(135deg, ${C.primary} 0%, #5B21B6 100%)`, padding: '56px 20px 20px' }}>
-        <h1 style={{ color: 'white', fontSize: 22, fontWeight: 800, margin: '0 0 4px', letterSpacing: -0.4 }}>Restaurants</h1>
-        <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, margin: 0 }}>{ALL_RESTAURANTS.length} registered · 3 pending approval</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+          <div>
+            <h1 style={{ color: 'white', fontSize: 22, fontWeight: 800, margin: '0 0 4px', letterSpacing: -0.4 }}>Restaurants</h1>
+            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, margin: 0 }}>{restaurants.length} registered · 3 pending approval</p>
+          </div>
+          <button type="button" onClick={() => { setFormOpen(value => !value); setFormError('') }} style={{ backgroundColor: 'rgba(255,255,255,0.15)', border: '1.5px solid rgba(255,255,255,0.3)', borderRadius: 10, padding: '9px 12px', color: 'white', fontSize: 12, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>+ Add Restaurant</button>
+        </div>
+        <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: 11, margin: '8px 0 0' }}>Demo only: changes reset when the page is refreshed.</p>
       </div>
+      {formOpen && (
+        <form onSubmit={addRestaurant} style={{ margin: 16, padding: 16, backgroundColor: 'white', borderRadius: 16, border: `1px solid ${C.border}` }}>
+          <h2 style={{ margin: '0 0 12px', color: C.text, fontSize: 16 }}>Add a restaurant</h2>
+          <label style={{ display: 'block', marginBottom: 10, color: C.muted, fontSize: 12 }}>
+            Restaurant name
+            <input autoFocus required maxLength={100} value={draft.name} onChange={event => setDraft(prev => ({ ...prev, name: event.target.value }))} style={{ display: 'block', width: '100%', boxSizing: 'border-box', marginTop: 5, padding: 10, border: `1px solid ${C.border}`, borderRadius: 9, color: C.text }} />
+          </label>
+          <label style={{ display: 'block', color: C.muted, fontSize: 12 }}>
+            Cuisine
+            <input required maxLength={80} value={draft.cuisine} onChange={event => setDraft(prev => ({ ...prev, cuisine: event.target.value }))} style={{ display: 'block', width: '100%', boxSizing: 'border-box', marginTop: 5, padding: 10, border: `1px solid ${C.border}`, borderRadius: 9, color: C.text }} />
+          </label>
+          {formError && <p role="alert" style={{ margin: '10px 0 0', color: C.red, fontSize: 12 }}>{formError}</p>}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 14 }}>
+            <button type="button" onClick={() => setFormOpen(false)} style={{ padding: '8px 12px', border: `1px solid ${C.border}`, borderRadius: 9, backgroundColor: 'white', color: C.muted, cursor: 'pointer' }}>Cancel</button>
+            <button type="submit" style={{ padding: '8px 14px', border: 0, borderRadius: 9, backgroundColor: C.primary, color: 'white', fontWeight: 700, cursor: 'pointer' }}>Add restaurant</button>
+          </div>
+        </form>
+      )}
       <div style={{ backgroundColor: 'white', padding: '12px 20px', borderBottom: `1px solid ${C.border}` }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, backgroundColor: '#F9FAFB', border: `1.5px solid ${C.border}`, borderRadius: 14, padding: '11px 14px' }}>
           <span style={{ fontSize: 16 }}>🔍</span>
@@ -300,14 +368,89 @@ function RestaurantsTab() {
             </div>
             <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
               <button onClick={() => window.alert(`${r.name}\n${r.cuisine}\n${r.orders} orders\nRevenue: ${r.revenue}`)} style={{ flex: 1, padding: '8px', backgroundColor: C.primaryLight, color: C.primary, border: `1px solid ${C.primaryBorder}`, borderRadius: 10, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>View Details</button>
-              {r.status === 'Active' ? (
-                <button onClick={() => window.alert(`${r.name} suspended`)} style={{ flex: 1, padding: '8px', backgroundColor: C.redLight, color: C.red, border: `1px solid #FECDD3`, borderRadius: 10, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Suspend</button>
-              ) : (
-                <button onClick={() => window.alert(`${r.name} restored`)} style={{ flex: 1, padding: '8px', backgroundColor: C.greenLight, color: C.green, border: `1px solid #BBF7D0`, borderRadius: 10, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Restore</button>
-              )}
+              <button onClick={() => setRestaurants(prev => prev.map(item => item.name === r.name ? { ...item, status: item.status === 'Active' ? 'Suspended' : 'Active' } : item))} style={{ flex: 1, padding: '8px', backgroundColor: r.status === 'Active' ? C.redLight : C.greenLight, color: r.status === 'Active' ? C.red : C.green, border: `1px solid ${r.status === 'Active' ? '#FECDD3' : '#BBF7D0'}`, borderRadius: 10, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>{r.status === 'Active' ? 'Suspend' : 'Restore'}</button>
+              <button onClick={() => { if (window.confirm(`Remove ${r.name} from this demo list?`)) setRestaurants(prev => prev.filter(item => item.name !== r.name)) }} style={{ flex: 1, padding: '8px', backgroundColor: '#FFF1F2', color: C.red, border: '1px solid #FECDD3', borderRadius: 10, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Remove</button>
             </div>
           </div>
         ))}
+        {shown.length === 0 && <p style={{ color: C.muted, textAlign: 'center', fontSize: 13 }}>No restaurants match this search.</p>}
+      </div>
+    </div>
+  )
+}
+
+function RidersTab({ riders, setRiders }: { riders: AdminRider[]; setRiders: Dispatch<SetStateAction<AdminRider[]>> }) {
+  const [search, setSearch] = useState('')
+  const [formOpen, setFormOpen] = useState(false)
+  const [formError, setFormError] = useState('')
+  const [draft, setDraft] = useState({ name: '', zone: '' })
+  const shown = riders.filter(rider => `${rider.name} ${rider.zone}`.toLowerCase().includes(search.toLowerCase()))
+
+  const addRider = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const name = draft.name.trim()
+    const zone = draft.zone.trim()
+    if (!name || !zone) {
+      setFormError('Enter both a rider name and delivery zone.')
+      return
+    }
+    setRiders(prev => [{ id: `rider-${Date.now()}`, name, zone, status: 'Active' }, ...prev])
+    setDraft({ name: '', zone: '' })
+    setFormError('')
+    setFormOpen(false)
+  }
+
+  return (
+    <div style={{ backgroundColor: C.bg, minHeight: '100vh', paddingBottom: 100 }}>
+      <div style={{ background: `linear-gradient(135deg, ${C.primary} 0%, #5B21B6 100%)`, padding: '56px 20px 20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+          <div>
+            <h1 style={{ color: 'white', fontSize: 22, fontWeight: 800, margin: '0 0 4px', letterSpacing: -0.4 }}>Delivery Riders</h1>
+            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, margin: 0 }}>{riders.length} riders in the demo list</p>
+          </div>
+          <button type="button" onClick={() => { setFormOpen(value => !value); setFormError('') }} style={{ backgroundColor: 'rgba(255,255,255,0.15)', border: '1.5px solid rgba(255,255,255,0.3)', borderRadius: 10, padding: '9px 12px', color: 'white', fontSize: 12, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>+ Add Rider</button>
+        </div>
+        <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: 11, margin: '8px 0 0' }}>Demo only: changes reset when the page is refreshed.</p>
+      </div>
+      {formOpen && (
+        <form onSubmit={addRider} style={{ margin: 16, padding: 16, backgroundColor: 'white', borderRadius: 16, border: `1px solid ${C.border}` }}>
+          <h2 style={{ margin: '0 0 12px', color: C.text, fontSize: 16 }}>Add a delivery rider</h2>
+          <label style={{ display: 'block', marginBottom: 10, color: C.muted, fontSize: 12 }}>
+            Rider name
+            <input autoFocus required maxLength={100} value={draft.name} onChange={event => setDraft(prev => ({ ...prev, name: event.target.value }))} style={{ display: 'block', width: '100%', boxSizing: 'border-box', marginTop: 5, padding: 10, border: `1px solid ${C.border}`, borderRadius: 9, color: C.text }} />
+          </label>
+          <label style={{ display: 'block', color: C.muted, fontSize: 12 }}>
+            Delivery zone
+            <input required maxLength={100} value={draft.zone} onChange={event => setDraft(prev => ({ ...prev, zone: event.target.value }))} style={{ display: 'block', width: '100%', boxSizing: 'border-box', marginTop: 5, padding: 10, border: `1px solid ${C.border}`, borderRadius: 9, color: C.text }} />
+          </label>
+          {formError && <p role="alert" style={{ margin: '10px 0 0', color: C.red, fontSize: 12 }}>{formError}</p>}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 14 }}>
+            <button type="button" onClick={() => setFormOpen(false)} style={{ padding: '8px 12px', border: `1px solid ${C.border}`, borderRadius: 9, backgroundColor: 'white', color: C.muted, cursor: 'pointer' }}>Cancel</button>
+            <button type="submit" style={{ padding: '8px 14px', border: 0, borderRadius: 9, backgroundColor: C.primary, color: 'white', fontWeight: 700, cursor: 'pointer' }}>Add rider</button>
+          </div>
+        </form>
+      )}
+      <div style={{ backgroundColor: 'white', padding: '12px 20px', borderBottom: `1px solid ${C.border}` }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, backgroundColor: '#F9FAFB', border: `1.5px solid ${C.border}`, borderRadius: 14, padding: '11px 14px' }}>
+          <span style={{ fontSize: 16 }}>🔍</span>
+          <input value={search} onChange={event => setSearch(event.target.value)} placeholder="Search riders or zones…" style={{ flex: 1, border: 'none', background: 'transparent', fontSize: 14, color: C.text, outline: 'none' }} />
+        </div>
+      </div>
+      <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {shown.map(rider => (
+          <div key={rider.id} style={{ backgroundColor: 'white', borderRadius: 18, padding: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: '#EFF6FF', display: 'grid', placeItems: 'center', fontSize: 22 }}>🛵</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ margin: '0 0 3px', color: C.text, fontSize: 14, fontWeight: 700 }}>{rider.name}</p>
+                <p style={{ margin: 0, color: C.muted, fontSize: 12 }}>{rider.zone}</p>
+              </div>
+              <StatusBadge status={rider.status} />
+            </div>
+            <button type="button" aria-label={`Remove rider ${rider.name}`} onClick={() => { if (window.confirm(`Remove ${rider.name} from this demo list?`)) setRiders(prev => prev.filter(item => item.id !== rider.id)) }} style={{ width: '100%', marginTop: 12, padding: 8, backgroundColor: '#FFF1F2', color: C.red, border: '1px solid #FECDD3', borderRadius: 10, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Remove Rider</button>
+          </div>
+        ))}
+        {shown.length === 0 && <p style={{ color: C.muted, textAlign: 'center', fontSize: 13 }}>No riders match this search.</p>}
       </div>
     </div>
   )
@@ -352,6 +495,53 @@ function UsersTab() {
             </div>
           </div>
         ))}
+      </div>
+    </div>
+  )
+}
+
+function VerificationTab({ profiles }: { profiles: DemoProfile[] }) {
+  const [search, setSearch] = useState('')
+  const shown = profiles.filter(profile => `${profile.fullName} ${profile.phone} ${profile.city} ${profile.businessName || ''}`.toLowerCase().includes(search.toLowerCase()))
+  const pendingCount = profiles.filter(profile => profile.status === 'Pending review').length
+  const roleLabel: Record<ProfileRole, string> = { customer: 'Customer', delivery: 'Delivery partner', restaurant: 'Restaurant owner' }
+
+  return (
+    <div style={{ backgroundColor: C.bg, minHeight: '100vh', paddingBottom: 100 }}>
+      <div style={{ background: `linear-gradient(135deg, ${C.primary} 0%, #5B21B6 100%)`, padding: '56px 20px 20px' }}>
+        <h1 style={{ color: 'white', fontSize: 22, fontWeight: 800, margin: '0 0 4px', letterSpacing: -0.4 }}>Profile verification</h1>
+        <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, margin: 0 }}>{pendingCount} pending · {profiles.length} submitted in this demo session</p>
+        <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: 11, margin: '8px 0 0' }}>Only contact and location details are shown. Driver proof is a mock status; no ID document is stored.</p>
+      </div>
+      <div style={{ backgroundColor: 'white', padding: '12px 20px', borderBottom: `1px solid ${C.border}` }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, backgroundColor: '#F9FAFB', border: `1.5px solid ${C.border}`, borderRadius: 14, padding: '11px 14px' }}>
+          <span style={{ fontSize: 16 }}>🔍</span>
+          <input value={search} onChange={event => setSearch(event.target.value)} placeholder="Search name, phone, city…" style={{ flex: 1, border: 'none', background: 'transparent', fontSize: 14, color: C.text, outline: 'none' }} />
+        </div>
+      </div>
+      <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {shown.map(profile => (
+          <div key={`${profile.role}:${profile.accountId}`} style={{ backgroundColor: 'white', borderRadius: 18, padding: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 }}>
+              <div>
+                <p style={{ margin: '0 0 3px', color: C.text, fontSize: 15, fontWeight: 700 }}>{profile.fullName}</p>
+                <p style={{ margin: 0, color: C.muted, fontSize: 12 }}>{roleLabel[profile.role]} · {profile.phone}</p>
+              </div>
+              <StatusBadge status={profile.status} />
+            </div>
+            <div style={{ marginTop: 12, padding: 11, backgroundColor: '#F9FAFB', borderRadius: 11 }}>
+              {profile.businessName && <p style={{ margin: '0 0 5px', color: C.text, fontSize: 12 }}><strong>Restaurant:</strong> {profile.businessName} · {profile.cuisine}</p>}
+              <p style={{ margin: '0 0 5px', color: C.text, fontSize: 12 }}><strong>Location:</strong> {profile.address}, {profile.city} {profile.postalCode}</p>
+              {profile.serviceZone && <p style={{ margin: '0 0 5px', color: C.text, fontSize: 12 }}><strong>Service area:</strong> {profile.serviceZone} · {profile.vehicleType}</p>}
+              {profile.role === 'delivery' && <p style={{ margin: 0, color: C.muted, fontSize: 12 }}><strong>Mock ID proof:</strong> {profile.proofType} · {profile.mockProofSubmitted ? 'Marked submitted' : 'Not submitted'}</p>}
+            </div>
+            <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+              <button type="button" onClick={() => reviewDemoProfile(profile.accountId, profile.role, 'Verified')} style={{ flex: 1, padding: 9, backgroundColor: C.greenLight, color: C.green, border: '1px solid #BBF7D0', borderRadius: 10, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>Mark verified</button>
+              <button type="button" onClick={() => reviewDemoProfile(profile.accountId, profile.role, 'Changes requested')} style={{ flex: 1, padding: 9, backgroundColor: C.redLight, color: C.red, border: '1px solid #FECDD3', borderRadius: 10, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>Request changes</button>
+            </div>
+          </div>
+        ))}
+        {shown.length === 0 && <p style={{ color: C.muted, textAlign: 'center', fontSize: 13 }}>{profiles.length ? 'No profiles match this search.' : 'No profiles have been submitted in this demo session yet.'}</p>}
       </div>
     </div>
   )
@@ -608,16 +798,28 @@ function AdminChatbot() {
 }
 
 // ── Root export ───────────────────────────────────────────────────────────────
-export default function AdminPortal() {
+export default function AdminPortal({ onSignOut }: { onSignOut: () => void }) {
   const [tab, setTab] = useState<AdminTab>('dashboard')
+  const [restaurants, setRestaurants] = useState<AdminRestaurant[]>(ALL_RESTAURANTS)
+  const [riders, setRiders] = useState<AdminRider[]>(INITIAL_RIDERS)
+  const profiles = useDemoProfiles()
+  const menuItems = [
+    { label: 'Verification queue', description: 'Review submitted user profiles', icon: '✅', onSelect: () => setTab('verify') },
+    { label: 'Settings', description: 'Platform preferences', icon: '⚙️', onSelect: () => window.alert('Settings are not configured in this demo yet.') },
+    { label: 'Help Centre', description: 'Admin support and app help', icon: '🎧', onSelect: () => window.alert('Help Centre is a demo placeholder; support content is not configured yet.') },
+    { label: 'Sign out', icon: '🚪', danger: true, onSelect: onSignOut },
+  ]
   return (
     <div style={{ minHeight: '100vh' }}>
       {tab === 'dashboard'   && <Dashboard />}
       {tab === 'orders'      && <OrdersTab />}
-      {tab === 'restaurants' && <RestaurantsTab />}
+      {tab === 'restaurants' && <RestaurantsTab restaurants={restaurants} setRestaurants={setRestaurants} />}
+      {tab === 'riders'      && <RidersTab riders={riders} setRiders={setRiders} />}
       {tab === 'users'       && <UsersTab />}
+      {tab === 'verify'      && <VerificationTab profiles={profiles} />}
       <AdminNav tab={tab} onTab={setTab} />
       <AdminChatbot />
+      <HamburgerMenu role="Admin" items={menuItems} />
     </div>
   )
 }

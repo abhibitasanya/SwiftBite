@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { askChatbot } from '../services/chatbot'
+import { ProfileForm, useDemoProfiles } from '../profileManagement'
+import HamburgerMenu from '../components/HamburgerMenu'
 
 const C = {
   primary: '#2563EB',
@@ -56,7 +58,7 @@ function DeliveryNav({ tab, onTab }: { tab: DeliveryTab; onTab: (t: DeliveryTab)
 }
 
 // ── Home ──────────────────────────────────────────────────────────────────────
-function DeliveryHome({ onGoToOrders }: { onGoToOrders: () => void }) {
+function DeliveryHome({ onGoToOrders, fullName }: { onGoToOrders: () => void; fullName: string }) {
   const [isOnline, setIsOnline] = useState(true)
   const [activeStep, setActiveStep] = useState(1)
 
@@ -76,7 +78,7 @@ function DeliveryHome({ onGoToOrders }: { onGoToOrders: () => void }) {
             <div style={{ width: 48, height: 48, borderRadius: 16, border: '2px solid rgba(255,255,255,0.3)', backgroundColor: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>🛵</div>
             <div>
               <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: 12, margin: '0 0 2px' }}>Delivery Partner</p>
-              <h1 style={{ color: 'white', fontSize: 20, fontWeight: 800, margin: 0, letterSpacing: -0.3 }}>Marcus Chen</h1>
+              <h1 style={{ color: 'white', fontSize: 20, fontWeight: 800, margin: 0, letterSpacing: -0.3 }}>{fullName}</h1>
             </div>
           </div>
           {/* Online toggle */}
@@ -299,48 +301,10 @@ function EarningsTab() {
 }
 
 // ── Delivery Profile ──────────────────────────────────────────────────────────
-function DeliveryProfile() {
+function DeliveryProfile({ accountId, fullName, onSignOut }: { accountId: string; fullName: string; onSignOut: () => void }) {
   return (
-    <div style={{ backgroundColor: C.bg, minHeight: '100vh', paddingBottom: 100 }}>
-      <div style={{ background: `linear-gradient(135deg, ${C.primary} 0%, #1D4ED8 100%)`, padding: '56px 20px 28px' }}>
-        <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 16 }}>
-          <div style={{ width: 72, height: 72, borderRadius: 22, border: '3px solid rgba(255,255,255,0.3)', backgroundColor: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 34 }}>🛵</div>
-          <div>
-            <h2 style={{ color: 'white', fontSize: 20, fontWeight: 800, margin: '0 0 4px' }}>Marcus Chen</h2>
-            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, margin: '0 0 6px' }}>Delivery Partner · ID #DP-2041</p>
-            <div style={{ backgroundColor: 'rgba(74,222,128,0.2)', border: '1px solid #4ADE80', borderRadius: 8, padding: '3px 10px', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-              <div style={{ width: 6, height: 6, backgroundColor: '#4ADE80', borderRadius: '50%' }} />
-              <span style={{ color: 'white', fontSize: 11, fontWeight: 700 }}>Verified Partner</span>
-            </div>
-          </div>
-        </div>
-        <div style={{ display: 'flex', gap: 10 }}>
-          {[{ v: '4.9★', l: 'Rating' }, { v: '847', l: 'Total Deliveries' }, { v: '98%', l: 'Acceptance' }].map(s => (
-            <div key={s.l} style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.12)', borderRadius: 12, padding: '10px 8px', textAlign: 'center' }}>
-              <p style={{ color: 'white', fontSize: 16, fontWeight: 800, margin: '0 0 2px' }}>{s.v}</p>
-              <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 9, margin: 0 }}>{s.l}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-      <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {[
-          { icon: '🏍️', label: 'My Vehicle', sub: 'Honda Activa · SF-2041' },
-          { icon: '📄', label: 'Documents', sub: 'All verified' },
-          { icon: '💳', label: 'Bank Account', sub: 'HDFC ·····4242' },
-          { icon: '📞', label: 'Support', sub: 'Available 24/7' },
-          { icon: '⚙️', label: 'Settings', sub: 'Notifications, navigation' },
-        ].map(r => (
-          <button key={r.label} onClick={() => window.alert(`${r.label}: ${r.sub}`)} style={{ backgroundColor: C.surface, borderRadius: 16, padding: '14px 16px', display: 'flex', gap: 12, alignItems: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', border: 'none', cursor: 'pointer', textAlign: 'left', width: '100%' }}>
-            <div style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.primaryLight, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>{r.icon}</div>
-            <div style={{ flex: 1 }}>
-              <p style={{ fontSize: 14, fontWeight: 700, color: C.text, margin: 0 }}>{r.label}</p>
-              <p style={{ fontSize: 12, color: C.muted, margin: '2px 0 0' }}>{r.sub}</p>
-            </div>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D1D5DB" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
-          </button>
-        ))}
-      </div>
+    <div style={{ backgroundColor: C.bg, minHeight: '100vh', padding: '56px 16px 100px' }}>
+      <ProfileForm role="delivery" accountId={accountId} fullName={fullName} onSignOut={onSignOut} />
     </div>
   )
 }
@@ -596,16 +560,25 @@ function DeliveryChatbot() {
 }
 
 // ── Root export ───────────────────────────────────────────────────────────────
-export default function DeliveryPortal() {
+export default function DeliveryPortal({ accountId, fullName, onSignOut }: { accountId: string; fullName: string; onSignOut: () => void }) {
   const [tab, setTab] = useState<DeliveryTab>('home')
+  const profiles = useDemoProfiles()
+  const profile = profiles.find(item => item.accountId === accountId && item.role === 'delivery')
+  const menuItems = [
+    { label: 'Profile & verification', description: 'Contact details and review status', icon: '👤', onSelect: () => setTab('profile') },
+    { label: 'Settings', description: 'Notifications and preferences', icon: '⚙️', onSelect: () => window.alert('Settings are not configured in this demo yet.') },
+    { label: 'Help Centre', description: 'Support and app help', icon: '🎧', onSelect: () => window.alert('Help Centre is a demo placeholder; support content is not configured yet.') },
+    { label: 'Sign out', icon: '🚪', danger: true, onSelect: onSignOut },
+  ]
   return (
     <div style={{ minHeight: '100vh' }}>
-      {tab === 'home'     && <DeliveryHome onGoToOrders={() => setTab('orders')} />}
+      {tab === 'home'     && <DeliveryHome onGoToOrders={() => setTab('orders')} fullName={profile?.fullName || fullName} />}
       {tab === 'orders'   && <AvailableOrdersTab />}
       {tab === 'earnings' && <EarningsTab />}
-      {tab === 'profile'  && <DeliveryProfile />}
+      {tab === 'profile'  && <DeliveryProfile accountId={accountId} fullName={profile?.fullName || fullName} onSignOut={onSignOut} />}
       <DeliveryNav tab={tab} onTab={setTab} />
       <DeliveryChatbot />
+      <HamburgerMenu role="Delivery partner" items={menuItems} />
     </div>
   )
 }

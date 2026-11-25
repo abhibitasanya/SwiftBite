@@ -16,7 +16,11 @@ The current SwiftBite deliverable is a web prototype that demonstrates customer-
 
 \item \textbf{Ordering:} The frontend demonstrates cart, checkout, and order-status screens. Creating a persistent order, processing a payment, and live GPS tracking are not part of the current customer workflow.
 
-\item \textbf{Chatbot:} The assistant must be able to provide app guidance through local responses and may use the backend Gemini integration when the required server-side API key is configured.
+\item \textbf{Delivery Map:} The order screen displays OpenStreetMap tiles centered on Bhubaneswar with zoom controls and an approximate static city-center marker. It does not show a rider's live location.
+
+\item \textbf{Chatbot:} The assistant provides app guidance through the backend Gemini integration when configured, with local responses retained as a fallback. A Gemini-generated recipe response was verified during testing.
+
+\item \textbf{Chatbot Reliability:} The primary model receives one retry for transient HTTP 429 or 5xx errors. If primary generation fails, the backend attempts a secondary model; local rule-based replies remain available if model generation still fails.
 
 \item \textbf{Validation:} Backend request payloads are validated with Zod. The registration flow checks required fields and password confirmation in the frontend and backend.
 
@@ -34,7 +38,7 @@ The current SwiftBite deliverable is a web prototype that demonstrates customer-
 
 \item \textbf{Validation and middleware:} Zod, CORS, Helmet, Morgan, and Dotenv.
 
-\item \textbf{Chatbot integration:} Google Generative AI SDK for optional Gemini responses; local rule-based responses provide a fallback path.
+\item \textbf{Chatbot integration:} Google Generative AI SDK for Gemini responses; local rule-based responses provide a fallback path.
 
 \item \textbf{Development and version control:} VS Code, npm, Git, and GitHub.
 

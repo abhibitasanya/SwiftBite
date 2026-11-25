@@ -186,7 +186,7 @@ LIMIT 1
 \item The browser loads the React application built by Vite.
 \item The backend is connected to MySQL, and its schema and restaurant API have been verified. The sign-up and sign-in screens send requests to the backend authentication routes; a file-backed authentication fallback remains available when database operations fail.
 \item The customer home and menu use bundled sample data, while cart and checkout state are maintained in the frontend.
-\item The Place Order action advances through the demonstration confirmation and order-status screens; the customer flow does not persist an order or process a payment.
-\item Chat messages use the local response helper when no API base URL is configured, or the backend chatbot route when configured. Gemini use requires a server-side API key.
+\item The Place Order action opens a demonstration confirmation screen. Track My Order opens the delivery map, which loads zoomable OpenStreetMap tiles centered on Bhubaneswar; the marker is static and the order flow does not persist an order or process a payment.
+\item Chat messages use the local response helper when no API base URL is configured, or the backend chatbot route when configured. Gemini requires a server-side API key; transient primary-model errors receive one retry, a secondary model is attempted after primary failure, and local rule-based replies remain the final fallback.
 \item The portal switcher and non-customer dashboards are prototype views and do not provide production role authorization.
 \end{itemize}

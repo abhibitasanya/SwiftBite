@@ -15,6 +15,7 @@ The frontend was developed with React, TypeScript, Vite, Tailwind CSS, and custo
 \item Email or phone selection and registration validation, including a required password-confirmation check.
 \item A customer home page, sample restaurant and menu browsing, category filters, favourites, and cart quantity controls.
 \item Checkout, order confirmation, order-status, profile, order-history, and settings interfaces.
+\item A zoomable OpenStreetMap tile view centered on Bhubaneswar, with an approximate static city-center marker and an explicit notice that rider GPS is not live.
 \item Demonstration views for admin, restaurant-owner, and delivery-partner workflows.
 \item An installable-web-app manifest and service-worker registration.
 \end{itemize}
@@ -29,8 +30,8 @@ The backend is connected to MySQL using connection values read from environment 
 
 \section{Chatbot Assistance}
 
-The chatbot endpoint can use the Google Generative AI SDK when a server-side \texttt{GEMINI\_API\_KEY} is supplied. The frontend also provides a local rule-based assistant path when no API base URL is configured, and the backend contains local guidance responses when Gemini is unavailable. Personalized food recommendation and chat-driven order placement are not implemented features.
+The backend chatbot uses the Google Generative AI SDK with a server-side \texttt{GEMINI\_API\_KEY}. The configured primary model is \texttt{gemini-3.8-flash}; it retries transient HTTP 429 and 5xx failures once with exponential backoff and jitter, then tries \texttt{gemini-3.6-flash} once if primary generation fails. During testing, the backend returned a Gemini-generated recipe response (Figure \ref{fig:gemini_recipe_response}). Local rule-based responses remain available when model generation fails or the API is not configured. Conversation history is preserved for model requests. The chatbot does not access live menu or order data; personalized food recommendations and chat-driven order placement are not implemented features.
 
 \section{Current Integration Status}
 
-The delivered work is a functioning prototype rather than a production food-delivery service. The working MySQL connection, initialized schema, and restaurant API have been verified. Authentication and chatbot screens can communicate with the backend, but full authentication-to-database integration has not yet been tested. The customer catalogue and checkout flow remain separate from database-backed restaurant and order records, while complete role authorization, persistent customer orders, payment processing, and GPS tracking remain future work.
+The delivered work is a functioning prototype rather than a production food-delivery service. The working MySQL connection, initialized schema, and restaurant API have been verified. The chatbot's Gemini response and primary-to-secondary model fallback behavior were also verified, but full authentication-to-database integration has not yet been tested. The customer catalogue and checkout flow remain separate from database-backed restaurant and order records. The delivery map loads OpenStreetMap tiles for Bhubaneswar but does not show a live rider location. Complete role authorization, persistent customer orders, payment processing, and GPS tracking remain future work.
