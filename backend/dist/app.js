@@ -1511,7 +1511,7 @@ export function createApp() {
                 assistantReply = await getAIResponse(aiConversation, parsed.data.role ?? "customer");
             }
             catch (error) {
-                console.error("AI response failed, falling back to local provider:", error);
+                console.error("AI response failed; using local fallback.");
                 assistantReply = chatbotProvider.respond({
                     messages: conversation,
                     ...(parsed.data.role ? { role: parsed.data.role } : {}),

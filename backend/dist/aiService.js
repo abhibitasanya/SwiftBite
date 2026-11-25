@@ -72,14 +72,21 @@ export async function getAIResponse(messages, role = "customer") {
         }
         const chat = model.startChat({
             history: chatHistory,
-            systemInstruction: systemPrompt
+            systemInstruction: {
+                role: "system",
+                parts: [{ text: systemPrompt }],
+            },
         });
         const result = await chat.sendMessage(latestMessage.text);
         const response = await result.response;
         return response.text();
     }
     catch (error) {
-        console.error("Error getting AI response:", error);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const safeErrorMessage = API_KEY
+            ? errorMessage.split(API_KEY).join("[REDACTED]")
+            : errorMessage;
+        console.error("Error getting AI response:", safeErrorMessage);
         throw error;
     }
 }
