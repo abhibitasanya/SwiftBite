@@ -5,6 +5,8 @@ import {
 } from "@google/generative-ai";
 
 const API_KEY = process.env.GEMINI_API_KEY;
+const PRIMARY_MODEL_ID = "gemini-3.8-flash";
+const SECONDARY_MODEL_ID = "gemini-3.6-flash";
 
 if (!API_KEY) {
   console.warn("GEMINI_API_KEY not set in environment variables. AI features will be disabled.");
@@ -12,11 +14,13 @@ if (!API_KEY) {
 
 let genAI: GoogleGenerativeAI | null = null;
 let model: GenerativeModel | null = null;
+let secondaryModel: GenerativeModel | null = null;
 
 if (API_KEY) {
   try {
     genAI = new GoogleGenerativeAI(API_KEY);
-    model = genAI.getGenerativeModel({ model: "gemini-3.8-flash" });
+    model = genAI.getGenerativeModel({ model: PRIMARY_MODEL_ID });
+    secondaryModel = genAI.getGenerativeModel({ model: SECONDARY_MODEL_ID });
   } catch (error) {
     console.error("Failed to initialize Gemini AI:", error);
   }
@@ -37,7 +41,7 @@ type ChatbotMessage = {
 
 type ChatRole = "customer" | "delivery" | "restaurant" | "platform";
 
-const MAX_RETRIES = 2;
+const PRIMARY_MAX_ATTEMPTS = 2;
 const RETRY_BASE_DELAY_MS = 1000;
 const RETRY_JITTER_MS = 250;
 
@@ -55,6 +59,25 @@ function getRetryableStatus(error: unknown): number | undefined {
 function getSafeErrorMessage(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error);
   return API_KEY ? message.split(API_KEY).join("[REDACTED]") : message;
+}
+
+async function generateModelResponse(
+  targetModel: GenerativeModel,
+  chatHistory: { role: string; parts: { text: string }[] }[],
+  systemPrompt: string,
+  latestMessage: string,
+): Promise<string> {
+  const chat = targetModel.startChat({
+    history: chatHistory,
+    systemInstruction: {
+      role: "system",
+      parts: [{ text: systemPrompt }],
+    },
+  });
+
+  const result = await chat.sendMessage(latestMessage);
+  const response = await result.response;
+  return response.text();
 }
 
 function getSystemPrompt(role: ChatRole): string {
@@ -125,36 +148,45 @@ export async function getAIResponse(
     throw new Error("Latest message must be from user");
   }
 
-  let retries = 0;
-  while (true) {
+  let lastPrimaryError: unknown;
+  for (let attempt = 0; attempt < PRIMARY_MAX_ATTEMPTS; attempt += 1) {
     try {
-      const chat = model.startChat({
-        history: chatHistory,
-        systemInstruction: {
-          role: "system",
-          parts: [{ text: systemPrompt }],
-        },
-      });
-
-      const result = await chat.sendMessage(latestMessage.text);
-      const response = await result.response;
-      return response.text();
+      return await generateModelResponse(model, chatHistory, systemPrompt, latestMessage.text);
     } catch (error) {
       const status = getRetryableStatus(error);
-      if (status !== undefined && retries < MAX_RETRIES) {
+      lastPrimaryError = error;
+      if (status !== undefined && attempt + 1 < PRIMARY_MAX_ATTEMPTS) {
         const delayMs =
-          RETRY_BASE_DELAY_MS * 2 ** retries + Math.random() * RETRY_JITTER_MS;
-        retries += 1;
+          RETRY_BASE_DELAY_MS * 2 ** attempt + Math.random() * RETRY_JITTER_MS;
         console.warn(
-          `Gemini returned HTTP ${status}; retrying ${retries}/${MAX_RETRIES} in ${Math.round(delayMs)}ms.`,
+          `Gemini primary model returned HTTP ${status}; retrying attempt ${attempt + 2}/${PRIMARY_MAX_ATTEMPTS} in ${Math.round(delayMs)}ms.`,
         );
         await new Promise(resolve => setTimeout(resolve, delayMs));
         continue;
       }
 
-      console.error("Error getting AI response:", getSafeErrorMessage(error));
-      throw error;
+      if (status === undefined) {
+        console.error(
+          "Gemini primary model failed without retrying:",
+          getSafeErrorMessage(error),
+        );
+      }
+      break;
     }
+  }
+
+  if (!secondaryModel) {
+    const error = lastPrimaryError ?? new Error("Secondary Gemini model is not initialized.");
+    console.error("Secondary Gemini model unavailable:", getSafeErrorMessage(error));
+    throw error;
+  }
+
+  console.warn(`Gemini primary model failed; trying secondary model ${SECONDARY_MODEL_ID}.`);
+  try {
+    return await generateModelResponse(secondaryModel, chatHistory, systemPrompt, latestMessage.text);
+  } catch (error) {
+    console.error("Secondary Gemini model failed:", getSafeErrorMessage(error));
+    throw error;
   }
 }
 
