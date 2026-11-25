@@ -1,0 +1,41 @@
+\chapter{System Analysis}
+
+\section{Software Requirement Specification}
+
+The current SwiftBite deliverable is a web prototype that demonstrates customer-facing ordering screens and a supporting API. Its implemented scope is distinguished below from production integrations that remain future work.
+
+\begin{itemize}
+
+\item \textbf{Frontend:} The application must provide a responsive web interface for the landing page, account flows, restaurant and menu browsing, cart, checkout, order-status screens, profile, and demonstration portals.
+
+\item \textbf{Authentication:} The registration and login screens must accept an email address or phone number. Registration requires a name, a password of at least six characters, password confirmation, and acceptance of the terms. The frontend calls the backend authentication endpoints; complete session-token and production authorization flows are not implemented.
+
+\item \textbf{Backend API:} The Express service provides routes for authentication, restaurants, rider and restaurant profiles, menu items, image uploads, orders, dashboards, and chatbot assistance.
+
+\item \textbf{Data:} The backend includes an initialized MySQL schema for users, restaurants, profiles, menu items, uploaded images, and orders. The MySQL connection and restaurant API were verified. The customer storefront currently displays bundled sample restaurant and menu data.
+
+\item \textbf{Ordering:} The frontend demonstrates cart, checkout, and order-status screens. Creating a persistent order, processing a payment, and live GPS tracking are not part of the current customer workflow.
+
+\item \textbf{Chatbot:} The assistant must be able to provide app guidance through local responses and may use the backend Gemini integration when the required server-side API key is configured.
+
+\item \textbf{Validation:} Backend request payloads are validated with Zod. The registration flow checks required fields and password confirmation in the frontend and backend.
+
+\end{itemize}
+
+\section{Software Tools Used}
+
+\begin{itemize}
+
+\item \textbf{Frontend:} React 19, TypeScript, Vite, Tailwind CSS 4, and custom CSS.
+
+\item \textbf{Backend:} Node.js, Express 5, and TypeScript.
+
+\item \textbf{Database:} MySQL with the \texttt{mysql2} promise client; the backend is connected and the schema is initialized. The restaurant API is verified. The API also has a file-backed authentication fallback when database operations fail.
+
+\item \textbf{Validation and middleware:} Zod, CORS, Helmet, Morgan, and Dotenv.
+
+\item \textbf{Chatbot integration:} Google Generative AI SDK for optional Gemini responses; local rule-based responses provide a fallback path.
+
+\item \textbf{Development and version control:} VS Code, npm, Git, and GitHub.
+
+\end{itemize}

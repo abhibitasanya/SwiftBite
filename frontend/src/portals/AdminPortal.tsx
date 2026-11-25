@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { askChatbot, type ChatbotRole } from '../services/chatbot'
+import { askChatbot } from '../services/chatbot'
 
 const C = {
   primary: '#7C3AED',
@@ -401,7 +401,7 @@ function AdminChatbot() {
         timestamp: new Date(message.timestamp).toISOString(),
       }))
 
-      const { reply, sessionId, offline } = await askChatbot({
+      const { reply, sessionId } = await askChatbot({
         messages: apiMessages,
         sessionId: chatSessionId,
         role: 'platform',

@@ -1,0 +1,192 @@
+\chapter{Appendix}
+
+\section*{Project Links}
+\textbf{Configured Demo:} \url{https://swiftbite-ryf2.onrender.com} \\
+\textbf{GitHub Repository:} \url{https://github.com/abhibitasanya/SwiftBite}
+
+\section{Development Commands}
+
+\subsection*{(a) Frontend}
+
+The frontend is a React, TypeScript, and Vite project located in \texttt{frontend/}. The available commands are:
+
+\begin{verbatim}
+cd frontend
+npm install
+npm run dev
+npm run build
+\end{verbatim}
+
+\subsection*{(b) Backend}
+
+The Express and TypeScript API is located in \texttt{backend/}. Its package scripts provide development, production build, production start, and lint commands:
+
+\begin{verbatim}
+cd backend
+npm install
+npm run dev
+npm run build
+npm start
+npm run lint
+\end{verbatim}
+
+The backend reads database and optional AI configuration from environment variables. The repository includes \texttt{backend/.env.example}; real credentials should be supplied locally and must not be included in the report or source control.
+
+\subsection*{(c) Project Structure}
+
+\begin{verbatim}
+SwiftBite/
+|-- frontend/
+|   |-- src/
+|   |   |-- App.tsx
+|   |   |-- screens/
+|   |   |-- components/
+|   |   |-- portals/
+|   |   |-- services/
+|   |   |-- data/mockData.ts
+|   |-- public/
+|   |-- package.json
+|   |-- vite.config.ts
+|
+|-- backend/
+|   |-- src/
+|   |   |-- app.ts
+|   |   |-- server.ts
+|   |   |-- db.ts
+|   |   |-- aiService.ts
+|   |   |-- schema.sql
+|   |-- package.json
+|
+|-- Latex/
+|-- README.md
+\end{verbatim}
+
+\section{Selected Implementation Details}
+
+\subsection*{(a) Frontend Entry Point}
+
+The frontend is mounted with React DOM from \texttt{frontend/src/main.tsx}:
+
+\begin{tcolorbox}[colback=gray!5,colframe=black,title=React Application Entry]
+\begin{verbatim}
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import App from './App'
+import './index.css'
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+)
+\end{verbatim}
+\end{tcolorbox}
+
+\subsection*{(b) Backend Server Entry Point}
+
+The backend server reads its listening port from the environment, defaulting to port 4000, and creates the Express application:
+
+\begin{tcolorbox}[colback=gray!5,colframe=black,title=Express Server Entry]
+\begin{verbatim}
+import { createApp } from "./app.js";
+
+const port = Number(process.env.PORT ?? 4000);
+const app = createApp();
+
+app.listen(port, () => {
+  console.log(`Backend API running on http://localhost:${port}`);
+});
+\end{verbatim}
+\end{tcolorbox}
+
+\subsection*{(c) Registration Validation}
+
+The backend validates that the confirmation value is present and equal to the chosen password. The frontend performs the same comparison before making the request:
+
+\begin{tcolorbox}[colback=gray!5,colframe=black,title=Registration Schema]
+\begin{verbatim}
+const registerSchema = z.object({
+  fullName: z.string().trim().min(2),
+  identifier: z.string().min(1),
+  password: z.string().min(6),
+  confirmPassword: z.string().min(6),
+  role: z.enum(["customer", "delivery", "restaurant", "platform"]),
+  loginMode: z.enum(["email", "phone"]),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match.",
+  path: ["confirmPassword"],
+});
+\end{verbatim}
+\end{tcolorbox}
+
+\subsection*{(d) Database Configuration}
+
+The MySQL connection pool in \texttt{backend/src/db.ts} reads its host, port, username, password, database name, and optional TLS setting from environment variables. The actual password value is intentionally not reproduced here.
+
+\section{Database Queries}
+
+The authoritative schema is \texttt{backend/src/schema.sql}. The following extracts reflect its users and restaurants tables.
+
+\subsection*{(a) Users Table}
+
+\begin{tcolorbox}[colback=gray!5,colframe=black,title=Users Table Schema]
+\begin{verbatim}
+CREATE TABLE IF NOT EXISTS users (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  full_name VARCHAR(120) NOT NULL,
+  identifier VARCHAR(191) NOT NULL,
+  role ENUM('customer', 'delivery', 'restaurant', 'platform') NOT NULL,
+  password_hash CHAR(64) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uniq_users_identifier_role (identifier, role)
+);
+\end{verbatim}
+\end{tcolorbox}
+
+\subsection*{(b) Restaurants Table}
+
+\begin{tcolorbox}[colback=gray!5,colframe=black,title=Restaurants Table Schema]
+\begin{verbatim}
+CREATE TABLE IF NOT EXISTS restaurants (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  name VARCHAR(140) NOT NULL,
+  cuisine VARCHAR(120) NOT NULL,
+  location VARCHAR(160) NOT NULL,
+  eta_minutes INT NOT NULL,
+  rating DECIMAL(2,1) NOT NULL,
+  description VARCHAR(255) NOT NULL,
+  featured TINYINT(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (id),
+  UNIQUE KEY uniq_restaurants_name (name)
+);
+\end{verbatim}
+\end{tcolorbox}
+
+\subsection*{(c) Login Lookup}
+
+The backend login route uses a parameterized query scoped to the user's identifier and role:
+
+\begin{tcolorbox}[colback=gray!5,colframe=black,title=Login Lookup]
+\begin{verbatim}
+SELECT id, full_name, identifier, role
+FROM users
+WHERE LOWER(TRIM(identifier)) = LOWER(TRIM(?))
+  AND role = ?
+  AND password_hash = SHA2(?, 256)
+LIMIT 1
+\end{verbatim}
+\end{tcolorbox}
+
+\section{Current System Flow}
+
+\begin{itemize}
+\item The browser loads the React application built by Vite.
+\item The backend is connected to MySQL, and its schema and restaurant API have been verified. The sign-up and sign-in screens send requests to the backend authentication routes; a file-backed authentication fallback remains available when database operations fail.
+\item The customer home and menu use bundled sample data, while cart and checkout state are maintained in the frontend.
+\item The Place Order action advances through the demonstration confirmation and order-status screens; the customer flow does not persist an order or process a payment.
+\item Chat messages use the local response helper when no API base URL is configured, or the backend chatbot route when configured. Gemini use requires a server-side API key.
+\item The portal switcher and non-customer dashboards are prototype views and do not provide production role authorization.
+\end{itemize}

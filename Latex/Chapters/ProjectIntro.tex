@@ -1,0 +1,33 @@
+\chapter{Project Introduction}
+
+The rapid growth of online food delivery services has significantly transformed the way customers order and access food in modern lifestyles. With increasing dependence on digital platforms, users now expect fast, convenient, and personalized food ordering experiences.
+
+\vspace{0.5mm}
+
+Traditional food ordering systems primarily focus on basic order placement and delivery functionalities, often lacking intelligent interaction, personalized recommendations, and efficient management features. As competition in the food delivery industry continues to increase, there is a growing need for a smart and scalable system that can improve customer experience while simplifying restaurant and delivery operations.
+
+\vspace{0.5mm}
+
+The SwiftBite project explores these challenges through a web-based food-ordering prototype with a customer storefront, account flows, and demonstration portals for different user roles. It also provides chatbot assistance for common application questions. The prototype combines a React frontend with a backend API connected to MySQL; the database connection and restaurant API have been verified. Persistent ordering, payment processing, and production role authorization remain areas for further development.
+
+\section{Project Objectives}
+
+The primary objective of the SwiftBite project is to develop and evaluate a user-friendly food-ordering prototype with an account flow, a customer storefront, and illustrative interfaces for customer, restaurant, delivery, and administration workflows.
+
+The project also includes a chatbot assistance feature for answering application questions. It is not a personalized recommendation engine; optional Gemini integration and a local rule-based fallback provide the current response paths.
+
+The project uses a React, TypeScript, and Vite frontend with a Node.js and Express API and a MySQL schema. The customer restaurant catalogue, cart, checkout, and tracking screens are currently prototype flows, rather than a complete real-time ordering and delivery service.
+
+\section{Background of the Project}
+
+The inspiration for SwiftBite arises from the demand for convenient online food-ordering experiences. The prototype explores this area through a customer-facing interface, account flows, and application guidance from a chatbot. It does not analyze customer preferences or generate personalized food recommendations.
+
+The current implementation uses React and Vite for the frontend, an Express API for backend services, and a connected MySQL database with an initialized schema. The backend restaurant endpoint has been verified against MySQL. The local chatbot can provide rule-based guidance, with optional Gemini responses through the backend. The customer storefront still uses bundled catalogue data, and checkout, order status, and role-specific portals demonstrate interface flows; persistent customer orders, payment processing, live tracking, personalized recommendations, and production access control remain future work.
+
+\section{Operation Environment}
+
+The SwiftBite application operates as a web-based prototype. The frontend is developed using \textbf{React}, \textbf{TypeScript}, and \textbf{Vite}, with \textbf{Tailwind CSS} and custom CSS for its responsive interface. The project also includes a web app manifest and service-worker registration.
+
+The backend is developed using \textbf{Node.js}, \textbf{Express}, and \textbf{TypeScript}. It exposes REST API routes for authentication, restaurant and profile data, menu items, image uploads, orders, dashboards, and chatbot assistance. The backend is connected to \textbf{MySQL} through \texttt{mysql2}; its schema is initialized, and the restaurant API has been verified against the database. The frontend storefront currently uses bundled sample restaurant and menu data, and checkout does not persist orders or payment transactions.
+
+Backend libraries include \textbf{CORS}, \textbf{Helmet}, \textbf{Morgan}, \textbf{Dotenv}, \textbf{mysql2}, and \textbf{Zod}. The chatbot can use the Google Generative AI SDK when a server-side key is configured and otherwise falls back to local responses. Role-specific portal switching is marked as a demonstration feature, not production access control.

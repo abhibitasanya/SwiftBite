@@ -1,0 +1,33 @@
+\chapter{Future Scope of the Project}
+
+The current SwiftBite prototype establishes the frontend screens and backend API foundation for a food-ordering application. The following extensions would be required to move from demonstration flows to a production service:
+
+\begin{itemize}
+
+\item \textbf{Connect the Customer Catalogue to the API:}
+The backend restaurant API now reads from MySQL. Replace the frontend's bundled restaurant and menu data with API responses, including loading, empty, and error states.
+
+\item \textbf{Persist Carts and Orders:}
+Connect checkout to the order API, validate the order on the server, store order items and delivery details, and expose order history to the customer.
+
+\item \textbf{Integrate Payments:}
+Connect a supported payment provider and implement transaction verification, failure handling, and payment records before presenting an order as paid.
+
+\item \textbf{Implement Production Authentication:}
+Use an industry-standard password-hashing scheme, issue and validate sessions or access tokens, and enforce role permissions on protected API routes.
+
+\item \textbf{Add Live Delivery Updates:}
+Integrate delivery-partner location updates and a mapping service if real-time GPS tracking is required.
+
+\item \textbf{Complete Portal-to-API Integration:}
+Connect restaurant, delivery, and administration screens to their corresponding API routes and enforce server-side authorization.
+
+\item \textbf{Expand Chatbot Capabilities:}
+Improve the assistant's guidance and add carefully scoped integrations only after account, order, and privacy permissions are established. Personalized recommendations are not currently implemented.
+
+\item \textbf{Add Automated Integration Tests:}
+Extend verification against the connected MySQL service to cover registration, login, persistent order creation, permission checks, and error handling. The connection, initialized schema, and restaurant-list API have already been verified.
+
+\end{itemize}
+
+These improvements would extend the current academic prototype into a more complete and reliable ordering system.

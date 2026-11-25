@@ -1,3 +1,4 @@
+import "dotenv/config";
 import mysql, { type Pool } from "mysql2/promise";
 
 const host = process.env.MYSQL_HOST ?? "localhost";

@@ -1,0 +1,36 @@
+\chapter{Work Done So Far}
+
+This chapter records the current implementation of SwiftBite as represented by the project source code. The customer ordering journey is a frontend prototype, while the backend provides a separate set of API capabilities.
+
+\section{Development Environment and Project Structure}
+
+The repository is organized into a Vite-based React frontend and a Node.js/Express backend, each with its own package configuration. Both sides use TypeScript. The frontend includes its own data, screens, portals, UI components, and API services; backend source includes the Express application, server entry point, database connection, AI service, and MySQL schema.
+
+\section{Frontend Development}
+
+The frontend was developed with React, TypeScript, Vite, Tailwind CSS, and custom CSS. Implemented screens and interactions include:
+
+\begin{itemize}
+\item A public landing page and customer account screens for sign-in, sign-up, and password recovery.
+\item Email or phone selection and registration validation, including a required password-confirmation check.
+\item A customer home page, sample restaurant and menu browsing, category filters, favourites, and cart quantity controls.
+\item Checkout, order confirmation, order-status, profile, order-history, and settings interfaces.
+\item Demonstration views for admin, restaurant-owner, and delivery-partner workflows.
+\item An installable-web-app manifest and service-worker registration.
+\end{itemize}
+
+The restaurant and menu catalogue is currently loaded from bundled sample data. Cart, checkout, order confirmation, and tracking are frontend demonstrations; they do not yet create persistent orders or process transactions through the API.
+
+\section{Backend and Database Development}
+
+The backend uses Express and TypeScript. It exposes API routes for user registration and login, roles, restaurants, rider and restaurant profiles, menu items, image uploads, orders, dashboards, and chatbot assistance. Request schemas are validated with Zod. The MySQL schema defines users, restaurants, profiles, categories, menu items, uploaded images, and orders.
+
+The backend is connected to MySQL using connection values read from environment variables. Its eight-table schema was initialized, with four restaurants and four categories seeded, and the restaurant endpoint returned database-backed records. Authentication can fall back to a file-backed store if database operations fail. The frontend currently calls the backend for authentication and chatbot assistance; its customer storefront still uses bundled sample data, and checkout does not persist orders.
+
+\section{Chatbot Assistance}
+
+The chatbot endpoint can use the Google Generative AI SDK when a server-side \texttt{GEMINI\_API\_KEY} is supplied. The frontend also provides a local rule-based assistant path when no API base URL is configured, and the backend contains local guidance responses when Gemini is unavailable. Personalized food recommendation and chat-driven order placement are not implemented features.
+
+\section{Current Integration Status}
+
+The delivered work is a functioning prototype rather than a production food-delivery service. The working MySQL connection, initialized schema, and restaurant API have been verified. Authentication and chatbot screens can communicate with the backend, but full authentication-to-database integration has not yet been tested. The customer catalogue and checkout flow remain separate from database-backed restaurant and order records, while complete role authorization, persistent customer orders, payment processing, and GPS tracking remain future work.

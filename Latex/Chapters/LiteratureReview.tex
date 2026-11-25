@@ -1,0 +1,43 @@
+\chapter{Literature Review}
+
+\section{Online Food Ordering Systems}
+
+Online food ordering systems have significantly transformed the food service industry by providing customers with convenient access to restaurants and food delivery services through digital platforms. These systems enable users to browse menus, place orders, make online payments, and track deliveries in real time. Popular platforms such as Swiggy and Zomato have demonstrated the effectiveness of centralized food ordering applications in improving customer convenience and restaurant operations. However, many conventional systems mainly focus on basic ordering functionalities and often lack intelligent interaction and personalized user experiences.
+
+These systems provide context for SwiftBite's prototype, which demonstrates restaurant and menu browsing alongside account and chatbot interfaces. Personalized recommendations and NLP-based recommendation features are not implemented.
+
+\section{AI-Powered Chatbot Systems}
+
+AI-powered chatbot systems have become increasingly popular in modern web applications for providing automated customer support and real-time assistance. These systems utilize Natural Language Processing (NLP) techniques to understand user queries and generate human-like responses. Chatbots improve user engagement, reduce response time, and minimize dependency on manual support services.
+
+Existing chatbot systems are widely used in e-commerce, healthcare, banking, and food delivery platforms. SwiftBite provides application guidance through a local rule-based response path and can use Gemini through the backend when configured. It does not provide live order support or place orders through chat.
+
+\section{Recommendation Systems}
+
+Recommendation systems play a major role in enhancing user engagement and personalization in digital platforms. These systems analyze user behavior, search history, and preferences to suggest relevant products or services. In food delivery applications, recommendation systems help customers discover restaurants and food items based on their interests and previous orders.
+
+Many existing food delivery platforms use recommendation algorithms to improve customer satisfaction and increase sales. SwiftBite does not currently implement personalized recommendations; this remains a possible future enhancement.
+
+\section{Role-Based Management Systems}
+
+Role-based access control systems are widely used in modern applications to ensure secure and organized management of multiple user categories. Such systems provide separate interfaces and permissions for administrators, customers, delivery personnel, and service providers.
+
+Food delivery platforms commonly use role-based dashboards for handling restaurant management, delivery tracking, and customer operations efficiently. SwiftBite includes role-specific demonstration views for customers, restaurant owners, delivery personnel, and administrators. These views are not protected by complete server-side role authorization.
+
+\section{Full-Stack Web Development Technologies}
+
+Modern food ordering applications rely heavily on full-stack web technologies to provide scalable, responsive, and efficient user experiences. Frontend frameworks such as React.js and Next.js are widely used for building interactive user interfaces, while backend technologies like Node.js and Express.js are commonly used for handling APIs and business logic.
+
+Database management systems such as MySQL play an important role in storing user information, restaurant details, and order data. SwiftBite's frontend uses React, TypeScript, Vite, Tailwind CSS, and custom CSS; its backend uses Node.js, Express, and TypeScript with a working MySQL connection and initialized schema. The restaurant API has been verified against the database. The customer storefront still uses bundled sample data and is not integrated with persistent order processing.
+
+\section{Application Security and Validation Systems}
+
+Security and validation mechanisms are essential components of modern web applications, especially in systems involving online transactions and user data management. Backend libraries and middleware such as Helmet, CORS, and Zod are commonly used to improve API security, handle cross-origin requests, and validate incoming data.
+
+Logging and monitoring tools like Morgan help developers track API activities and system performance. SwiftBite includes Morgan, CORS, Helmet, and Zod for request logging, cross-origin configuration, security headers, and payload validation. Their presence does not imply complete production security or authorization.
+
+\section{Comparison with Existing Systems}
+
+Many existing food ordering platforms mainly focus on order placement and delivery functionalities, with limited emphasis on intelligent interaction and personalized assistance. Some systems provide recommendation features, while others focus on chatbot integration independently.
+
+SwiftBite combines a customer-facing interface, demonstration portal views, backend API routes, and optional chatbot integration in a prototype. Personalized recommendations, persistent customer ordering, payment processing, live delivery tracking, and production role authorization are not part of the current implementation.

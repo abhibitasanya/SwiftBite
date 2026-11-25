@@ -1,0 +1,134 @@
+\documentclass[12pt]{report}
+% \documentclass[12pt,twoside]{report} use this to print on both sides
+\usepackage[utf8]{inputenc}
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage[a4paper,top=25mm,bottom=25mm,left=25mm,right=25mm]{geometry}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{tocloft}
+\usepackage{placeins}
+\renewcommand{\cfttoctitlefont}{\hspace*{\fill}\Large\bfseries}
+\renewcommand{\cftaftertoctitle}{\hspace*{\fill}}
+\renewcommand{\cftlottitlefont}{\hspace*{\fill}\Large\bfseries}
+\renewcommand{\cftafterlottitle}{\hspace*{\fill}}
+\renewcommand{\cftloftitlefont}{\hspace*{\fill}\Large\bfseries}
+\renewcommand{\cftafterloftitle}{\hspace*{\fill}}
+
+\usepackage{sectsty}
+\chapternumberfont{\Large}
+\chaptertitlefont{\Large}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{verbatim}
+\usepackage{array}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{tikz}
+\usepackage{everypage}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning}
+\usepackage{microtype}
+\usepackage{enumitem}
+\usepackage{tcolorbox}
+\usepackage{newtxtext}
+\usepackage{newtxmath}
+
+\AddEverypageHook{
+    \ifnum\value{page}>0
+    \begin{tikzpicture}[remember picture,overlay]
+        \draw[line width=0.8pt]
+        ([xshift=0.75cm,yshift=0.75cm]current page.south west)
+        rectangle
+        ([xshift=-0.75cm,yshift=-0.75cm]current page.north east);
+    \end{tikzpicture}
+    \fi
+}
+
+
+\pagenumbering{roman}
+
+% This command removes the red border around hyperlinks
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    filecolor=magenta,      
+    urlcolor=cyan,
+}
+
+
+
+% document begins here
+\begin{document}
+\setlength{\parskip}{0.3cm}
+\setstretch{1}
+%\setlength{\parskip}{0pt}
+\setlength{\parindent}{15pt}
+
+\setlist[itemize]{
+    itemsep=1pt,
+    topsep=2pt,
+    parsep=0pt,
+    partopsep=0pt
+}
+\input{Header/titlepage}
+\newpage
+\input{Header/certificate}
+\addcontentsline{toc}{chapter}{Certificate}
+\newpage
+\input{Header/declaration}
+\addcontentsline{toc}{chapter}{Candidate's Declaration}
+\newpage
+\input{Header/ackment}
+\addcontentsline{toc}{chapter}{Acknowledgement}
+\newpage
+\input{Header/abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+\newpage
+\input{Header/objective}
+\addcontentsline{toc}{chapter}{Project Objective}
+\newpage
+\input{Header/technology}
+\addcontentsline{toc}{chapter}{Technology Used}
+\newpage
+\input{Header/keyfeatures}
+\addcontentsline{toc}{chapter}{Key Features}
+\newpage
+\setcounter{tocdepth}{2}
+\addcontentsline{toc}{chapter}{Content}
+\tableofcontents
+
+\newpage
+
+
+\input{Header/symbol}
+
+% CHAPTERS BEGIN
+\pagenumbering{arabic}
+\input{Chapters/intro}
+\input{Chapters/ITDepartment}
+\input{Chapters/ProjectIntro}
+\input{Chapters/objectives}
+\input{Chapters/LiteratureReview}
+\input{Chapters/sysanalysis}
+\input{Chapters/sysdesign}
+\input{Chapters/sysimplement}
+\input{Chapters/testing}
+\input{Chapters/Results_and_Discussions}
+\input{Chapters/WorkDone}
+\input{Chapters/advantages}
+\input{Chapters/limitations}
+\input{Chapters/conclusion}
+
+% Bibliography
+\clearpage
+\addcontentsline{toc}{chapter}{Bibliography}
+\bibliographystyle{IEEEtran} % You can change the style here (e.g., unsrt, abbrv)
+\nocite{*}
+\bibliography{references}
+\input{Chapters/futurescope}
+\input{Chapters/appendix}
+
+
+\end{document}

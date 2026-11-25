@@ -1,0 +1,52 @@
+\chapter{System Design}
+
+\section{Overview}
+
+SwiftBite is organized as a React frontend and a separate Express API. The frontend uses bundled sample data for the customer restaurant and menu screens and local application state for cart and order-status demonstrations. It calls the backend for account registration and login and chatbot assistance. The backend also exposes routes for restaurant, profile, menu, image-upload, order, and dashboard operations.
+
+The backend is connected to MySQL using environment-based settings. The eight-table schema has been initialized, including four seeded restaurants and four categories, and the database-backed restaurant API has been verified. Authentication retains a file-backed fallback for cases where database operations fail. Portal switching in the frontend is explicitly a demonstration flow; it does not by itself provide server-side role authorization.
+
+\section{Table Design}
+
+\begin{table}[H]
+\centering
+\caption{Users Table Schema}
+\label{tab:users}
+\begin{tabular}{|l|l|p{7cm}|}
+\hline
+\textbf{Field Name} & \textbf{Data Type} & \textbf{Description} \\ \hline
+\texttt{id} & BIGINT UNSIGNED & Auto-incrementing primary key \\ \hline
+\texttt{full\_name} & VARCHAR(120) & User's display name \\ \hline
+\texttt{identifier} & VARCHAR(191) & Email address or phone identifier \\ \hline
+\texttt{role} & ENUM & One of \texttt{customer}, \texttt{delivery}, \texttt{restaurant}, or \texttt{platform} \\ \hline
+\texttt{password\_hash} & CHAR(64) & SHA-256 password digest used by the current implementation \\ \hline
+\texttt{created\_at} & TIMESTAMP & Account creation time \\ \hline
+\texttt{updated\_at} & TIMESTAMP & Last update time \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Restaurants Table Schema}
+\label{tab:restaurants}
+\begin{tabular}{|l|l|p{7cm}|}
+\hline
+\textbf{Field Name} & \textbf{Data Type} & \textbf{Description} \\ \hline
+\texttt{id} & BIGINT UNSIGNED & Auto-incrementing primary key \\ \hline
+\texttt{name} & VARCHAR(140) & Restaurant name \\ \hline
+\texttt{cuisine} & VARCHAR(120) & Cuisine description \\ \hline
+\texttt{location} & VARCHAR(160) & Restaurant location \\ \hline
+\texttt{eta\_minutes} & INT & Estimated delivery time in minutes \\ \hline
+\texttt{rating} & DECIMAL(2,1) & Restaurant rating \\ \hline
+\texttt{description} & VARCHAR(255) & Short restaurant description \\ \hline
+\texttt{featured} & TINYINT(1) & Featured-listing flag \\ \hline
+\end{tabular}
+\end{table}
+
+The schema also defines rider and restaurant profiles, restaurant categories, menu items, uploaded images, and orders. It does not define payment transactions. The customer checkout screen currently remains a frontend demonstration and does not write an order to these tables.
+
+\section{Database Functionality}
+
+The MySQL schema is located in \texttt{backend/src/schema.sql}. It defines the backend's account and restaurant data structures and supporting profile, menu, upload, and order tables. The API uses the connection pool in \texttt{backend/src/db.ts}, with connection settings read from environment variables. The live connection and initialized schema were verified, and the restaurant-list query returned records from MySQL.
+
+Authentication routes retain a file-backed fallback for cases where database operations fail; this is not a replacement for persistent production storage. The frontend's customer restaurant catalogue and food catalogue are currently loaded from \texttt{frontend/src/data/mockData.ts}, rather than fetched from MySQL. Persistent order processing, payment records, and real-time delivery location are not implemented in the customer flow.

@@ -1,0 +1,31 @@
+\chapter{Limitations of the Project}
+
+SwiftBite is currently a functional interface prototype with supporting backend APIs. The following limitations apply to the current implementation:
+
+\begin{itemize}
+
+\item \textbf{Sample Storefront Data:}
+The customer restaurant and menu screens use data bundled in the frontend rather than retrieving the catalogue from MySQL.
+
+\item \textbf{Non-Persistent Customer Orders:}
+Cart, checkout, confirmation, and tracking are frontend demonstrations. The customer flow does not create database orders or preserve cart contents across a new browser session.
+
+\item \textbf{No Payment Processing:}
+Payment choices are displayed in the checkout interface, but no payment gateway or transaction processing is connected.
+
+\item \textbf{No Live Delivery Tracking:}
+The order-status screen shows a demonstration timeline and ETA; it does not display GPS coordinates or receive live delivery updates.
+
+\item \textbf{Demo Portal Authorization:}
+Portal switching is explicitly marked as demo functionality. Production server-side role authorization and protected sessions are not implemented.
+
+\item \textbf{Authentication Hardening:}
+The current authentication endpoints use SHA-256 password digests and do not issue a session token or JWT. Production deployment requires a stronger password-hashing scheme and complete session and authorization controls.
+
+\item \textbf{Optional AI Service:}
+Gemini responses require a server-side API key. Without it, the application relies on local or backend rule-based chatbot responses, which provide limited guidance.
+
+\item \textbf{Database Integration Coverage:}
+The MySQL connection, schema, and restaurant API have been verified, but registration, login, and order persistence have not been fully integration-tested against the database. The file-backed authentication fallback is intended for continuity in a demo environment, not as a production database.
+
+\end{itemize}

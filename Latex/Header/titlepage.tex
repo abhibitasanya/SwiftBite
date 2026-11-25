@@ -1,0 +1,128 @@
+\begin{titlepage}
+\thispagestyle{empty}
+
+% --- BACKGROUND ILLUSTRATIONS (TIKZ) ---
+% SwiftBite Brand Colors
+\definecolor{brandPrimary}{HTML}{14532D}   % Dark Forest Green
+\definecolor{brandSecondary}{HTML}{D1E8D5} % Soft Sage/Mint Green
+\definecolor{brandText}{HTML}{1F2937}      % Dark Charcoal Typography
+\definecolor{brandBg}{HTML}{F4F4F0}        % Warm Off-White 
+
+% \pagecolor{brandBg} % Uncomment this line if you want the off-white background!
+
+\begin{tikzpicture}[remember picture, overlay]
+
+    % Decorative Border
+    \draw[brandPrimary, line width=1pt]
+    ([xshift=0.5cm,yshift=0.5cm]current page.south west)
+    rectangle
+    ([xshift=-0.5cm,yshift=-0.5cm]current page.north east);
+
+    \draw[brandPrimary, line width=0.4pt]
+    ([xshift=0.8cm,yshift=0.8cm]current page.south west)
+    rectangle
+    ([xshift=-0.8cm,yshift=-0.8cm]current page.north east);
+    
+    % Top Right Forest Green Blob (Scaled down to keep text clear)
+    \path[fill=brandPrimary] 
+        (current page.north east) coordinate (NE)
+        (NE) ++(-4.5, 0) coordinate (P1)
+        (NE) ++(0, -4.5) coordinate (P2)
+        (P1) .. controls ++(2, -0.5) and ++(-1, 1.5) .. (P2) -- (NE) -- cycle;
+
+    % Top Right Sage Green Blob
+    \path[fill=brandSecondary] 
+        (current page.north east) coordinate (NE2)
+        (NE2) ++(-2.5, 0) coordinate (Y1)
+        (NE2) ++(0, -2.5) coordinate (Y2)
+        (Y1) .. controls ++(1, -1) and ++(-1, 1) .. (Y2) -- (NE2) -- cycle;
+        
+    % Top Decorative Line & Dots
+    
+    \fill[brandPrimary] (current page.north east) ++(-1.5,-5.5) circle (0.12);
+    \fill[brandSecondary] (current page.north east) ++(-2.5,-3.5) circle (0.18);
+
+    % Bottom Left Forest Green Blob (Scaled down so names are visible)
+    \path[fill=brandPrimary, opacity=0.95] 
+        (current page.south west) coordinate (SW)
+        (SW) ++(3.5, 0) coordinate (P3)
+        (SW) ++(0, 4.5) coordinate (P4)
+        (P3) .. controls ++(-1.5, 1) and ++(0.5, -2) .. (P4) -- (SW) -- cycle;
+
+    % Bottom Left Sage Green Blob
+    \path[fill=brandSecondary] 
+        (current page.south west) coordinate (SW2)
+        (SW2) ++(2, 0) coordinate (Y3)
+        (SW2) ++(0, 2.5) coordinate (Y4)
+        (Y3) .. controls ++(-0.5, 1) and ++(1, -0.5) .. (Y4) -- (SW2) -- cycle;
+        
+    % Bottom Decorative Line & Dots
+    
+    \fill[brandPrimary] (current page.south west) ++(1.2,5) circle (0.12);
+    \fill[brandSecondary] (current page.south west) ++(0.8,3) circle (0.18);
+\end{tikzpicture}
+% --- END BACKGROUND ---
+
+
+% --- FOREGROUND TEXT & LOGOS ---
+\begin{center}
+    \color{brandText} % Applies Dark Charcoal to all text
+    
+    % NALCO Section
+    \vspace*{0.5cm}
+    \begin{minipage}{0.2\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{Header/nalco2.jpg}
+    \end{minipage}
+    
+    \vspace{0.3cm}
+    {\large \textbf{National Aluminium Company Limited (NALCO)}}\\[0.1cm]
+    {\normalsize \textbf{Alumina Refinery Plant, Damanjodi}}\\
+    {\small Koraput, Odisha}
+    
+    \vspace{1.5cm}
+    
+    % Title Section 
+    {\large \textsf{VOCATIONAL TRAINING REPORT}}\\[0.2cm]
+    {\normalsize \textsf{ON}}\\[0.4cm]
+    {\huge \textbf{\textsf{SwiftBite}}}\\[0.2cm] 
+    {\Large \textsf{An Intelligent Food Ordering System}}
+    
+    \vspace{1.5cm}
+    
+    % XIM Section
+    \includegraphics[width=0.18\textwidth]{Header/ximlogo.png}
+    
+    \vspace{0.3cm}
+    {\large \textbf{XIM University}}\\[0.1cm]
+    {\normalsize School of Computer Science and Engineering}\\
+    {\small Bhubaneswar, Odisha, India}
+    
+    \vspace{0.8cm}
+    
+    % Training Details
+    {\normalsize \textbf{Training Period}}\\
+    {\normalsize 02/05/2026 to 31/05/2026}
+    
+    \vfill 
+    
+    % Footer Section (Now safely clear of the corner vectors)
+    \begin{minipage}[t]{0.48\textwidth}
+        \begin{flushleft}
+            {\normalsize \textbf{Submitted by:}}\\[0.2cm]
+            {\small \textbf{Abhibita Sanya Priyadarshani} \\(Regd No. - RF2026CS0035) \\(University Roll No.- UCSE23001)}
+        \end{flushleft}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.45\textwidth}
+        \begin{flushright}
+            {\normalsize \textbf{Under the Guidance of:}}\\[0.2cm]
+            {\small \textbf{Dillip Kumar Sahoo}}\\
+            {\small Deputy General Manager\\(Systems)}
+        \end{flushright}
+    \end{minipage}
+
+    
+
+\end{center}
+\end{titlepage}

@@ -170,7 +170,7 @@ export default function App() {
         timestamp: new Date(message.timestamp).toISOString(),
       }))
 
-      const { reply, sessionId, offline } = await askChatbot({
+      const { reply, sessionId } = await askChatbot({
         messages: apiMessages,
         sessionId: chatSessionId,
         role: toChatbotRole(role),

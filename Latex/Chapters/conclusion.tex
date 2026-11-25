@@ -1,0 +1,23 @@
+\chapter{Conclusion}
+
+SwiftBite is a web-based food-ordering prototype developed with React, TypeScript, and Vite, supported by a Node.js and Express API. The frontend demonstrates a landing page, account registration and login, sample restaurant and menu browsing, cart and checkout screens, order-status views, and interfaces for multiple application roles.
+
+The implemented work includes:
+
+\begin{itemize}
+
+\item A customer-facing storefront with restaurant categories, sample menu items, favourites, and cart quantity controls.
+
+\item Account registration and login screens, with required password confirmation and backend request validation.
+
+\item An Express API with authentication, restaurant, profile, menu, upload, order, dashboard, and chatbot routes.
+
+\item A working MySQL connection and initialized eight-table schema; the backend restaurant API reads from MySQL. A file-backed authentication fallback remains available if database operations fail.
+
+\item Chatbot assistance that can use Gemini when configured and can fall back to local rule-based guidance.
+
+\item Demonstration interfaces for customer, admin, restaurant-owner, and delivery-partner workflows.
+
+\end{itemize}
+
+The current customer catalogue uses bundled sample data, and checkout and order tracking remain frontend demonstrations. The prototype does not process payments, persist customer orders through the checkout journey, provide live GPS tracking, or enforce production role authorization. These distinctions define the current state of work and the next steps toward a production-ready food-ordering system.

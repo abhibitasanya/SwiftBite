@@ -1,5 +1,3 @@
-import React from 'react';
-import C from '../theme/colors';
 import Icon from '../components/icons';
 
 export function LandingPageScreen({ onGetStarted, onInstall, installAvailable }: { onGetStarted: () => void; onInstall: () => void; installAvailable: boolean }) {

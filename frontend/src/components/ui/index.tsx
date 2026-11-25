@@ -1,7 +1,6 @@
-import React from 'react';
 import C from '../../theme/colors';
 import Icon from '../icons';
-import { Restaurant, CartItem } from '../../types';
+import { Restaurant } from '../../types';
 
 function SectionHeader({ title, subtitle, onSeeAll }: { title: string; subtitle?: string; onSeeAll?: () => void }) {
   return (

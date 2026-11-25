@@ -1,5 +1,4 @@
 import cors from "cors";
-import dotenv from "dotenv";
 import express, { type Request, type Response } from "express";
 import { createHash, randomUUID } from "crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
@@ -10,8 +9,6 @@ import type { RowDataPacket } from "mysql2/promise";
 import { db } from "./db.js";
 import { z } from "zod";
 import { getAIResponse, isAIInitialized } from "./aiService.js";
-
-dotenv.config();
 
 const loginSchema = z.object({
   identifier: z.string().min(1),
@@ -24,10 +21,10 @@ const registerSchema = z.object({
   fullName: z.string().trim().min(2),
   identifier: z.string().min(1),
   password: z.string().min(6),
-  confirmPassword: z.string().min(6).optional(),
+  confirmPassword: z.string().min(6),
   role: z.enum(["customer", "delivery", "restaurant", "platform"]),
   loginMode: z.enum(["email", "phone"]),
-}).refine((data) => !data.confirmPassword || data.password === data.confirmPassword, {
+}).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords do not match.",
   path: ["confirmPassword"],
 });

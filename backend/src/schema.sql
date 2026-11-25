@@ -1,5 +1,4 @@
-CREATE DATABASE IF NOT EXISTS swiftdb;
-USE swiftdb;
+-- Run this schema against the database selected by MYSQL_DATABASE.
 
 CREATE TABLE IF NOT EXISTS users (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -22,7 +21,8 @@ CREATE TABLE IF NOT EXISTS restaurants (
   rating DECIMAL(2,1) NOT NULL,
   description VARCHAR(255) NOT NULL,
   featured TINYINT(1) NOT NULL DEFAULT 0,
-  PRIMARY KEY (id)
+  PRIMARY KEY (id),
+  UNIQUE KEY uniq_restaurants_name (name)
 );
 
 INSERT INTO restaurants (name, cuisine, location, eta_minutes, rating, description, featured)
@@ -42,6 +42,7 @@ ON DUPLICATE KEY UPDATE
 CREATE TABLE IF NOT EXISTS rider_profiles (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   user_identifier VARCHAR(191) NOT NULL,
+  user_role ENUM('customer', 'delivery', 'restaurant', 'platform') NOT NULL DEFAULT 'delivery',
   full_name VARCHAR(120) NOT NULL,
   profile_image_url VARCHAR(255) DEFAULT NULL,
   age INT NOT NULL,
@@ -71,12 +72,13 @@ CREATE TABLE IF NOT EXISTS rider_profiles (
   PRIMARY KEY (id),
   UNIQUE KEY uniq_rider_profiles_user_identifier (user_identifier),
   KEY idx_rider_profiles_status (availability_status, is_online),
-  CONSTRAINT fk_rider_profiles_user_identifier FOREIGN KEY (user_identifier) REFERENCES users(identifier) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT fk_rider_profiles_user_identifier FOREIGN KEY (user_identifier, user_role) REFERENCES users(identifier, role) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS restaurant_profiles (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   user_identifier VARCHAR(191) NOT NULL,
+  user_role ENUM('customer', 'delivery', 'restaurant', 'platform') NOT NULL DEFAULT 'restaurant',
   restaurant_name VARCHAR(160) NOT NULL,
   restaurant_logo_url VARCHAR(255) DEFAULT NULL,
   cover_image_url VARCHAR(255) DEFAULT NULL,
@@ -96,7 +98,7 @@ CREATE TABLE IF NOT EXISTS restaurant_profiles (
   PRIMARY KEY (id),
   UNIQUE KEY uniq_restaurant_profiles_user_identifier (user_identifier),
   KEY idx_restaurant_profiles_cuisine (cuisine_type),
-  CONSTRAINT fk_restaurant_profiles_user_identifier FOREIGN KEY (user_identifier) REFERENCES users(identifier) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT fk_restaurant_profiles_user_identifier FOREIGN KEY (user_identifier, user_role) REFERENCES users(identifier, role) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS restaurant_categories (
@@ -124,6 +126,7 @@ ON DUPLICATE KEY UPDATE
 CREATE TABLE IF NOT EXISTS menu_items (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   restaurant_identifier VARCHAR(191) NOT NULL,
+  restaurant_user_role ENUM('customer', 'delivery', 'restaurant', 'platform') NOT NULL DEFAULT 'restaurant',
   dish_name VARCHAR(160) NOT NULL,
   dish_image_url VARCHAR(255) DEFAULT NULL,
   price DECIMAL(10,2) NOT NULL DEFAULT 0,
@@ -141,7 +144,7 @@ CREATE TABLE IF NOT EXISTS menu_items (
   PRIMARY KEY (id),
   KEY idx_menu_items_restaurant_identifier (restaurant_identifier),
   KEY idx_menu_items_featured (is_featured, is_bestseller, is_recommended),
-  CONSTRAINT fk_menu_items_restaurant_identifier FOREIGN KEY (restaurant_identifier) REFERENCES users(identifier) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT fk_menu_items_restaurant_identifier FOREIGN KEY (restaurant_identifier, restaurant_user_role) REFERENCES users(identifier, role) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS uploaded_images (

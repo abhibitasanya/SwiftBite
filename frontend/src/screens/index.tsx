@@ -3,7 +3,7 @@ import C from '../theme/colors';
 import Icon from '../components/icons';
 import { SectionHeader, RestaurantCard, CartFAB, BackButton } from '../components/ui';
 import { RESTAURANTS, MENU_ITEMS, CATEGORIES, ONBOARDING } from '../data/mockData';
-import { Restaurant, MenuItem, CartItem, Screen, type NavTab } from '../types';
+import { CartItem, Screen, type NavTab } from '../types';
 import { API_BASE } from '../services/api';
 
 function SplashScreen() {
@@ -650,7 +650,7 @@ function OrderTrackingScreen({ onBack, onViewSuccess }: any) {
 
       {/* Delivery partner */}
       <div style={{ padding: '14px 20px', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', gap: 12 }}>
-        <div style={{ width: 48, height: 48, borderRadius: '50%', border: `2px solid ${C.border}`, backgroundColor: C.primaryLight, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>🛵</div>
+        <div style={{ width: 48, height: 48, borderRadius: '50%', border: `2px solid ${C.border}`, backgroundColor: C.greenLight, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>🛵</div>
         <div style={{ flex: 1 }}>
           <p style={{ fontSize: 14, fontWeight: 700, color: C.text, margin: '0 0 3px' }}>Marcus Chen</p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Icon.Star /><span style={{ fontSize: 12, color: C.muted, fontWeight: 500 }}>4.9 · Delivery Partner</span></div>
@@ -947,9 +947,10 @@ function LoginScreen({ onLogin, onSignUp, onForgot }: { onLogin: (user: { fullNa
     if (!contact || !password) { setError(`Please fill in your ${contactMode} and password.`); return }
     setError('')
     setLoading(true)
+    let timeout: number | undefined
     try {
       const controller = new AbortController()
-      const timeout = window.setTimeout(() => controller.abort(), 15000)
+      timeout = window.setTimeout(() => controller.abort(), 15000)
       const response = await fetch(`${API_BASE}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -961,16 +962,18 @@ function LoginScreen({ onLogin, onSignUp, onForgot }: { onLogin: (user: { fullNa
           loginMode: contactMode,
         }),
       })
-      window.clearTimeout(timeout)
       const data = await response.json().catch(() => ({}))
       if (!response.ok) {
         setError(data.message || 'Invalid email or password.')
         return
       }
       onLogin(data.user)
-    } catch {
-      setError(`Unable to reach the server (${API_BASE || 'same-origin'}). Please try again.`)
+    } catch (error) {
+      setError(error instanceof DOMException && error.name === 'AbortError'
+        ? 'The sign-in request timed out. Please try again.'
+        : `Unable to reach the server (${API_BASE || 'same-origin'}). Please try again.`)
     } finally {
+      if (timeout !== undefined) window.clearTimeout(timeout)
       setLoading(false)
     }
   }
@@ -1049,15 +1052,20 @@ function SignUpScreen({ onSignUp, onLogin }: { onSignUp: () => void; onLogin: ()
       setError('Please enter your name, a valid identifier, and a password of at least 6 characters.')
       return
     }
+    if (!confirmPassword) {
+      setError('Please confirm your password.')
+      return
+    }
     if (password !== confirmPassword) {
       setError('Passwords do not match.')
       return
     }
     setError('')
     setLoading(true)
+    let timeout: number | undefined
     try {
       const controller = new AbortController()
-      const timeout = window.setTimeout(() => controller.abort(), 15000)
+      timeout = window.setTimeout(() => controller.abort(), 15000)
       const response = await fetch(`${API_BASE}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1071,16 +1079,18 @@ function SignUpScreen({ onSignUp, onLogin }: { onSignUp: () => void; onLogin: ()
           loginMode: contactMode,
         }),
       })
-      window.clearTimeout(timeout)
       const data = await response.json().catch(() => ({}))
       if (!response.ok) {
         setError(data.message || 'Unable to create your account.')
         return
       }
       onSignUp()
-    } catch {
-      setError(`Unable to reach the server (${API_BASE || 'same-origin'}). Please try again.`)
+    } catch (error) {
+      setError(error instanceof DOMException && error.name === 'AbortError'
+        ? 'The account creation request timed out. Please try again.'
+        : `Unable to reach the server (${API_BASE || 'same-origin'}). Please try again.`)
     } finally {
+      if (timeout !== undefined) window.clearTimeout(timeout)
       setLoading(false)
     }
   }

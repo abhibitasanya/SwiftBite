@@ -1,4 +1,4 @@
-import { Restaurant, MenuItem, CartItem, Screen } from '../types';
+import { Restaurant, MenuItem } from '../types';
 
 const RESTAURANTS: Restaurant[] = [
   { id: 1, name: 'The Burger Lab', cuisine: 'American • Burgers • Fast Food', rating: 4.8, reviews: 2847, deliveryTime: 25, distance: '0.8 km', deliveryFee: 29, image: 'photo-1568901346375-23c9450c58cd', offer: '20% off orders above ₹2,000', tags: ['Trending', 'Top Rated'] },
