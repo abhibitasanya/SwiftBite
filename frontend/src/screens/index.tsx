@@ -949,7 +949,41 @@ function AuthInput({ label, type = 'text', placeholder, value, onChange, icon, r
   )
 }
 
+export type AuthRole = 'customer' | 'delivery' | 'restaurant' | 'platform'
 type ContactMode = 'email' | 'phone'
+
+const AUTH_ROLES: AuthRole[] = ['customer', 'delivery', 'restaurant', 'platform']
+
+function isAuthRole(value: string): value is AuthRole {
+  return AUTH_ROLES.some(role => role === value)
+}
+
+function AccountTypeSelect({ role, onRoleChange, includePlatform }: { role: AuthRole | ''; onRoleChange: (role: AuthRole | '') => void; includePlatform: boolean }) {
+  return (
+    <div style={{ marginBottom: 18 }}>
+      <label htmlFor="account-type" style={{ fontSize: 13, fontWeight: 700, color: C.text, display: 'block', marginBottom: 8 }}>Account type</label>
+      <select
+        id="account-type"
+        required
+        value={role}
+        onChange={event => {
+          const value = event.target.value
+          onRoleChange(isAuthRole(value) ? value : '')
+        }}
+        style={{ width: '100%', padding: '14px 16px', backgroundColor: C.bgGray, border: `1.5px solid ${C.border}`, borderRadius: 14, color: role ? C.text : C.muted, fontSize: 15, fontFamily: 'inherit' }}
+      >
+        <option value="" disabled>Choose your account type</option>
+        <option value="customer">Customer</option>
+        <option value="delivery">Delivery partner</option>
+        <option value="restaurant">Restaurant owner</option>
+        {includePlatform && <option value="platform">Admin (existing accounts only)</option>}
+      </select>
+      <p style={{ margin: '7px 0 0', color: C.muted, fontSize: 11, lineHeight: 1.4 }}>
+        {includePlatform ? 'Choose the same account type used when you registered.' : 'Admin accounts are provisioned separately and cannot be created through public signup.'}
+      </p>
+    </div>
+  )
+}
 
 function ContactModeToggle({ mode, onMode }: { mode: ContactMode; onMode: (mode: ContactMode) => void }) {
   return (
@@ -984,7 +1018,7 @@ function SocialLogin() {
 }
 
 // ── Auth: Login ───────────────────────────────────────────────────────────────
-function LoginScreen({ onLogin, onSignUp, onForgot }: { onLogin: (user: { fullName: string; identifier: string; role: string }) => void; onSignUp: () => void; onForgot: () => void }) {
+function LoginScreen({ role, onRoleChange, onLogin, onSignUp, onForgot }: { role: AuthRole | ''; onRoleChange: (role: AuthRole | '') => void; onLogin: (user: { fullName: string; identifier: string; role: string }) => void; onSignUp: () => void; onForgot: () => void }) {
   const [contactMode, setContactMode] = useState<ContactMode>('email')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
@@ -995,6 +1029,7 @@ function LoginScreen({ onLogin, onSignUp, onForgot }: { onLogin: (user: { fullNa
 
   const handleLogin = async () => {
     const contact = contactMode === 'email' ? email : phone
+    if (!role) { setError('Choose the account type you registered with.'); return }
     if (!contact || !password) { setError(`Please fill in your ${contactMode} and password.`); return }
     setError('')
     setLoading(true)
@@ -1009,13 +1044,17 @@ function LoginScreen({ onLogin, onSignUp, onForgot }: { onLogin: (user: { fullNa
         body: JSON.stringify({
           identifier: contact.trim(),
           password,
-          role: 'customer',
+          role,
           loginMode: contactMode,
         }),
       })
       const data = await response.json().catch(() => ({}))
       if (!response.ok) {
         setError(data.message || 'Invalid email or password.')
+        return
+      }
+      if (!data.user || typeof data.user.fullName !== 'string' || typeof data.user.identifier !== 'string' || data.user.role !== role) {
+        setError('The server returned an invalid account response. Please try again.')
         return
       }
       onLogin(data.user)
@@ -1038,10 +1077,11 @@ function LoginScreen({ onLogin, onSignUp, onForgot }: { onLogin: (user: { fullNa
         <img src="/swiftbite-logo.png" alt="SwiftBite logo" className="swift-auth-logo" style={{ marginBottom: 16 }} />
         <div style={{ display: 'none' }}>⚡</div>
         <h1 style={{ fontSize: 28, fontWeight: 800, color: C.text, margin: '0 0 6px', letterSpacing: -0.6 }}>Welcome back!</h1>
-        <p style={{ fontSize: 14, color: C.muted, margin: 0, textAlign: 'center' }}>Sign in to continue ordering your favourites</p>
+        <p style={{ fontSize: 14, color: C.muted, margin: 0, textAlign: 'center' }}>Choose your account type, then sign in to continue.</p>
       </div>
 
       <div className="swift-auth-panel" style={{ padding: '24px 24px 0' }}>
+        <AccountTypeSelect role={role} onRoleChange={onRoleChange} includePlatform />
         <ContactModeToggle mode={contactMode} onMode={setContactMode} />
         {contactMode === 'email' ? (
           <AuthInput label="Email address" type="email" placeholder="alex@example.com" value={email} onChange={setEmail} icon="✉️" />
@@ -1081,7 +1121,7 @@ function LoginScreen({ onLogin, onSignUp, onForgot }: { onLogin: (user: { fullNa
 }
 
 // ── Auth: Sign Up ─────────────────────────────────────────────────────────────
-function SignUpScreen({ onSignUp, onLogin }: { onSignUp: () => void; onLogin: () => void }) {
+function SignUpScreen({ role, onRoleChange, onSignUp, onLogin }: { role: AuthRole | ''; onRoleChange: (role: AuthRole | '') => void; onSignUp: (user: { fullName: string; identifier: string; role: string }) => void; onLogin: () => void }) {
   const [name, setName] = useState('')
   const [contactMode, setContactMode] = useState<ContactMode>('email')
   const [email, setEmail] = useState('')
@@ -1099,6 +1139,10 @@ function SignUpScreen({ onSignUp, onLogin }: { onSignUp: () => void; onLogin: ()
 
   const handle = async () => {
     const identifier = contactMode === 'email' ? email.trim() : phone.trim()
+    if (!role || role === 'platform') {
+      setError('Choose a customer, delivery partner, or restaurant owner account type.')
+      return
+    }
     if (!name.trim() || !identifier || password.length < 6) {
       setError('Please enter your name, a valid identifier, and a password of at least 6 characters.')
       return
@@ -1126,7 +1170,7 @@ function SignUpScreen({ onSignUp, onLogin }: { onSignUp: () => void; onLogin: ()
           identifier,
           password,
           confirmPassword,
-          role: 'customer',
+          role,
           loginMode: contactMode,
         }),
       })
@@ -1135,7 +1179,11 @@ function SignUpScreen({ onSignUp, onLogin }: { onSignUp: () => void; onLogin: ()
         setError(data.message || 'Unable to create your account.')
         return
       }
-      onSignUp()
+      if (!data.user || typeof data.user.fullName !== 'string' || typeof data.user.identifier !== 'string' || data.user.role !== role) {
+        setError('Your account was created, but the server returned an invalid account response. Please sign in with the selected type.')
+        return
+      }
+      onSignUp(data.user)
     } catch (error) {
       setError(error instanceof DOMException && error.name === 'AbortError'
         ? 'The account creation request timed out. Please try again.'
@@ -1149,8 +1197,9 @@ function SignUpScreen({ onSignUp, onLogin }: { onSignUp: () => void; onLogin: ()
   return (
     <div style={{ backgroundColor: 'white', minHeight: '100vh', overflowY: 'auto' }}>
       <div style={{ height: 6, background: `linear-gradient(90deg, ${C.red}, ${C.orange})` }} />
-      <AuthHeader title="Create account" subtitle="Join SwiftBite and start ordering amazing food today." />
+      <AuthHeader title="Create account" subtitle="Choose your account type and create your SwiftBite account." />
       <div className="swift-auth-panel" style={{ padding: '0 24px 40px' }}>
+        <AccountTypeSelect role={role} onRoleChange={onRoleChange} includePlatform={false} />
         <AuthInput label="Full name" placeholder="Alex Johnson" value={name} onChange={setName} icon="👤" />
         <ContactModeToggle mode={contactMode} onMode={setContactMode} />
         {contactMode === 'email' ? (

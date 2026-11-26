@@ -5,7 +5,7 @@ import DeliveryPortal from './portals/DeliveryPortal'
 import RestaurantPortal from './portals/RestaurantPortal'
 import { askChatbot, type ChatbotRole } from './services/chatbot'
 
-import { SplashScreen, OnboardingScreen, HomeScreen, RestaurantListScreen, RestaurantDetailScreen, FoodDetailScreen, CartScreen, CheckoutScreen, OrderTrackingScreen, OrderSuccessScreen, OrderHistoryScreen, FavoritesScreen, NotificationsScreen, ProfileScreen, LoginScreen, SignUpScreen, ForgotScreen, OTPScreen, ResetScreen, SettingsScreen, TABS, TAB_SCREEN, SCREEN_TAB, SwitchRoleButton, LandingPageScreen } from './screens';
+import { SplashScreen, OnboardingScreen, HomeScreen, RestaurantListScreen, RestaurantDetailScreen, FoodDetailScreen, CartScreen, CheckoutScreen, OrderTrackingScreen, OrderSuccessScreen, OrderHistoryScreen, FavoritesScreen, NotificationsScreen, ProfileScreen, LoginScreen, SignUpScreen, ForgotScreen, OTPScreen, ResetScreen, SettingsScreen, TABS, TAB_SCREEN, SCREEN_TAB, SwitchRoleButton, LandingPageScreen, type AuthRole } from './screens';
 import { Restaurant, MenuItem, CartItem, Screen, type NavTab } from './types';
 import { MENU_ITEMS } from './data/mockData';
 import C from './theme/colors';
@@ -93,6 +93,7 @@ export default function App() {
   const demoProfiles = useDemoProfiles()
   const normalizeRole = (role: string): Role => role === 'platform' ? 'admin' : role === 'delivery' || role === 'restaurant' ? role : 'customer'
   const [role, setRole] = useState<Role>(() => sessionUser ? normalizeRole(sessionUser.role) : 'customer')
+  const [authRole, setAuthRole] = useState<AuthRole | ''>('')
   const [showRoleSelector, setShowRoleSelector] = useState(false)
   const [screen, setScreen] = useState<Screen>(() => sessionUser ? 'home' : 'landing')
   const [history, setHistory] = useState<Screen[]>([])
@@ -267,6 +268,20 @@ export default function App() {
     setScreen('auth-login')
   }
 
+  const startSession = (user: { id?: number; fullName: string; identifier: string; role: string }) => {
+    const normalized = { ...user, role: normalizeRole(user.role) }
+    setSessionUser(normalized)
+    localStorage.setItem('swiftbite-session', JSON.stringify(normalized))
+    setRole(normalized.role)
+    setHistory([])
+    setScreen('home')
+  }
+
+  const startSignup = () => {
+    if (authRole === 'platform') setAuthRole('')
+    goto('auth-signup')
+  }
+
   const profileRole = role === 'delivery' || role === 'restaurant' ? role : 'customer'
   const profileAccountId = sessionUser?.identifier || `demo-${profileRole}`
   const profileName = sessionUser?.fullName || (profileRole === 'delivery' ? 'Delivery Partner' : profileRole === 'restaurant' ? 'Restaurant Owner' : 'SwiftBite Member')
@@ -322,8 +337,8 @@ export default function App() {
           {screen === 'checkout' && <CheckoutScreen onBack={goBack} onPlaceOrder={() => goto('success')} cartTotal={cartTotal} />}
           {screen === 'tracking' && <OrderTrackingScreen onBack={() => { setCart([]); goto('home') }} />}
           {screen === 'success' && <OrderSuccessScreen onDone={() => { setCart([]); goto('home') }} onTrack={() => goto('tracking')} />}
-          {screen === 'auth-login'  && <LoginScreen onLogin={(user) => { const normalized = { ...user, role: normalizeRole(user.role) }; setSessionUser(normalized); localStorage.setItem('swiftbite-session', JSON.stringify(normalized)); setRole(normalized.role); setHistory([]); setScreen(normalized.role === 'customer' ? 'home' : normalized.role === 'admin' ? 'home' : 'home') }} onSignUp={() => goto('auth-signup')} onForgot={() => goto('auth-forgot')} />}
-          {screen === 'auth-signup' && <SignUpScreen onSignUp={() => goto('auth-login')} onLogin={() => goto('auth-login')} />}
+          {screen === 'auth-login'  && <LoginScreen role={authRole} onRoleChange={setAuthRole} onLogin={startSession} onSignUp={startSignup} onForgot={() => goto('auth-forgot')} />}
+          {screen === 'auth-signup' && <SignUpScreen role={authRole === 'platform' ? '' : authRole} onRoleChange={setAuthRole} onSignUp={startSession} onLogin={() => goto('auth-login')} />}
           {screen === 'auth-forgot' && <ForgotScreen  onSend={() => goto('auth-otp')} onBack={() => goto('auth-login')} />}
           {screen === 'auth-otp'   && <OTPScreen     onVerify={() => goto('auth-reset')} onBack={goBack} onResend={() => window.alert('A new verification code has been sent.')} />}
           {screen === 'auth-reset' && <ResetScreen   onReset={() => goto('auth-login')} onBack={() => goto('auth-forgot')} />}

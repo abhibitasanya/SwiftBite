@@ -19,7 +19,7 @@ const registerSchema = z.object({
     identifier: z.string().min(1),
     password: z.string().min(6),
     confirmPassword: z.string().min(6),
-    role: z.enum(["customer", "delivery", "restaurant", "platform"]),
+    role: z.enum(["customer", "delivery", "restaurant"]),
     loginMode: z.enum(["email", "phone"]),
 }).refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match.",
