@@ -206,12 +206,12 @@ export default function App() {
   const goto = (s: Screen) => { setHistory(h => [...h, screen]); setScreen(s) }
   const goBack = () => { const prev = history[history.length - 1] || 'home'; setHistory(h => h.slice(0, -1)); setScreen(prev) }
 
-  const addToCart = (item: MenuItem, restaurant: string) => {
+  const addToCart = (item: MenuItem, restaurant: string, quantity = 1) => {
     setCartAnim(true); setTimeout(() => setCartAnim(false), 500)
     setCart(prev => {
       const ex = prev.find(c => c.id === item.id)
-      return ex ? prev.map(c => c.id === item.id ? { ...c, quantity: c.quantity + 1 } : c)
-        : [...prev, { id: item.id, name: item.name, price: item.price, quantity: 1, image: item.image, restaurant }]
+      return ex ? prev.map(c => c.id === item.id ? { ...c, quantity: c.quantity + quantity } : c)
+        : [...prev, { id: item.id, name: item.name, price: item.price, quantity, image: item.image, restaurant }]
     })
   }
 
@@ -332,7 +332,7 @@ export default function App() {
           {screen === 'home' && <HomeScreen onRestaurantClick={(r: Restaurant) => { setSelRestaurant(r); goto('restaurant-detail') }} onSearch={() => goto('restaurants')} onNotifications={() => goto('notifications')} cart={cart} cartTotal={cartTotal} cartCount={cartCount} onCartClick={() => goto('cart')} favorites={favorites} onFav={toggleFav} cartAnimating={cartAnim} user={sessionUser} />}
           {screen === 'restaurants' && <RestaurantListScreen onBack={goBack} onRestaurantClick={(r: Restaurant) => { setSelRestaurant(r); goto('restaurant-detail') }} favorites={favorites} onFav={toggleFav} />}
           {screen === 'restaurant-detail' && selRestaurant && <RestaurantDetailScreen restaurant={selRestaurant} onBack={goBack} onFoodClick={(f: MenuItem) => { setSelFood(f); goto('food-detail') }} onAddToCart={(f: MenuItem) => addToCart(f, selRestaurant.name)} onRemoveFromCart={removeFromCart} cart={cart} cartTotal={cartTotal} cartCount={cartCount} onCartClick={() => goto('cart')} favorites={favorites} onFav={toggleFav} />}
-          {screen === 'food-detail' && selFood && <FoodDetailScreen food={selFood} restaurant={selRestaurant?.name || ''} onBack={goBack} onAddToCart={() => { addToCart(selFood, selRestaurant?.name || ''); goBack() }} />}
+          {screen === 'food-detail' && selFood && <FoodDetailScreen food={selFood} restaurant={selRestaurant?.name || ''} onBack={goBack} onAddToCart={(quantity: number) => { addToCart(selFood, selRestaurant?.name || '', quantity); goBack() }} />}
           {screen === 'cart' && <CartScreen cart={cart} onBack={goBack} onAddItem={(id: number) => { const it = MENU_ITEMS.find(m => m.id === id); if (it) addToCart(it, selRestaurant?.name || '') }} onRemoveItem={removeFromCart} onCheckout={() => goto('checkout')} cartTotal={cartTotal} />}
           {screen === 'checkout' && <CheckoutScreen onBack={goBack} onPlaceOrder={() => goto('success')} cartTotal={cartTotal} />}
           {screen === 'tracking' && <OrderTrackingScreen onBack={() => { setCart([]); goto('home') }} />}

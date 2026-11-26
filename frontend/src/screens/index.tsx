@@ -322,11 +322,16 @@ function RestaurantDetailScreen({ restaurant: r, onBack, onFoodClick, onAddToCar
               </div>
               <div style={{ position: 'relative', width: 96, flexShrink: 0 }}>
                 <img src={`https://images.unsplash.com/${item.image}?w=192&h=192&fit=crop&auto=format`} alt={item.name} style={{ width: 96, height: 96, objectFit: 'cover', borderRadius: 12, display: 'block' }} />
-                <div onClick={e => { e.stopPropagation(); onAddToCart(item) }} style={{ position: 'absolute', bottom: -2, right: -2 }}>
+                <div style={{ position: 'absolute', bottom: -2, right: -2 }}>
                   {count === 0 ? (
-                    <div className="btn-press" style={{ backgroundColor: C.red, borderRadius: 10, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 3px 10px rgba(226,55,68,0.4)', cursor: 'pointer' }}>
-                      <Icon.Plus />
-                    </div>
+                    <button
+                      onClick={e => { e.stopPropagation(); onAddToCart(item) }}
+                      aria-label={`Add ${item.name} to cart`}
+                      className="btn-press"
+                      style={{ backgroundColor: C.red, borderRadius: 10, height: 34, padding: '0 10px', display: 'flex', alignItems: 'center', gap: 5, boxShadow: '0 3px 10px rgba(226,55,68,0.4)', cursor: 'pointer', border: 'none', color: 'white', fontSize: 12, fontWeight: 700 }}
+                    >
+                      <Icon.Plus /> Add
+                    </button>
                   ) : (
                     <div style={{ backgroundColor: C.surface, borderRadius: 10, display: 'flex', alignItems: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.15)', border: `1px solid ${C.border}` }}>
                       <button onClick={e => { e.stopPropagation(); onRemoveFromCart(item.id) }} style={{ width: 28, height: 28, border: 'none', background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, color: C.red, fontWeight: 700 }}>−</button>
@@ -349,7 +354,7 @@ function RestaurantDetailScreen({ restaurant: r, onBack, onFoodClick, onAddToCar
           <button onClick={onCartClick} className="btn-press" style={{ width: '100%', padding: '15px 20px', backgroundColor: C.red, color: 'white', border: 'none', borderRadius: 16, cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 8px 28px rgba(226,55,68,0.45)', fontSize: 15, fontWeight: 700 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div style={{ backgroundColor: 'rgba(255,255,255,0.22)', borderRadius: 8, padding: '3px 9px', fontSize: 13, fontWeight: 700 }}>{cartCount}</div>
-              View Cart
+              Review Cart
             </div>
             <span>₹{cartTotal.toFixed(0)}</span>
           </button>
@@ -405,8 +410,8 @@ function FoodDetailScreen({ food, restaurant, onBack, onAddToCart }: any) {
             <span style={{ width: 32, textAlign: 'center', fontSize: 16, fontWeight: 700, color: C.text }}>{qty}</span>
             <button onClick={() => setQty(q => q + 1)} style={{ width: 40, height: 40, border: 'none', background: 'none', cursor: 'pointer', fontSize: 20, color: C.red, fontWeight: 700 }}>+</button>
           </div>
-          <button onClick={onAddToCart} className="btn-press" style={{ flex: 1, padding: '16px', backgroundColor: C.red, color: 'white', border: 'none', borderRadius: 14, fontSize: 15, fontWeight: 700, cursor: 'pointer', boxShadow: '0 8px 24px rgba(226,55,68,0.3)' }}>
-            Add to Cart — ${(food.price * qty).toFixed(0)}
+          <button onClick={() => onAddToCart(qty)} className="btn-press" style={{ flex: 1, padding: '16px', backgroundColor: C.red, color: 'white', border: 'none', borderRadius: 14, fontSize: 15, fontWeight: 700, cursor: 'pointer', boxShadow: '0 8px 24px rgba(226,55,68,0.3)' }}>
+            Add {qty} to Cart — ₹{(food.price * qty).toFixed(0)}
           </button>
         </div>
       </div>
