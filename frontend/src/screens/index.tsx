@@ -979,7 +979,9 @@ function AccountTypeSelect({ role, onRoleChange, includePlatform }: { role: Auth
         {includePlatform && <option value="platform">Admin (existing accounts only)</option>}
       </select>
       <p style={{ margin: '7px 0 0', color: C.muted, fontSize: 11, lineHeight: 1.4 }}>
-        {includePlatform ? 'Choose the same account type used when you registered.' : 'Admin accounts are provisioned separately and cannot be created through public signup.'}
+        {includePlatform
+          ? role === 'platform' ? 'Admin accounts are provisioned by the server; use the password configured for your account.' : 'Choose the same account type used when you registered.'
+          : 'Admin accounts are provisioned separately and cannot be created through public signup.'}
       </p>
     </div>
   )
@@ -1026,6 +1028,16 @@ function LoginScreen({ role, onRoleChange, onLogin, onSignUp, onForgot }: { role
   const [showPw, setShowPw] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  const handleRoleChange = (nextRole: AuthRole | '') => {
+    if (nextRole === 'platform') {
+      setEmail('admin@gmail.com')
+      setContactMode('email')
+    } else if (role === 'platform' && email === 'admin@gmail.com') {
+      setEmail('')
+    }
+    onRoleChange(nextRole)
+  }
 
   const handleLogin = async () => {
     const contact = contactMode === 'email' ? email : phone
@@ -1081,8 +1093,8 @@ function LoginScreen({ role, onRoleChange, onLogin, onSignUp, onForgot }: { role
       </div>
 
       <div className="swift-auth-panel" style={{ padding: '24px 24px 0' }}>
-        <AccountTypeSelect role={role} onRoleChange={onRoleChange} includePlatform />
-        <ContactModeToggle mode={contactMode} onMode={setContactMode} />
+        <AccountTypeSelect role={role} onRoleChange={handleRoleChange} includePlatform />
+        {role !== 'platform' && <ContactModeToggle mode={contactMode} onMode={setContactMode} />}
         {contactMode === 'email' ? (
           <AuthInput label="Email address" type="email" placeholder="alex@example.com" value={email} onChange={setEmail} icon="✉️" />
         ) : (

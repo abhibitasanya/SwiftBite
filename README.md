@@ -34,6 +34,10 @@ SwiftBite includes a chatbot for general questions about using the app. When `GE
 - **Type Safety**: TypeScript
 - **Deployment**: Vercel / Render *(update as needed)*
 
+### Admin account provisioning
+
+Public signup cannot create administrator accounts. To provision the initial admin, set `ADMIN_BOOTSTRAP_PASSWORD` as a backend environment secret with at least 16 characters, then start the backend after the MySQL schema is installed. On startup, the backend creates the `Admin` platform account for `admin@gmail.com` only if that account does not already exist; it will never replace an existing password. Remove the environment variable after provisioning. The password is not hardcoded or logged.
+
 ## 🚀 Getting Started
 
 To run the SwiftBite frontend locally on your machine:
